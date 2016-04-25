@@ -33,7 +33,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <webmagic.version>0.5.4-SNAPSHOT</webmagic.version>
+        <webmagic.version>0.5.3</webmagic.version>
     </properties>
 
     <dependencies>
@@ -147,13 +147,18 @@
                 <groupId>us.codecraft</groupId>
                 <artifactId>webmagic-core</artifactId>
                 <version>${webmagic.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>us.codecraft</groupId>
                 <artifactId>webmagic-extension</artifactId>
                 <version>${webmagic.version}</version>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
