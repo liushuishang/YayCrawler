@@ -5,7 +5,7 @@
 
     <groupId>com.fangluotx</groupId>
     <artifactId>yaycrawler-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>${yaycrawler.version}</version>
     <modules>
         <module>yaycrawler.common</module>
         <module>yaycrawler.core</module>
@@ -34,6 +34,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <webmagic.version>0.5.3</webmagic.version>
+        <yaycrawler.version>1.0.0-SNAPSHOT</yaycrawler.version>
     </properties>
 
     <dependencies>
@@ -124,6 +125,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>1.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.jsoup</groupId>
