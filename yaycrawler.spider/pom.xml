@@ -65,6 +65,14 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+
+		<dependency>
+			<groupId>com.yaycrawler</groupId>
+			<artifactId>yaycrawler-common</artifactId>
+			<version>${yaycrawler.version}</version>
+		</dependency>
+
 	</dependencies>
 	
 	<build>
