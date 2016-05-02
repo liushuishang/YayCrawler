@@ -1,9 +1,11 @@
 package yaycrawler.common.domain;
 
 import com.sun.istack.internal.NotNull;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Date;
 
 /**
  * Created by yuananyun on 2016/5/1.
@@ -12,7 +14,8 @@ import java.io.Serializable;
 @Table(name="conf_field_rule")
 public class FieldParseRule implements Serializable {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid")
     private String id;
 
     private String regionId;
@@ -25,6 +28,8 @@ public class FieldParseRule implements Serializable {
     private String rule;
     @Column(name="valueType")
     private String valueType;
+    @Column(name = "createdDate",columnDefinition = "timestamp default now()")
+    private Date createdDate;
 
     public FieldParseRule() {
         valueType = "string";
@@ -75,5 +80,13 @@ public class FieldParseRule implements Serializable {
 
     public void setRegionId(String regionId) {
         this.regionId = regionId;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
     }
 }

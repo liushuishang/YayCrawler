@@ -1,6 +1,7 @@
 delete from conf_page_region;
 DELETE  from conf_field_rule;
 delete from conf_url_rule;
+delete from com_page_site;
 
 
 INSERT INTO `conf_page_region`
@@ -97,3 +98,25 @@ uuid(),
 '4238905893045-423423-4235',
 now());
 
+INSERT INTO `conf_page_site`
+(`id`,
+ `charset`,
+ `cycleRetryTimes`,
+ `defaultCookies`,
+ `domain`,
+ `headers`,
+ `retryTimes`,
+ `sleepTime`,
+ `userAgent`)
+VALUES
+  (
+      uuid(),
+    'GBK',
+    1,
+    null,
+    'floor.0731fdc.com',
+    '{"Host":"floor.0731fdc.com","Accept-Language":"zh-CN,zh;q=0.8"}',
+    3,
+    500,
+      'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.87 Safari/537.36'
+  );

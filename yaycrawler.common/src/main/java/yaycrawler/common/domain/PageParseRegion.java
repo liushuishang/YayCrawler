@@ -2,9 +2,11 @@ package yaycrawler.common.domain;
 
 
 import com.sun.istack.internal.NotNull;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,6 +27,9 @@ public class PageParseRegion implements Serializable {
     private String CSSSelector;
     private List<FieldParseRule> fieldParseRules;
     private List<UrlParseRule> urlParseRules;
+
+    @Column(name = "createdDate",columnDefinition = "timestamp default now()")
+    private Date createdDate;
 
     public PageParseRegion() {
         fieldParseRules = new LinkedList<>();
@@ -88,12 +93,21 @@ public class PageParseRegion implements Serializable {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid")
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
     }
 }

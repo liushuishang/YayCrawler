@@ -70,19 +70,7 @@ public class GenericPageProcessor implements PageProcessor {
 
     @Override
     public Site getSite() {
-
-        //改成从数据库中读取
-        String domain = "floor.0731fdc.com";
-        Site site = Site.me().setDomain(domain)
-                .setCharset("GBK")
-                .setRetrySleepTime(1000)
-                .setSleepTime(500)
-                .setTimeOut(10000)
-                .setUseGzip(true)
-                .setUserAgent("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.87 Safari/537.36")
-                .addHeader("Host", domain)
-                .addHeader("Accept-Language", "zh-CN,zh;q=0.8");
-        return site;
+        return Site.me();
     }
 
 
