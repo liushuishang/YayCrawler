@@ -8,9 +8,9 @@
     <version>${yaycrawler.version}</version>
     <modules>
         <module>yaycrawler.common</module>
-        <!--<module>yaycrawler.core</module>-->
-        <!--<module>yaycrawler.monitor</module>-->
+        <module>yaycrawler.admin</module>
         <module>yaycrawler.spider</module>
+        <module>yaycrawler.monitor</module>
     </modules>
     <packaging>pom</packaging>
 
