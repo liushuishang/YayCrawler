@@ -23,10 +23,11 @@ public class GenericPageProcessor implements PageProcessor {
         this.pageParseRuleService = pageParseRuleService;
     }
 
+
     @Override
     public void process(Page page) {
         String pageUrl = page.getRequest().getUrl();
-        List<PageParseRegion> regionList = pageParseRuleService.getPageRegionParseRule(pageUrl);
+        List<PageParseRegion> regionList = getPageRegionList(pageUrl);
         for (PageParseRegion pageParseRegion : regionList) {
             Map<String, Object> result = parseOneRegion(page, pageParseRegion);
             if (result != null)
@@ -34,7 +35,7 @@ public class GenericPageProcessor implements PageProcessor {
         }
     }
 
-    private Map<String, Object> parseOneRegion(Page page, PageParseRegion pageParseRegion) {
+    public  Map<String, Object> parseOneRegion(Page page, PageParseRegion pageParseRegion) {
         Selectable content = page.getHtml().css(pageParseRegion.getCSSSelector());
 
         List<UrlParseRule> urlParseRuleList = pageParseRegion.getUrlParseRules();
@@ -73,5 +74,7 @@ public class GenericPageProcessor implements PageProcessor {
         return Site.me();
     }
 
-
+    public List<PageParseRegion> getPageRegionList(String pageUrl) {
+        return pageParseRuleService.getPageRegionList(pageUrl);
+    }
 }

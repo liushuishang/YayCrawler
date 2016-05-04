@@ -1,5 +1,6 @@
 package yaycrawler.spider;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import us.codecraft.webmagic.pipeline.ConsolePipeline;
 import us.codecraft.webmagic.pipeline.Pipeline;
 import us.codecraft.webmagic.scheduler.RedisScheduler;
 import us.codecraft.webmagic.scheduler.Scheduler;
-import yaycrawler.common.dao.repositories.PageSiteRepository;
 import yaycrawler.common.service.PageParserRuleService;
 import yaycrawler.common.service.PageSiteService;
 import yaycrawler.spider.processor.GenericPageProcessor;
@@ -31,9 +31,17 @@ public class ApplicationTests {
     public void contextLoads() {
     }
 
+    @Test
+    @Ignore
+    public void initDB()
+    {
+        parserRuleService.getPageRegionList("http://floor.0731fdc.com/jggs.php");
+    }
+
 
     @Test
     public void test0731() {
+
         String seedUrl = "http://floor.0731fdc.com/jggs.php";
         GenericPageProcessor pageProcessor = new GenericPageProcessor(parserRuleService);
 

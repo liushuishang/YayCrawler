@@ -43,21 +43,27 @@ public class SelectorExpressionResolver {
     }
 
 
-    private static Object execute(Selectable selector, String methodName, String param) {
+    private static Object execute(Selectable selector, String methodName, Object... params) {
         String lowerMethodName = methodName.toLowerCase();
         Selectable selectable = selector;
+        try {
+            if ("xpath".equals(lowerMethodName))
+                selectable = selectable.xpath((String) params[0]);
+            else if ("links".equals(lowerMethodName))
+                selectable = selectable.links();
+            else if ("regex".equals(lowerMethodName)) {
+                if (params.length == 1)
+                    selectable = selectable.regex((String) params[0]);
+                else
+                    selectable = selectable.regex((String) params[0], (int) params[1]);
+            } else if ("all".equals(lowerMethodName))
+                return selectable.all();
+            else if ("get".equals(lowerMethodName))
+                return selectable.get();
 
-        if ("xpath".equals(lowerMethodName))
-            selectable = selectable.xpath(param);
-        else if ("links".equals(lowerMethodName))
-            selectable = selectable.links();
-        else if ("regex".equals(lowerMethodName))
-            selectable = selectable.regex(param);
-        else if ("all".equals(lowerMethodName))
-            return selectable.all();
-        else if("get".equals(lowerMethodName))
-            return selectable.get();
-
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         return selectable;
     }
 }

@@ -16,7 +16,5 @@ public class YaySpider extends Spider {
         }
     }
 
-    public static Spider create(Site site,PageProcessor pageProcessor) {
-        return new YaySpider(site,pageProcessor);
-    }
+
 }

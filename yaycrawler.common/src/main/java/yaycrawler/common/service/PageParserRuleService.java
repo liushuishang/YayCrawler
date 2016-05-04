@@ -24,7 +24,7 @@ public class PageParserRuleService {
 
     private Map<String, List<PageParseRegion>> urlPageParseRuleMap = new HashedMap();
 
-    public List<PageParseRegion> getPageRegionParseRule(String pageUrl) {
+    public List<PageParseRegion> getPageRegionList(String pageUrl) {
         if (StringUtils.isBlank(pageUrl)) return null;
         String url = UrlUtils.getContextPath(pageUrl);
 
