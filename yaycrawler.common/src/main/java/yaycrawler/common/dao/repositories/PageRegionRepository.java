@@ -11,4 +11,7 @@ import java.util.List;
 public interface PageRegionRepository extends CrudRepository<PageParseRegion, String> {
 
     List<PageParseRegion> findByPageUrl(String pageUrl);
+
+    List<PageParseRegion> findByPageUrlAndName(String pageUrl,String name);
+
 }
