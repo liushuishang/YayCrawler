@@ -17,17 +17,32 @@ import java.util.List;
 @Table(name = "conf_page_region")
 public class PageParseRegion implements Serializable {
 
-
+    @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid")
     private String id;
-    private String name;
+    @Column(name = "pageId",nullable = false,columnDefinition = "varchar(38)")
+    private String pageId;
+    @NotNull
+    @Column(name = "pageUrl")
     private String pageUrl;
+    @Transient
+    private String method;
+    @Transient
+    private String urlParamsJson;
+    @Column(name = "name",nullable = false)
+    private String name;
     /**
-     * 区域的css选择表达式
+     * 区域选择表达式
      */
-    private String CSSSelector;
+    @Column(name = "selectExpression",columnDefinition = "varchar(100)")
+    private String selectExpression;
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "regionId", insertable = false, updatable = false)
     private List<FieldParseRule> fieldParseRules;
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "regionId", insertable = false, updatable = false)
     private List<UrlParseRule> urlParseRules;
-
     @Column(name = "createdDate",columnDefinition = "timestamp default now()")
     private Date createdDate;
 
@@ -40,31 +55,25 @@ public class PageParseRegion implements Serializable {
         this();
         this.name = name;
         this.pageUrl = pageUrl;
-        this.CSSSelector = CSSSelector;
+        this.selectExpression = CSSSelector;
     }
 
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "regionId", insertable = false, updatable = false)
-    public List<FieldParseRule> getFieldParseRules() {
-        return fieldParseRules;
+    public String getId() {
+        return id;
     }
 
-    public void setFieldParseRules(List<FieldParseRule> fieldParseRules) {
-        this.fieldParseRules = fieldParseRules;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "regionId", insertable = false, updatable = false)
-    public List<UrlParseRule> getUrlParseRules() {
-        return urlParseRules;
+    public String getPageId() {
+        return pageId;
     }
 
-    public void setUrlParseRules(List<UrlParseRule> urlParseRules) {
-        this.urlParseRules = urlParseRules;
+    public void setPageId(String pageId) {
+        this.pageId = pageId;
     }
 
-    @NotNull
-    @Column(name = "pageUrl")
     public String getPageUrl() {
         return pageUrl;
     }
@@ -73,17 +82,22 @@ public class PageParseRegion implements Serializable {
         this.pageUrl = pageUrl;
     }
 
-    @NotNull
-    @Column(name = "cssSelector")
-    public String getCSSSelector() {
-        return CSSSelector;
+    public String getMethod() {
+        return method;
     }
 
-    public void setCSSSelector(String CSSSelector) {
-        this.CSSSelector = CSSSelector;
+    public void setMethod(String method) {
+        this.method = method;
     }
 
-    @Column(name = "name")
+    public String getUrlParamsJson() {
+        return urlParamsJson;
+    }
+
+    public void setUrlParamsJson(String urlParamsJson) {
+        this.urlParamsJson = urlParamsJson;
+    }
+
     public String getName() {
         return name;
     }
@@ -92,15 +106,28 @@ public class PageParseRegion implements Serializable {
         this.name = name;
     }
 
-    @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid")
-    public String getId() {
-        return id;
+    public String getSelectExpression() {
+        return selectExpression;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setSelectExpression(String selectExpression) {
+        this.selectExpression = selectExpression;
+    }
+
+    public List<FieldParseRule> getFieldParseRules() {
+        return fieldParseRules;
+    }
+
+    public void setFieldParseRules(List<FieldParseRule> fieldParseRules) {
+        this.fieldParseRules = fieldParseRules;
+    }
+
+    public List<UrlParseRule> getUrlParseRules() {
+        return urlParseRules;
+    }
+
+    public void setUrlParseRules(List<UrlParseRule> urlParseRules) {
+        this.urlParseRules = urlParseRules;
     }
 
     public Date getCreatedDate() {

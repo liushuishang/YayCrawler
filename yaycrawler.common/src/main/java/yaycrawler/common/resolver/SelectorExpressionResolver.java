@@ -3,6 +3,8 @@ package yaycrawler.common.resolver;
 import org.apache.commons.lang3.StringUtils;
 import us.codecraft.webmagic.selector.Selectable;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,19 +29,24 @@ public class SelectorExpressionResolver {
                 String methodName = matcher.group(1);
                 if (StringUtils.isBlank(methodName)) continue;
 
+                String [] paramArray=null;
                 String param = matcher.group(2);
                 if (param != null) {
                     param = param.replaceAll("\"([^\"]*)\"", "$1");//去掉双引号
+                    paramArray = StringUtils.split(param, "$$");
                 }
-                localObject = execute((Selectable) localObject, methodName, param);
+                if(paramArray==null) {
+                    paramArray=new String[1];
+                    paramArray[0] = param;
+                }
+
+                localObject = execute((Selectable) localObject, methodName, paramArray);
 
                 if (!(localObject instanceof Selectable))
                     return (T) localObject;
             }
         }
-        if (localObject instanceof Selectable) {
-            return (T) ((Selectable) localObject).all();
-        } else return (T) localObject;
+        return (T) localObject;
     }
 
 
@@ -47,7 +54,31 @@ public class SelectorExpressionResolver {
         String lowerMethodName = methodName.toLowerCase();
         Selectable selectable = selector;
         try {
-            if ("xpath".equals(lowerMethodName))
+
+            /**
+             * 自定义
+             */
+            if ("constant".equals(lowerMethodName)) {
+                return params[0];
+            }
+            //应该有四个参数（template,varName,start,end)
+            if ("paging".equals(lowerMethodName)) {
+                List<String> dl = new LinkedList<>();
+                String template = String.valueOf(params[0]);
+                String varName = String.valueOf(params[1]);
+                int start=Integer.parseInt((String)params[2]);
+                int end = Integer.parseInt((String) params[3]);
+                for(int i=start;i<=end;i++) {
+                    dl.add(template.replace(varName + "=?", varName + "=" + i));
+                }
+                return dl;
+            }
+
+            if ("css".equals(lowerMethodName)) {
+                if (params.length == 1)
+                    selectable = selectable.$(String.valueOf(params[0]));
+                else selectable = selectable.$(String.valueOf(params[0]), String.valueOf(params[1]));
+            } else if ("xpath".equals(lowerMethodName))
                 selectable = selectable.xpath((String) params[0]);
             else if ("links".equals(lowerMethodName))
                 selectable = selectable.links();

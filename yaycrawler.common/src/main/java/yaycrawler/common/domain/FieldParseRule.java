@@ -17,9 +17,9 @@ public class FieldParseRule implements Serializable {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
     private String id;
-
+    @NotNull
+    @Column(columnDefinition = "varchar(38)")
     private String regionId;
-
     @NotNull
     @Column(name="fieldName")
     private String fieldName;

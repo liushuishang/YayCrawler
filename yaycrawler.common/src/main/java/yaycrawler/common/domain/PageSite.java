@@ -5,6 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by yuananyun on 2016/5/2.
@@ -26,7 +27,7 @@ public class PageSite implements Serializable {
     private String defaultCookies;
     @Column(name = "charset", columnDefinition = "varchar(10) default 'utf-8'")
     private String charset;
-    @Column(name = "sleepTime",insertable = false,updatable = false)
+    @Column(name = "sleepTime", insertable = false, updatable = false)
     private Long sleepTime;
     @Column(name = "retryTimes", columnDefinition = "int default 3")
     private int retryTimes;
@@ -36,6 +37,10 @@ public class PageSite implements Serializable {
     private Long timeOut;
     @Column(name = "headers", columnDefinition = "varchar(1000)")
     private String headers;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "siteId", insertable = false, updatable = false)
+    private List<SiteCookie> cookieList;
 
 
     public String getId() {
@@ -116,5 +121,13 @@ public class PageSite implements Serializable {
 
     public void setHeaders(String headers) {
         this.headers = headers;
+    }
+
+    public List<SiteCookie> getCookieList() {
+        return cookieList;
+    }
+
+    public void setCookieList(List<SiteCookie> cookieList) {
+        this.cookieList = cookieList;
     }
 }

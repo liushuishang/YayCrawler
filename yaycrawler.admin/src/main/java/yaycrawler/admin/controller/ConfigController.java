@@ -1,25 +1,28 @@
 package yaycrawler.admin.controller;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
-import yaycrawler.common.domain.FieldParseRule;
 import yaycrawler.common.domain.PageParseRegion;
-import yaycrawler.common.domain.UrlParseRule;
+import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.service.PageParserRuleService;
+import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.spider.service.ConfigSpiderService;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by yuananyun on 2016/5/3.
@@ -27,6 +30,7 @@ import java.util.Map;
 @Controller
 //@RequestMapping("/config")
 public class ConfigController {
+    private static Logger logger = LoggerFactory.getLogger(ConfigController.class);
 
     @Autowired
     private PageParserRuleService pageParseRuleService;
@@ -39,78 +43,70 @@ public class ConfigController {
         return new ModelAndView("rule_management");
     }
 
+    @RequestMapping("/siteManagement")
+    public ModelAndView siteManagement() {
+        return new ModelAndView("site_management");
+    }
+
     @RequestMapping("/getPageRegionRules")
     @ResponseBody
     public List<PageParseRegion> getPageRegionsByUrl(String url) {
-
         List<PageParseRegion> pageRegions = pageParseRuleService.getPageRegionList(url);
         return pageRegions;
     }
+
     @RequestMapping("/queryPageRulesByUrl")
     @ResponseBody
-    public Object queryPageRulesByUrl(String url)
-    {        url = "http://floor.0731fdc.com/jggs.php";
-        Assert.notNull(url);
-        List<PageParseRegion> pageRegions = getPageRegionsByUrl(url);
-        List<Map<String, Object>> allRuleList = new LinkedList<>();
+    public Object queryPageRulesByUrl(String url) {
+        List<Object[]> result=null;
+        if (url == null)
+            result= pageParseRuleService.queryAllRule();
+        else
+            result= pageParseRuleService.queryRulesByUrl(url);
 
-        for (PageParseRegion pageRegion : pageRegions) {
-            List<Map<String,Object>> regionRuleList=new LinkedList<>();
-            String regionName = pageRegion.getName();
-            String cssSelector = pageRegion.getCSSSelector();
-            for (FieldParseRule fieldParseRule : pageRegion.getFieldParseRules()) {
-                Map fieldRule = new HashMap<>();
-                fieldRule.put("regionName", regionName);
-                fieldRule.put("cssSelector", cssSelector);
-                fieldRule.put("ruleType", "字段");
-                fieldRule.put("fieldName", fieldParseRule.getFieldName());
-                fieldRule.put("rule", fieldParseRule.getRule());
+       List<Map<String, Object>> dataList =new LinkedList<>();
+        for (Object[] valueArray : result) {
+            Map<String,Object> data=new HashMap<>();
+            data.put("id", valueArray[0]);
+            data.put("pageUrl", valueArray[1]);
+            data.put("regionName", valueArray[2]);
+            data.put("selectExpression", valueArray[3]);
+            data.put("ruleType", valueArray[4]);
+            data.put("fieldName", valueArray[5]);
+            data.put("rule", valueArray[6]);
 
-                regionRuleList.add(fieldRule);
-            }
-            for (UrlParseRule urlParseRule : pageRegion.getUrlParseRules()) {
-
-                Map fieldRule = new HashMap<>();
-                fieldRule.put("regionName", regionName);
-                fieldRule.put("cssSelector", cssSelector);
-                fieldRule.put("ruleType", "子级URL");
-                fieldRule.put("fieldName", "");
-                fieldRule.put("rule", urlParseRule.getRule());
-
-                regionRuleList.add(fieldRule);
-            }
-            allRuleList.addAll(regionRuleList);
+            dataList.add(data);
         }
-        return allRuleList;
+        return dataList;
     }
 
 
     @RequestMapping(value = "/testPageWithRule", method = RequestMethod.POST)
     @ResponseBody
-    public Object testPage(HttpServletRequest request, @RequestParam(required = true) String targetUrl,
+    public Object testPage(HttpServletRequest httpServletRequest, @RequestParam(required = true) String targetUrl,
                            @RequestBody PageParseRegion region) {
-        HttpSession session = request.getSession(true);
-        Page page = (Page) session.getAttribute("page");
-        Map<String, Object> testResult = configSpiderService.test(targetUrl, region, page, null);
 
+        String urlParamsJson = region.getUrlParamsJson();
+        Map<String, Object> paramsMap = null;
+        if (!StringUtils.isBlank(urlParamsJson)) {
+            try {
+                paramsMap = JSON.parseObject(urlParamsJson, Map.class);
+            } catch (Exception ex) {
+                logger.error(ex.getMessage());
+                return RestFulResult.failure("Url参数不是一个合法的json");
+            }
+        }
+        Request targetRequest = UrlUtils.createRequest(targetUrl, region.getMethod(), paramsMap);
+        Map<String, Object> testResult = configSpiderService.test(targetRequest, region, null, null);
         Map<String, Object> data = MapUtils.getMap(testResult, "data");
-        page = (Page) testResult.get("page");
+        Page page = (Page) testResult.get("page");
         if (page == null) return null;
 
-        List<String> childUrlInfoList = new LinkedList<>();
-        for (Request r : page.getTargetRequests()) {
-            childUrlInfoList.add(r.toString());
-        }
+        List<String> childUrlInfoList = page.getTargetRequests().stream().map(Request::toString).collect(Collectors.toCollection(LinkedList::new));
         Map<String, Object> result = new HashMap<>();
         result.put("data", data);
         result.put("childUrls", childUrlInfoList);
 
-        Page tmpPage = new Page();
-        tmpPage.setHtml(page.getHtml());
-        tmpPage.setRequest(page.getRequest());
-        tmpPage.setUrl(page.getUrl());
-        page = null;
-        session.setAttribute("page", tmpPage);
         return result;
     }
 
@@ -118,22 +114,26 @@ public class ConfigController {
     @ResponseBody
     public Object saveFieldRule(@RequestBody Map<String, Object> params) {
         try {
+            String pageUrl = MapUtils.getString(params, "pageUrl");
+            pageUrl = UrlUtils.getContextPath(pageUrl);
+
+            String pageMethod = MapUtils.getString(params, "method");
+            String urlParamsJson = MapUtils.getString(params, "urlParamsJson");
+
+            String pageRegionName = MapUtils.getString(params, "regionName");
+            String regionSelectExpression = MapUtils.getString(params, "selectExpression");
+
+
             Map fieldParseRuleMap = MapUtils.getMap(params, "fieldParseRule");
-            if (fieldParseRuleMap == null) return false;
-
-            PageParseRegion region = getPageParseRegion(params);
-            if (region == null) return false;
-
             String fieldName = MapUtils.getString(fieldParseRuleMap, "fieldName");
             String rule = MapUtils.getString(fieldParseRuleMap, "rule");
-            FieldParseRule fieldParseRule = new FieldParseRule(fieldName, rule);
-            fieldParseRule.setRegionId(region.getId());
 
-            pageParseRuleService.saveFieldParseRule(fieldParseRule);
+            return pageParseRuleService.saveFieldParseRule(pageUrl, pageMethod, urlParamsJson, pageRegionName, regionSelectExpression, fieldName, rule);
+
         } catch (Exception ex) {
-            return false;
+            logger.error(ex.getMessage(), ex);
+            return RestFulResult.failure(ex.getMessage());
         }
-        return true;
     }
 
 
@@ -141,34 +141,30 @@ public class ConfigController {
     @ResponseBody
     public Object saveUrlRule(@RequestBody Map<String, Object> params) {
         try {
+            String pageUrl = MapUtils.getString(params, "pageUrl");
+            pageUrl = UrlUtils.getContextPath(pageUrl);
+
+            String pageMethod = MapUtils.getString(params, "method");
+            String urlParamsJson = MapUtils.getString(params, "urlParamsJson");
+
+            String pageRegionName = MapUtils.getString(params, "regionName");
+            String regionSelectExpression = MapUtils.getString(params, "selectExpression");
+
             Map urlParseRuleMap = MapUtils.getMap(params, "urlParseRule");
-            if (urlParseRuleMap == null) return false;
-
-            PageParseRegion region = getPageParseRegion(params);
-            if (region == null) return false;
-
             String rule = MapUtils.getString(urlParseRuleMap, "rule");
-            UrlParseRule urlParseRule = new UrlParseRule(rule);
-            urlParseRule.setRegionId(region.getId());
-
-            pageParseRuleService.saveUrlParseRule(urlParseRule);
+            return pageParseRuleService.saveUrlParseRule(pageUrl, pageMethod, urlParamsJson, pageRegionName, regionSelectExpression, rule);
 
         } catch (Exception ex) {
-            return false;
+            logger.error(ex.getMessage(), ex);
+            return RestFulResult.failure(ex.getMessage());
         }
-        return true;
+    }
+    @RequestMapping(value = "/deleteRuleByIds",method = RequestMethod.POST)
+    @ResponseBody
+    public Object deleteRuleByIds(@RequestBody String[] idArray)
+    {
+        return pageParseRuleService.deleteRuleByIds(idArray);
     }
 
-    private PageParseRegion getPageParseRegion(@RequestBody Map<String, Object> params) {
-        String pageUrl = MapUtils.getString(params, "pageUrl");
-        String regionName = MapUtils.getString(params, "name");
-        String cssSelector = MapUtils.getString(params, "cssselector");
-        PageParseRegion region = pageParseRuleService.findRegionByUrlAndName(pageUrl, regionName);
-        if (region == null) {
-            PageParseRegion newRegion = new PageParseRegion(regionName, pageUrl, cssSelector);
-            region = pageParseRuleService.savePageRegion(newRegion);
-        }
-        return region;
-    }
 
 }

@@ -19,17 +19,20 @@ public class UrlParseRule implements Serializable {
     @GenericGenerator(name = "uuid", strategy = "uuid")
     private String id;
 
+    @NotNull
+    @Column(columnDefinition = "varchar(38)")
     private String regionId;
 
     @NotNull
     private String rule;
+    @NotNull
     private String method;
 
     @Column(name = "createdDate",columnDefinition = "timestamp default now()")
     private Date createdDate;
 
     public UrlParseRule() {
-        method = "get";
+        method = "GET";
     }
 
     public UrlParseRule(String rule) {

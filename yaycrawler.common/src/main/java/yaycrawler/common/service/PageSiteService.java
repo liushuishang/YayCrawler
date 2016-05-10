@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Site;
 import yaycrawler.common.dao.repositories.PageSiteRepository;
 import yaycrawler.common.domain.PageSite;
+import yaycrawler.common.domain.SiteCookie;
 
 import java.util.Map;
 
@@ -41,6 +42,9 @@ public class PageSiteService {
                     site.addCookie(domain, entry.getKey(), entry.getValue());
                 }
             }
+            if (pageSite.getCookieList() != null)
+                for (SiteCookie cookie : pageSite.getCookieList())
+                    site.addHeader("Cookie", cookie.getCookie());
         }
         return site;
     }

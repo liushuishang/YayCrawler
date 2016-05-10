@@ -18,6 +18,7 @@ import java.util.*;
  */
 public class GenericPageProcessor implements PageProcessor {
     private PageParserRuleService pageParseRuleService;
+    private static String DEFAULT_PAGE_SELECTOR = "page";
 
     public GenericPageProcessor(PageParserRuleService pageParseRuleService) {
         this.pageParseRuleService = pageParseRuleService;
@@ -36,13 +37,17 @@ public class GenericPageProcessor implements PageProcessor {
     }
 
     public  Map<String, Object> parseOneRegion(Page page, PageParseRegion pageParseRegion) {
-        Selectable content = page.getHtml().css(pageParseRegion.getCSSSelector());
+        Selectable context =null;
+        if (DEFAULT_PAGE_SELECTOR.equals(pageParseRegion.getSelectExpression()))
+            context = page.getHtml();
+        else
+            context = SelectorExpressionResolver.resolve(page.getHtml(), pageParseRegion.getSelectExpression());
 
         List<UrlParseRule> urlParseRuleList = pageParseRegion.getUrlParseRules();
         if (urlParseRuleList != null && urlParseRuleList.size() > 0) {
             Set<String> childSet = new HashSet<>();
             for (UrlParseRule urlParseRule : urlParseRuleList) {
-                Collection<? extends String> urlList = SelectorExpressionResolver.resolve(content, urlParseRule.getRule());
+                Collection<? extends String> urlList = SelectorExpressionResolver.resolve(context, urlParseRule.getRule());
                 if (urlList != null && urlList.size() > 0)
                     childSet.addAll(urlList);
             }
@@ -53,7 +58,7 @@ public class GenericPageProcessor implements PageProcessor {
         if (fieldParseRuleList != null && fieldParseRuleList.size() > 0) {
             int i = 0;
             Map<String, Object> resultMap = new HashedMap();
-            List<Selectable> nodes = content.nodes();
+            List<Selectable> nodes = context.nodes();
             for (Selectable node : nodes) {
                 Map<String, Object> childMap = new HashedMap();
                 for (FieldParseRule fieldParseRule : fieldParseRuleList) {

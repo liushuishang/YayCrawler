@@ -1,5 +1,6 @@
 package yaycrawler.spider.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
@@ -7,7 +8,9 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.Downloader;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
+import us.codecraft.webmagic.utils.UrlUtils;
 import yaycrawler.common.domain.PageParseRegion;
+import yaycrawler.common.service.PageSiteService;
 import yaycrawler.spider.processor.GenericPageProcessor;
 
 import java.util.HashMap;
@@ -23,6 +26,9 @@ public class ConfigSpiderService {
     private Downloader downloader;
     private GenericPageProcessor pageProcessor;
 
+    @Autowired
+    private PageSiteService pageSiteService;
+
     public ConfigSpiderService() {
         downloader = new HttpClientDownloader();
         downloader.setThread(1);
@@ -32,17 +38,17 @@ public class ConfigSpiderService {
     /**
      * 测试一个页面区域解析规则
      *
-     * @param url
+     * @param request
      * @param parseRegion
      * @param page
      * @return
      */
-    public Map<String, Object> test(String url, PageParseRegion parseRegion, Page page, Site site) {
+    public Map<String, Object> test(Request request, PageParseRegion parseRegion, Page page, Site site) {
         if (pageProcessor == null) return null;
 
         if (page == null) {
             final Site finalSite = site;
-            page = downloader.download(new Request(url), new Task() {
+            page = downloader.download(request, new Task() {
                 @Override
                 public String getUUID() {
                     return UUID.randomUUID().toString();
@@ -50,7 +56,7 @@ public class ConfigSpiderService {
 
                 @Override
                 public Site getSite() {
-                    return finalSite == null ? Site.me() : finalSite;
+                    return finalSite == null ? ConfigSpiderService.this.getSite(request.getUrl()) : finalSite;
                 }
             });
         }
@@ -60,6 +66,17 @@ public class ConfigSpiderService {
         result.put("data", data);
         result.put("page", page);
         return result;
+    }
+
+    private Site getSite(String url) {
+        Site site = pageSiteService.getSite(url);
+        if (site == null) {
+            site = Site.me();
+            String domain = UrlUtils.getDomain(url);
+            site.setDomain(domain);
+            site.addHeader("host", domain);
+        }
+        return site;
     }
 
 }

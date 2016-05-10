@@ -107,8 +107,7 @@
     <script th:inline="javascript">
         /*<![CDATA[*/
         window.global = {};
-        window.global.contextPath = "/admin";
-
+        window.global.contextPath =/*[[${#httpServletRequest.getContextPath()}]]*/;
 
 
         /*]]>*/
@@ -116,7 +115,7 @@
     <style type="text/css">
         .bars, .chart, .pie {
             overflow: hidden;
-            height: 20px;
+            height: 40px;
             width: 100%;
             font-size: 14px;
         }
