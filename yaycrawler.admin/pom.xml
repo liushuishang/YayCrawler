@@ -13,7 +13,7 @@
 
 	<parent>
 		<artifactId>yaycrawler-parent</artifactId>
-		<groupId>com.fangluotx</groupId>
+		<groupId>com.yaycrawler</groupId>
 		<version>${yaycrawler.version}</version>
 	</parent>
 
@@ -60,7 +60,7 @@
 			<version>${yaycrawler.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.fangluotx</groupId>
+			<groupId>com.yaycrawler</groupId>
 			<artifactId>yaycrawler-spider</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>

@@ -13,7 +13,7 @@
 
 	<parent>
 		<artifactId>yaycrawler-parent</artifactId>
-		<groupId>com.fangluotx</groupId>
+		<groupId>com.yaycrawler</groupId>
 		<version>${yaycrawler.version}</version>
 	</parent>
 
