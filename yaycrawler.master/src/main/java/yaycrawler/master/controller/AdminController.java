@@ -13,7 +13,6 @@ public class AdminController {
 
     public RestFulResult acceptAdminTask()
     {
-
         return null;
     }
 }

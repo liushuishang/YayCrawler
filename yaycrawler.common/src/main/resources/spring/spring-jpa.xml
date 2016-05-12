@@ -6,7 +6,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
 
-    <!--<jpa:repositories base-package="yaycrawler.common.dao.repositories"-->
+    <!--<jpa:repository base-package="yaycrawler.common.dao.repository"-->
                       <!--entity-manager-factory-ref="entityManagerFactory"-->
                       <!--transaction-manager-ref="transactionManager"/>-->
 

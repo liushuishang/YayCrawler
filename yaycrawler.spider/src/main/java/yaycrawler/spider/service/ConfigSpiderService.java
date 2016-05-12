@@ -42,7 +42,7 @@ public class ConfigSpiderService {
      * @param page
      * @return
      */
-    public Map<String, Object> test(Request request, PageParseRegion parseRegion, Page page, Site site) {
+    public Map<String, Object> test(final Request request, PageParseRegion parseRegion, Page page, Site site) {
         if (pageProcessor == null) return null;
 
         if (page == null) {

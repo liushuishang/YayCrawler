@@ -51,7 +51,7 @@ var ComponentsSelect2 = function() {
         $(".js-data-example-ajax").select2({
             width: "off",
             ajax: {
-                url: "https://api.github.com/search/repositories",
+                url: "https://api.github.com/search/repository",
                 dataType: 'json',
                 delay: 250,
                 data: function(params) {
