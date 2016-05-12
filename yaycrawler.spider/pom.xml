@@ -73,6 +73,11 @@
 			<artifactId>yaycrawler-common</artifactId>
 			<version>${yaycrawler.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.yaycrawler</groupId>
+			<artifactId>yaycrawler.dao</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 
 	</dependencies>
 	

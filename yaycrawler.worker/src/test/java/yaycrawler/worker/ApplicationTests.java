@@ -11,10 +11,10 @@ import us.codecraft.webmagic.downloader.Downloader;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.scheduler.QueueScheduler;
 import us.codecraft.webmagic.scheduler.Scheduler;
-import yaycrawler.common.service.PageParserRuleService;
-import yaycrawler.common.service.PageSiteService;
+import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.pipeline.GenericPipeline;
 import yaycrawler.spider.processor.GenericPageProcessor;
+import yaycrawler.spider.service.PageSiteService;
 import yaycrawler.spider.service.Spider0731Service;
 
 import java.util.HashMap;

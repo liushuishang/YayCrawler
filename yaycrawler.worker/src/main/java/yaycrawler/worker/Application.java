@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @ImportResource(locations = {"classpath*:spring/*.xml"})
-@EntityScan(basePackages = {"yaycrawler.common.domain"})
-@EnableJpaRepositories(basePackages = {"yaycrawler.common.dao.repositories"})
+@EntityScan(basePackages = {"yaycrawler.dao.domain"})
+@EnableJpaRepositories(basePackages = {"yaycrawler.dao.repositories"})
 public class Application {
 
 	public static void main(String[] args) {

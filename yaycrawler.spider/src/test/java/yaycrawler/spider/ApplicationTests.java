@@ -13,9 +13,9 @@ import us.codecraft.webmagic.pipeline.ConsolePipeline;
 import us.codecraft.webmagic.pipeline.Pipeline;
 import us.codecraft.webmagic.scheduler.RedisScheduler;
 import us.codecraft.webmagic.scheduler.Scheduler;
-import yaycrawler.common.service.PageParserRuleService;
-import yaycrawler.common.service.PageSiteService;
+import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.processor.GenericPageProcessor;
+import yaycrawler.spider.service.PageSiteService;
 import yaycrawler.spider.service.Spider0731Service;
 
 @RunWith(SpringJUnit4ClassRunner.class)

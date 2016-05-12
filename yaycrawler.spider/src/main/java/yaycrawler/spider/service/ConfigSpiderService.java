@@ -9,8 +9,7 @@ import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.Downloader;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.utils.UrlUtils;
-import yaycrawler.common.domain.PageParseRegion;
-import yaycrawler.common.service.PageSiteService;
+import yaycrawler.dao.domain.PageParseRegion;
 import yaycrawler.spider.processor.GenericPageProcessor;
 
 import java.util.HashMap;

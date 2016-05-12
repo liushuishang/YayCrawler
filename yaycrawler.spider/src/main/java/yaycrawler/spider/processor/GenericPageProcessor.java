@@ -5,11 +5,11 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Selectable;
-import yaycrawler.common.domain.FieldParseRule;
-import yaycrawler.common.domain.PageParseRegion;
-import yaycrawler.common.domain.UrlParseRule;
-import yaycrawler.common.resolver.SelectorExpressionResolver;
-import yaycrawler.common.service.PageParserRuleService;
+import yaycrawler.dao.domain.FieldParseRule;
+import yaycrawler.dao.domain.PageParseRegion;
+import yaycrawler.dao.domain.UrlParseRule;
+import yaycrawler.dao.service.PageParserRuleService;
+import yaycrawler.spider.resolver.SelectorExpressionResolver;
 
 import java.util.*;
 

@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
-import yaycrawler.common.domain.PageParseRegion;
 import yaycrawler.common.model.RestFulResult;
-import yaycrawler.common.service.PageParserRuleService;
 import yaycrawler.common.utils.UrlUtils;
+import yaycrawler.dao.domain.PageParseRegion;
+import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.service.ConfigSpiderService;
+import yaycrawler.spider.utils.RequestHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -58,15 +59,15 @@ public class ConfigController {
     @RequestMapping("/queryPageRulesByUrl")
     @ResponseBody
     public Object queryPageRulesByUrl(String url) {
-        List<Object[]> result=null;
+        List<Object[]> result = null;
         if (url == null)
-            result= pageParseRuleService.queryAllRule();
+            result = pageParseRuleService.queryAllRule();
         else
-            result= pageParseRuleService.queryRulesByUrl(url);
+            result = pageParseRuleService.queryRulesByUrl(url);
 
-       List<Map<String, Object>> dataList =new LinkedList<>();
+        List<Map<String, Object>> dataList = new LinkedList<>();
         for (Object[] valueArray : result) {
-            Map<String,Object> data=new HashMap<>();
+            Map<String, Object> data = new HashMap<>();
             data.put("id", valueArray[0]);
             data.put("pageUrl", valueArray[1]);
             data.put("regionName", valueArray[2]);
@@ -96,7 +97,7 @@ public class ConfigController {
                 return RestFulResult.failure("Url参数不是一个合法的json");
             }
         }
-        Request targetRequest = UrlUtils.createRequest(targetUrl, region.getMethod(), paramsMap);
+        Request targetRequest = RequestHelper.createRequest(targetUrl, region.getMethod(), paramsMap);
         Map<String, Object> testResult = configSpiderService.test(targetRequest, region, null, null);
         Map<String, Object> data = MapUtils.getMap(testResult, "data");
         Page page = (Page) testResult.get("page");
@@ -159,10 +160,10 @@ public class ConfigController {
             return RestFulResult.failure(ex.getMessage());
         }
     }
-    @RequestMapping(value = "/deleteRuleByIds",method = RequestMethod.POST)
+
+    @RequestMapping(value = "/deleteRuleByIds", method = RequestMethod.POST)
     @ResponseBody
-    public Object deleteRuleByIds(@RequestBody String[] idArray)
-    {
+    public Object deleteRuleByIds(@RequestBody String[] idArray) {
         return pageParseRuleService.deleteRuleByIds(idArray);
     }
 
