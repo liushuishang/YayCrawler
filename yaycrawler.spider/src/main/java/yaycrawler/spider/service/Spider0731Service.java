@@ -18,7 +18,7 @@ public class Spider0731Service extends BaseSpiderService {
         spider = new YaySpider(site, pageProcessor);
         spider.scheduler(scheduler);
         spider.setDownloader(downloader);
-        spider.setExitWhenComplete(false);
+        spider.setExitWhenComplete(true);
         spider.setUUID(UUID.randomUUID().toString());
         for (Pipeline pipeline : pipelines) {
             spider.addPipeline(pipeline);

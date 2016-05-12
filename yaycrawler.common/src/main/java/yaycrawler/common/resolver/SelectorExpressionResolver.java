@@ -15,6 +15,8 @@ public class SelectorExpressionResolver {
 
     private static Pattern INVOKE_PATTERN = Pattern.compile("(\\w+)\\((.*)\\)");
 
+
+
     public static <T> T resolve(Selectable selector, String expression) {
         if (selector == null) return null;
 
@@ -32,7 +34,7 @@ public class SelectorExpressionResolver {
                 String [] paramArray=null;
                 String param = matcher.group(2);
                 if (param != null) {
-                    param = param.replaceAll("\"([^\"]*)\"", "$1");//去掉双引号
+//                    param = param.replaceAll("\"([^\"]*)\"", "$1");//去掉双引号
                     paramArray = StringUtils.split(param, "$$");
                 }
                 if(paramArray==null) {
@@ -50,10 +52,22 @@ public class SelectorExpressionResolver {
     }
 
 
-    private static Object execute(Selectable selector, String methodName, Object... params) {
+    private static Object execute(Selectable selector, String methodName, Object... paramArray) {
         String lowerMethodName = methodName.toLowerCase();
         Selectable selectable = selector;
         try {
+            /**
+             * 参数处理
+             */
+            String[] params = new String[paramArray.length];
+            for (int i = 0; i < paramArray.length; i++) {
+                String p = String.valueOf(paramArray[i]);
+                if(p.startsWith("\""))
+                    p = p.substring(1, p.length());
+                if(p.endsWith("\""))
+                    p = p.substring(0, p.length() - 1);
+                params[i] = p;
+            }
 
             /**
              * 自定义
@@ -86,7 +100,7 @@ public class SelectorExpressionResolver {
                 if (params.length == 1)
                     selectable = selectable.regex((String) params[0]);
                 else
-                    selectable = selectable.regex((String) params[0], (int) params[1]);
+                    selectable = selectable.regex((String) params[0], Integer.parseInt(String.valueOf(params[1])));
             } else if ("all".equals(lowerMethodName))
                 return selectable.all();
             else if ("get".equals(lowerMethodName))

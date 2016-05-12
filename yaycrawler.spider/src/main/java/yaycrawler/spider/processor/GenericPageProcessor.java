@@ -42,7 +42,7 @@ public class GenericPageProcessor implements PageProcessor {
             context = page.getHtml();
         else
             context = SelectorExpressionResolver.resolve(page.getHtml(), pageParseRegion.getSelectExpression());
-
+if(context==null) return null;
         List<UrlParseRule> urlParseRuleList = pageParseRegion.getUrlParseRules();
         if (urlParseRuleList != null && urlParseRuleList.size() > 0) {
             Set<String> childSet = new HashSet<>();
