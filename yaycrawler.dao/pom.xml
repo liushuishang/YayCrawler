@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>yaycrawler.dao</artifactId>
+    <artifactId>yaycrawler-dao</artifactId>
 
     <dependencies>
         <dependency>

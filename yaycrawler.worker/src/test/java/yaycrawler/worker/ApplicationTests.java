@@ -39,7 +39,7 @@ public class ApplicationTests {
 	public void testMongoDB()
 	{
 		Map<String, Object> data = new HashMap<>();
-		data.put("name", "袁安云");
+		data.put("name", "zhangsan");
 		data.put("age", 28);
 		mongoTemplate.save(data, "yay");
 	}

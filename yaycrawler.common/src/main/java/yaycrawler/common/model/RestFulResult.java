@@ -14,6 +14,14 @@ public class RestFulResult {
         this.data = data;
     }
 
+    public RestFulResult() {
+    }
+
+    public boolean hasError()
+    {
+        return status == 0;
+    }
+
     public static RestFulResult success(Object data) {
         return new RestFulResult(1, null, data);
     }

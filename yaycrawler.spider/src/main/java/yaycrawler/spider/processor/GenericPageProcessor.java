@@ -1,6 +1,7 @@
 package yaycrawler.spider.processor;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
@@ -16,6 +17,7 @@ import java.util.*;
 /**
  * Created by yuananyun on 2016/5/1.
  */
+@Component
 public class GenericPageProcessor implements PageProcessor {
     private PageParserRuleService pageParseRuleService;
     private static String DEFAULT_PAGE_SELECTOR = "page";
@@ -36,13 +38,13 @@ public class GenericPageProcessor implements PageProcessor {
         }
     }
 
-    public  Map<String, Object> parseOneRegion(Page page, PageParseRegion pageParseRegion) {
-        Selectable context =null;
+    public Map<String, Object> parseOneRegion(Page page, PageParseRegion pageParseRegion) {
+        Selectable context = null;
         if (DEFAULT_PAGE_SELECTOR.equals(pageParseRegion.getSelectExpression()))
             context = page.getHtml();
         else
             context = SelectorExpressionResolver.resolve(page.getHtml(), pageParseRegion.getSelectExpression());
-if(context==null) return null;
+        if (context == null) return null;
         List<UrlParseRule> urlParseRuleList = pageParseRegion.getUrlParseRules();
         if (urlParseRuleList != null && urlParseRuleList.size() > 0) {
             Set<String> childSet = new HashSet<>();
