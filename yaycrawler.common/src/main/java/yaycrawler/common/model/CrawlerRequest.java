@@ -5,12 +5,21 @@ import java.util.Map;
 /**
  * Created by Administrator on 2016/5/12.
  */
-public class CrawRequest {
+public class CrawlerRequest {
 
     private String url;
     private String method;
     private Map data;
     private String domain;
+    private Long startTime;
+
+    public Long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
 
     public String getDomain() {
         return domain;

@@ -14,7 +14,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.script.DigestUtils;
 import org.springframework.stereotype.Service;
-import yaycrawler.common.model.CrawRequest;
+import yaycrawler.common.model.CrawlerRequest;
+
 import javax.servlet.http.HttpServletRequest;
 
 import java.util.List;
@@ -48,6 +49,7 @@ public class WorkInfoService {
     private static final String SET_PREFIX = "set_";
 
     private static final String ITEM_PREFIX = "item_";
+    private static final String RUNNING_PREFIX = "running_";
     private static final String SPIDER_DATA = "spider_data";
 
     public String getIpAddress(HttpServletRequest request) {
@@ -101,61 +103,93 @@ public class WorkInfoService {
         return ip;
     }
 
-    protected String getSetKey(String domain) {
-        return SET_PREFIX + domain;
-    }
+//    protected String getSetKey(String domain) {
+//        return SET_PREFIX + domain;
+//    }
+//
+//    protected String getQueueKey(String domain) {
+//        return QUEUE_PREFIX + domain;
+//    }
+//
+//    protected String getRunningKey(String domain) {
+//        return RUNNING_PREFIX + domain;
+//    }
 
-    protected String getQueueKey(String domain) {
-        return QUEUE_PREFIX + domain;
-    }
-
-    public Object regeditWorks(List<CrawRequest> crawRequests) {
-        for (CrawRequest crawRequest:crawRequests) {
-            regeditWork(crawRequest);
+    public Object regeditWorks(List<CrawlerRequest> crawlerRequests) {
+        for (CrawlerRequest crawlerRequest : crawlerRequests) {
+            regeditWork(crawlerRequest);
         }
-        return crawRequests;
+        return crawlerRequests;
     }
 
-    public Object regeditWork(CrawRequest crawRequest) {
-        boolean isDuplicate = isDuplicate(crawRequest);
-        if(!isDuplicate) {
-            String field = DigestUtils.sha1DigestAsHex(crawRequest.getUrl());
+    public Object regeditWork(CrawlerRequest crawlerRequest) {
+        boolean isDuplicate = isDuplicate(crawlerRequest);
+        String queue = QUEUE_PREFIX + "data";
+        if (!isDuplicate) {
+            String field = DigestUtils.sha1DigestAsHex(crawlerRequest.getUrl());
             HashOperations hashOperations = redisTemplate.opsForHash();
             ListOperations listOperations = redisTemplate.opsForList();
-            listOperations.leftPush(getQueueKey(crawRequest.getDomain()), crawRequest.getUrl());
-            String value = JSON.toJSONString(crawRequest);
-            hashOperations.put((ITEM_PREFIX + crawRequest.getDomain()), field, value);
-            SetOperations setOperations = redisTemplate.opsForSet();
-            setOperations.add(SPIDER_DATA,crawRequest.getDomain());
+            listOperations.leftPush(queue, crawlerRequest.getUrl());
+            String value = JSON.toJSONString(crawlerRequest);
+            hashOperations.put((ITEM_PREFIX + "data"), field, value);
         }
-//        listWorks(10);
-        return crawRequest;
+        return crawlerRequest;
     }
 
-    public boolean isDuplicate(CrawRequest request) {
+    public boolean isDuplicate(CrawlerRequest request) {
         SetOperations setOperations = redisTemplate.opsForSet();
-        boolean isDuplicate = setOperations.isMember(getSetKey(request.getDomain()), request.getUrl());
+        String uniqQueue = SET_PREFIX + "data";
+        boolean isDuplicate = setOperations.isMember(uniqQueue, request.getUrl());
         if (!isDuplicate) {
             String url = request.getUrl();
-            setOperations.add(getSetKey(request.getDomain()),url);
+            setOperations.add(uniqQueue, url);
         }
         return isDuplicate;
     }
 
-    public List<CrawRequest> listWorks(long count) {
+    public List<CrawlerRequest> listWorks(String workId, long count) {
         SetOperations setOperations = redisTemplate.opsForSet();
         HashOperations hashOperations = redisTemplate.opsForHash();
         ListOperations listOperations = redisTemplate.opsForList();
-        List<CrawRequest> crawRequests = Lists.newArrayList();
-        String domain = setOperations.pop(SPIDER_DATA).toString();
-        String key = ITEM_PREFIX + domain;
+        List<CrawlerRequest> crawlerRequests = Lists.newArrayList();
+        String queue = QUEUE_PREFIX + "data";
+        String runningQueue = RUNNING_PREFIX + "data";
+        String key = ITEM_PREFIX + "data";
         for (int i = 0; i < count; i++) {
-            Object url = listOperations.leftPop(getQueueKey(domain));
-            String field = DigestUtils.sha1DigestAsHex(url.toString());
-            String data = hashOperations.get(key,field).toString();
-            CrawRequest crawRequest = JSON.parseObject(data, CrawRequest.class);
-            crawRequests.add(crawRequest);
+            Object url = listOperations.leftPop(queue);
+            if (url != null) {
+                String field = DigestUtils.sha1DigestAsHex(url.toString());
+                String data = hashOperations.get(key, field).toString();
+                CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
+                crawlerRequests.add(crawlerRequest);
+            }
         }
-        return crawRequests;
+        long startTime = System.currentTimeMillis();
+        for (CrawlerRequest crawlerRequest : crawlerRequests) {
+            crawlerRequest.setStartTime(startTime);
+            listOperations.leftPush(runningQueue, crawlerRequest);
+            String field = DigestUtils.sha1DigestAsHex(crawlerRequest.getUrl());
+            hashOperations.delete(key,field);
+        }
+        return crawlerRequests;
+    }
+
+    public Object removeCraw(List<CrawlerRequest> crawlerRequests) {
+
+        SetOperations setOperations = redisTemplate.opsForSet();
+        HashOperations hashOperations = redisTemplate.opsForHash();
+        ListOperations listOperations = redisTemplate.opsForList();
+        String uniqQueue = SET_PREFIX + "data";
+        String runningQueue = RUNNING_PREFIX + "data";
+        for (CrawlerRequest crawlerRequest : crawlerRequests) {
+            String domain = crawlerRequest.getDomain();
+            String key = ITEM_PREFIX + "data";
+            String url = crawlerRequest.getUrl();
+            String field = DigestUtils.sha1DigestAsHex(url.toString());
+            hashOperations.delete(key, field);
+            setOperations.remove(uniqQueue, url);
+            listOperations.remove(runningQueue, 1, url);
+        }
+        return false;
     }
 }
