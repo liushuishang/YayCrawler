@@ -4,23 +4,21 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.script.DigestUtils;
 import org.springframework.stereotype.Service;
 import yaycrawler.common.model.CrawRequest;
-import yaycrawler.master.model.WorkInfo;
-import yaycrawler.master.repository.WorkInfoRepository;
-
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
+
+import java.util.List;
+
 
 /**
  * Created by Administrator on 2016/5/11.
@@ -34,11 +32,9 @@ public class WorkInfoService {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    @Autowired
-    private WorkInfoRepository workInfoRepository;
-    private LoadingCache<String,String> cahceBuilder= CacheBuilder
+    private LoadingCache<String, String> cahceBuilder = CacheBuilder
             .newBuilder()
-            .build(new CacheLoader<String, String>(){
+            .build(new CacheLoader<String, String>() {
                 @Override
                 public String load(String key) throws Exception {
 //                    String strProValue="hello "+key+"!";
@@ -52,19 +48,7 @@ public class WorkInfoService {
     private static final String SET_PREFIX = "set_";
 
     private static final String ITEM_PREFIX = "item_";
-
-    public Object regedit(WorkInfo params, HttpServletRequest request) {
-        String ip = getIpAddress(request);
-        params.setClientIp(ip);
-        cahceBuilder.put(params.getName(), JSON.toJSONString(params));
-        try {
-            System.out.println(cahceBuilder.get(params.getName()));
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        workInfoRepository.save(params);
-        return params;
-    }
+    private static final String SPIDER_DATA = "spider_data";
 
     public String getIpAddress(HttpServletRequest request) {
         //
@@ -117,12 +101,61 @@ public class WorkInfoService {
         return ip;
     }
 
+    protected String getSetKey(String domain) {
+        return SET_PREFIX + domain;
+    }
 
-    public Object regeditWork(CrawRequest params, HttpServletRequest request) {
-        String field = DigestUtils.sha1DigestAsHex(params.getUrl());
+    protected String getQueueKey(String domain) {
+        return QUEUE_PREFIX + domain;
+    }
+
+    public Object regeditWorks(List<CrawRequest> crawRequests) {
+        for (CrawRequest crawRequest:crawRequests) {
+            regeditWork(crawRequest);
+        }
+        return crawRequests;
+    }
+
+    public Object regeditWork(CrawRequest crawRequest) {
+        boolean isDuplicate = isDuplicate(crawRequest);
+        if(!isDuplicate) {
+            String field = DigestUtils.sha1DigestAsHex(crawRequest.getUrl());
+            HashOperations hashOperations = redisTemplate.opsForHash();
+            ListOperations listOperations = redisTemplate.opsForList();
+            listOperations.leftPush(getQueueKey(crawRequest.getDomain()), crawRequest.getUrl());
+            String value = JSON.toJSONString(crawRequest);
+            hashOperations.put((ITEM_PREFIX + crawRequest.getDomain()), field, value);
+            SetOperations setOperations = redisTemplate.opsForSet();
+            setOperations.add(SPIDER_DATA,crawRequest.getDomain());
+        }
+//        listWorks(10);
+        return crawRequest;
+    }
+
+    public boolean isDuplicate(CrawRequest request) {
+        SetOperations setOperations = redisTemplate.opsForSet();
+        boolean isDuplicate = setOperations.isMember(getSetKey(request.getDomain()), request.getUrl());
+        if (!isDuplicate) {
+            String url = request.getUrl();
+            setOperations.add(getSetKey(request.getDomain()),url);
+        }
+        return isDuplicate;
+    }
+
+    public List<CrawRequest> listWorks(long count) {
+        SetOperations setOperations = redisTemplate.opsForSet();
         HashOperations hashOperations = redisTemplate.opsForHash();
-        String value = JSON.toJSONString(params);
-        hashOperations.put((ITEM_PREFIX + params.getDomain()), field, value);
-        return params;
+        ListOperations listOperations = redisTemplate.opsForList();
+        List<CrawRequest> crawRequests = Lists.newArrayList();
+        String domain = setOperations.pop(SPIDER_DATA).toString();
+        String key = ITEM_PREFIX + domain;
+        for (int i = 0; i < count; i++) {
+            Object url = listOperations.leftPop(getQueueKey(domain));
+            String field = DigestUtils.sha1DigestAsHex(url.toString());
+            String data = hashOperations.get(key,field).toString();
+            CrawRequest crawRequest = JSON.parseObject(data, CrawRequest.class);
+            crawRequests.add(crawRequest);
+        }
+        return crawRequests;
     }
 }
