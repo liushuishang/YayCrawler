@@ -11,7 +11,8 @@ public class CommunicationAPIs {
      */
     public static final String WORKER_POST_MASTER_REGISTER = "/worker/register";
     public static final String WORKER_POST_MASTER_HEARTBEAT = "/worker/heartBeat";
-    public static final String WORKER_POST_MASTER_RESULT_NOTIFY = "/worker/crawlerResultNotify";
+    public static final String WORKER_POST_MASTER_SUCCESS_NOTIFY = "/worker/crawlerSuccessNotify";
+    public static final String WORKER_POST_MASTER_FAILURE_NOTIFY="/worker/crawlerFailureNotify";
 
     public static final String MASTER_POST_WORKER_TASK_ASSIGN = "/master/assignTasks";
 

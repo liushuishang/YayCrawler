@@ -28,7 +28,7 @@ public class CrawlerResultNotifyService implements IResultPersistentService {
         crawlerResult.setSuccess(true);
         crawlerResult.setCrawlerRequestList((List<CrawlerRequest>) data.getOrDefault("childRequests", null));
 
-       return masterActor.notifyCrawlerResult(crawlerResult);
+       return masterActor.notifyTaskSuccess(crawlerResult);
 
     }
 }

@@ -1,5 +1,7 @@
 package yaycrawler.worker.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import yaycrawler.spider.processor.GenericPageProcessor;
 import yaycrawler.spider.scheduler.CrawlerQueueScheduler;
 import yaycrawler.spider.service.PageSiteService;
 import yaycrawler.spider.utils.RequestHelper;
+import yaycrawler.worker.listener.TaskFailureListener;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +26,7 @@ import java.util.Map;
  */
 @Service
 public class TaskScheduleService {
+    private static Logger logger = LoggerFactory.getLogger(TaskScheduleService.class);
 
     @Autowired
     private PageSiteService pageSiteService;
@@ -30,6 +34,9 @@ public class TaskScheduleService {
     private GenericPageProcessor pageProcessor;
     @Autowired
     private GenericPipeline pipeline;
+
+    @Autowired
+    private TaskFailureListener failureListener;
 
     @Value("${worker.spider.maxIdleTime}")
     private long maxIdleTime;
@@ -52,7 +59,7 @@ public class TaskScheduleService {
                     spider.runAsync();
             }
         } catch (Exception ex) {
-ex.printStackTrace();
+            logger.error(ex.getMessage());
         }
     }
 
@@ -61,10 +68,10 @@ ex.printStackTrace();
     }
 
     private YaySpider createSpider(String domain) {
-        Site site = pageSiteService.getSite(domain);
-        YaySpider spider = new YaySpider(domain, site, pageProcessor);
+        YaySpider spider = new YaySpider(domain, pageSiteService,pageProcessor);
         spider.setScheduler(new CrawlerQueueScheduler());
         spider.addPipeline(pipeline);
+        spider.getSpiderListeners().add(failureListener);
         spiderMap.put(domain, spider);
         return spider;
     }

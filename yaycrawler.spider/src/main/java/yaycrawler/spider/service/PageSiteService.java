@@ -17,8 +17,18 @@ import java.util.Map;
 public class PageSiteService {
     @Autowired
     private PageSiteRepository siteRepository;
+    public Site getSite(String domain)
+    {
+        return getSite(domain,false);
+    }
 
-    public Site getSite(String domain) {
+    /**
+     * 获取Site
+     * @param domain
+     * @param needProxy 是否需要切换代理
+     * @return
+     */
+    public Site getSite(String domain,boolean needProxy) {
         Site site = Site.me();
         PageSite pageSite = siteRepository.findByDomain(domain);
         if (pageSite != null) {

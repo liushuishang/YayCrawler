@@ -55,14 +55,23 @@ public class WorkerController {
     }
 
 
-    @RequestMapping("/crawlerResultNotify")
+    @RequestMapping("/crawlerSuccessNotify")
     @ResponseBody
-    public RestFulResult crawlerResultNotify(HttpServletRequest request,@RequestBody CrawlerResult crawlerResult) {
+    public RestFulResult crawlerSuccessNotify(HttpServletRequest request,@RequestBody CrawlerResult crawlerResult) {
         Assert.notNull(crawlerResult);
 
         //TODO 把结果加入队列中
         workerActor.assignTasks(crawlerResult.getCrawlerRequestList());
 
+        return RestFulResult.success(true);
+    }
+
+    @RequestMapping("/crawlerFailureNotify")
+    @ResponseBody
+    public RestFulResult crawlerFailureNotify(HttpServletRequest request,@RequestBody CrawlerResult crawlerResult) {
+        Assert.notNull(crawlerResult);
+
+        //TODO 任务执行失败的处理
         return RestFulResult.success(true);
     }
 

@@ -1,24 +1,22 @@
 package yaycrawler.spider.crawler;
 
-import us.codecraft.webmagic.Site;
+import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.processor.PageProcessor;
+import yaycrawler.spider.service.PageSiteService;
 
 /**
  * Created by yuananyun on 2016/5/2.
  */
 public class YaySpider extends Spider {
-
+    private PageSiteService pageSiteService;
     private String domain;
-    private long lastIdleTime;
 
-    public YaySpider(String domain,Site site, PageProcessor pageProcessor) {
+    public YaySpider(String domain, PageSiteService pageSiteService, PageProcessor pageProcessor) {
         super(pageProcessor);
-        if(site!=null) {
-            this.site = site;
-            this.startRequests =site.getStartRequests();
-        }
+        this.pageSiteService = pageSiteService;
+        this.site = pageSiteService.getSite(domain);
         this.setDownloader(new HttpClientDownloader());
         //不需要把子连接加入到本地队列，因为我们的队列由Master统一管理
         spawnUrl=false;
@@ -26,16 +24,22 @@ public class YaySpider extends Spider {
         this.thread(3);
     }
 
+    @Override
+    protected void onError(Request request) {
+        //失败后换代理重试一次
+        Integer tryTimes= (Integer) request.getExtra("tryTimes");
+        if(tryTimes==null) tryTimes=0;
+        if(tryTimes==0) {
+            this.site = pageSiteService.getSite(domain, true);
+            request.putExtra("tryTimes", tryTimes++);
+            this.addRequest(request);
+        }else
+            super.onError(request);
+
+    }
 
     public String getDomain() {
         return domain;
     }
 
-    public long getLastIdleTime() {
-        return lastIdleTime;
-    }
-
-    public void setLastIdleTime(long lastIdleTime) {
-        this.lastIdleTime = lastIdleTime;
-    }
 }

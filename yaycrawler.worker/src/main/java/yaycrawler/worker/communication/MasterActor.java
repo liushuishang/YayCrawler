@@ -38,13 +38,13 @@ public class MasterActor {
     }
 
     /**
-     * Worker通知Master爬取结果
+     * Worker通知Master爬取结果成功
      *
      * @param crawlerResult
      * @return
      */
-    public boolean notifyCrawlerResult(CrawlerResult crawlerResult) {
-        String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_RESULT_NOTIFY);
+    public boolean notifyTaskSuccess(CrawlerResult crawlerResult) {
+        String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_SUCCESS_NOTIFY);
         RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerResult);
         if (result.hasError())
             throw new WorkerResultNotifyFailureException(result.getMessage());
@@ -52,4 +52,11 @@ public class MasterActor {
     }
 
 
+    public boolean notifyTaskFailure(CrawlerResult crawlerResult) {
+        String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_FAILURE_NOTIFY);
+        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerResult);
+        if (result.hasError())
+            throw new WorkerResultNotifyFailureException(result.getMessage());
+        return true;
+    }
 }
