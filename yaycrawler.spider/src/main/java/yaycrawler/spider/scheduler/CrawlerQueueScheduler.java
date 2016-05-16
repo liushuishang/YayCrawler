@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by ucs_yuananyun on 2016/5/16.
  */
 public class CrawlerQueueScheduler implements MonitorableScheduler {
-    private BlockingQueue<Request> queue = new LinkedBlockingQueue<Request>(1000);
+    private BlockingQueue<Request> queue = new LinkedBlockingQueue<Request>();
 
 
     @Override

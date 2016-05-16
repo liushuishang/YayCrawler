@@ -23,7 +23,7 @@ public class WorkerActor {
         for (WorkerRegistration workerRegistration : workerListMap.values()) {
             String targetUrl = CommunicationAPIs.getFullRemoteUrl(workerRegistration.getWorkerContextPath(), CommunicationAPIs.MASTER_POST_WORKER_TASK_ASSIGN);
             RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerRequestList);
-            if (result.hasError()) {
+            if (result==null||result.hasError()) {
 
             } else {
 

@@ -41,14 +41,18 @@ public class TaskScheduleService {
     }
 
     public void doSchedule(List<CrawlerRequest> taskList) {
-        for (CrawlerRequest CrawlerRequest : taskList) {
-            String domain = CrawlerRequest.getDomain();
-            YaySpider spider = spiderMap.get(domain);
-            if (spider == null)
-                spider = createSpider(domain);
-            spider.addRequest(convertCrawlerRequestToSpiderRequest(CrawlerRequest));
-            if (spider.getStatus() != Spider.Status.Running)
-                spider.runAsync();
+        try {
+            for (CrawlerRequest CrawlerRequest : taskList) {
+                String domain = CrawlerRequest.getDomain();
+                YaySpider spider = spiderMap.get(domain);
+                if (spider == null)
+                    spider = createSpider(domain);
+                spider.addRequest(convertCrawlerRequestToSpiderRequest(CrawlerRequest));
+                if (spider.getStatus() != Spider.Status.Running)
+                    spider.runAsync();
+            }
+        } catch (Exception ex) {
+ex.printStackTrace();
         }
     }
 

@@ -62,7 +62,7 @@ public class GenericPageProcessor implements PageProcessor {
             }
 //            page.addTargetRequests(new ArrayList<>(childSet));
             for (String childUrl : childUrlSet) {
-                childRequestList.add(new CrawlerRequest(childUrl, "GET", UrlUtils.getDomain(childUrl)));
+                childRequestList.add(new CrawlerRequest(childUrl,  UrlUtils.getDomain(childUrl),"GET"));
             }
         }
 

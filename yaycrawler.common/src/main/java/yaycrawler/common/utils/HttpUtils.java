@@ -65,7 +65,7 @@ public class HttpUtils {
         while (tryCount > 0) {
             if (HttpMethod.POST == method)
                 result = HttpUtils.postForResult(targetUrl, data);
-            if (!result.hasError()) break;
+            if (result!=null&&!result.hasError()) break;
             tryCount--;
         }
         return result;
