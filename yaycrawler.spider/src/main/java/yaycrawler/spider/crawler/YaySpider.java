@@ -11,6 +11,7 @@ import us.codecraft.webmagic.processor.PageProcessor;
 public class YaySpider extends Spider {
 
     private String domain;
+    private long lastIdleTime;
 
     public YaySpider(String domain,Site site, PageProcessor pageProcessor) {
         super(pageProcessor);
@@ -28,5 +29,13 @@ public class YaySpider extends Spider {
 
     public String getDomain() {
         return domain;
+    }
+
+    public long getLastIdleTime() {
+        return lastIdleTime;
+    }
+
+    public void setLastIdleTime(long lastIdleTime) {
+        this.lastIdleTime = lastIdleTime;
     }
 }

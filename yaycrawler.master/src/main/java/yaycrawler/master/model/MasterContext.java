@@ -10,13 +10,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by ucs_yuananyun on 2016/5/13.
  */
 public class MasterContext {
-    private static ConcurrentHashMap<String, WorkerRegistration> workerRegistrationMap = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, WorkerHeartbeat> workerHeartbeatMap = new ConcurrentHashMap<>();
+    public  static ConcurrentHashMap<String, WorkerRegistration> workerRegistrationMap = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, WorkerHeartbeat> workerHeartbeatMap = new ConcurrentHashMap<>();
 
     public static void registeWorker(WorkerRegistration registration) {
         if (registration.getWorkerId() != null)
             workerRegistrationMap.put(registration.getWorkerId(), registration);
     }
+
 
     public static void receiveWorkerHeartbeat(WorkerHeartbeat heartbeat) {
         if (workerRegistrationMap.containsKey(heartbeat.getWorkerId()))

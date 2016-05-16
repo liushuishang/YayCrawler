@@ -3,6 +3,7 @@ package yaycrawler.common.utils;
 import com.alibaba.fastjson.JSON;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -57,6 +58,17 @@ public class HttpUtils {
         } catch (Exception ex) {
             return RestFulResult.failure(ex.getMessage());
         }
+    }
+    public static  RestFulResult doHttpExecute(String targetUrl, HttpMethod method, Object data) {
+        int tryCount = 3;
+        RestFulResult result = null;
+        while (tryCount > 0) {
+            if (HttpMethod.POST == method)
+                result = HttpUtils.postForResult(targetUrl, data);
+            if (!result.hasError()) break;
+            tryCount--;
+        }
+        return result;
     }
 
 

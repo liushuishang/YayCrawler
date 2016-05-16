@@ -1,12 +1,15 @@
 package yaycrawler.worker.communication;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import yaycrawler.common.model.CommunicationAPIs;
+import yaycrawler.common.model.CrawlerResult;
 import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.model.WorkerRegistration;
 import yaycrawler.common.utils.HttpUtils;
 import yaycrawler.worker.exception.WorkerRegisteFailureException;
+import yaycrawler.worker.exception.WorkerResultNotifyFailureException;
 import yaycrawler.worker.model.WorkerContext;
 
 /**
@@ -17,14 +20,34 @@ public class MasterActor {
     @Value("${master.server.address}")
     private String masterServerAddress;
 
+    /**
+     * Worker注册Master
+     *
+     * @return
+     */
     public boolean register() {
-        WorkerRegistration workerRegistration = new WorkerRegistration(WorkerContext.workerId,WorkerContext.getContextPath());
+        WorkerRegistration workerRegistration = new WorkerRegistration(WorkerContext.workerId, WorkerContext.getContextPath());
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_REGISTER);
-        RestFulResult result = HttpUtils.postForResult(targetUrl, workerRegistration);
+        RestFulResult result =HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, workerRegistration);
         if (result.hasError())
             throw new WorkerRegisteFailureException(result.getMessage());
-
-        return !result.hasError();
+        return true;
     }
+
+    /**
+     * Worker通知Master爬取结果
+     *
+     * @param crawlerResult
+     * @return
+     */
+    public boolean notifyCrawlerResult(CrawlerResult crawlerResult) {
+        String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_RESULT_NOTIFY);
+        RestFulResult result =HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerResult);
+        if (result.hasError())
+            throw new WorkerResultNotifyFailureException(result.getMessage());
+        return true;
+    }
+
+
 
 }

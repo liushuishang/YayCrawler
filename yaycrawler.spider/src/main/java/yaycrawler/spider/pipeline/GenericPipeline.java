@@ -1,5 +1,6 @@
 package yaycrawler.spider.pipeline;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.ResultItems;
@@ -23,11 +24,13 @@ public class GenericPipeline implements Pipeline {
         for (IResultPersistentService persistentService : persistentServiceList) {
             try {
                 String pageUrl = resultItems.getRequest().getUrl();
-                Map<String, Object> dataMap = resultItems.getAll();
+                Map<String, Object> dataMap =resultItems.getAll();
 
-                if(dataMap.size()==0) continue;
+                if (dataMap.size() == 0) continue;
 
                 dataMap.put("pageUrl", pageUrl);
+                dataMap.put("_id", DigestUtils.shaHex(pageUrl));
+
                 persistentService.saveCrawlerResult(pageUrl, dataMap);
             } catch (Exception ex) {
                 ex.printStackTrace();

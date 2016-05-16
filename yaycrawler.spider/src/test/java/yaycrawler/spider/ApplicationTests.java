@@ -43,7 +43,7 @@ public class ApplicationTests {
     public void test0731() {
 
         String seedUrl = "http://floor.0731fdc.com/jggs.php";
-        GenericPageProcessor pageProcessor = new GenericPageProcessor(parserRuleService);
+        GenericPageProcessor pageProcessor = new GenericPageProcessor();
 
         Downloader downloader = new HttpClientDownloader();
         Pipeline pipeline = new ConsolePipeline();

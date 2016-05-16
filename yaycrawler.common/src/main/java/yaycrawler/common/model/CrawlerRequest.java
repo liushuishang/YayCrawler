@@ -13,6 +13,15 @@ public class CrawlerRequest {
     private String domain;
     private Long startTime;
 
+    public CrawlerRequest() {
+    }
+
+    public CrawlerRequest(String url, String domain, String method) {
+        this.url = url;
+        this.method = method;
+        this.domain = domain;
+    }
+
     public Long getStartTime() {
         return startTime;
     }

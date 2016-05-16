@@ -9,12 +9,11 @@ import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.Downloader;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.utils.UrlUtils;
+import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.dao.domain.PageParseRegion;
 import yaycrawler.spider.processor.GenericPageProcessor;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by ucs_yuananyun on 2016/5/4.
@@ -31,7 +30,7 @@ public class ConfigSpiderService {
     public ConfigSpiderService() {
         downloader = new HttpClientDownloader();
         downloader.setThread(1);
-        pageProcessor = new GenericPageProcessor(null);
+        pageProcessor = new GenericPageProcessor();
     }
 
     /**
@@ -60,10 +59,11 @@ public class ConfigSpiderService {
             });
         }
         if (page == null) return null;
-        Map<String, Object> data = pageProcessor.parseOneRegion(page, parseRegion);
+        List<CrawlerRequest> childRequestList=new LinkedList<>();
+        Map<String, Object> data = pageProcessor.parseOneRegion(page, parseRegion,childRequestList);
         Map<String, Object> result = new HashMap<>();
         result.put("data", data);
-        result.put("page", page);
+        result.put("childRequests", childRequestList);
         return result;
     }
 

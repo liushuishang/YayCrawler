@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.utils.UrlUtils;
@@ -23,7 +22,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by yuananyun on 2016/5/3.
@@ -99,16 +97,7 @@ public class ConfigController {
         }
         Request targetRequest = RequestHelper.createRequest(targetUrl, region.getMethod(), paramsMap);
         Map<String, Object> testResult = configSpiderService.test(targetRequest, region, null, null);
-        Map<String, Object> data = MapUtils.getMap(testResult, "data");
-        Page page = (Page) testResult.get("page");
-        if (page == null) return null;
-
-        List<String> childUrlInfoList = page.getTargetRequests().stream().map(Request::toString).collect(Collectors.toCollection(LinkedList::new));
-        Map<String, Object> result = new HashMap<>();
-        result.put("data", data);
-        result.put("childUrls", childUrlInfoList);
-
-        return result;
+        return testResult;
     }
 
     @RequestMapping(value = "/saveFieldRule", method = RequestMethod.POST)
