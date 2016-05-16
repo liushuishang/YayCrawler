@@ -25,7 +25,6 @@ public class WorkerController {
     @Autowired
     private WorkerActor workerActor;
 
-
     /**
      * worker注册
      *
@@ -62,11 +61,10 @@ public class WorkerController {
         Assert.notNull(crawlerResult);
 
         //TODO 把结果加入队列中
-        workerActor.assignTasks(crawlerResult.getCrawlerRequestList());
-
+//        workerActor.assignTasks(crawlerResult.getCrawlerRequestList());
+        workerActor.regeditTasks(crawlerResult.getCrawlerRequestList());
+        workerActor.removeTask(crawlerResult.getKey());
         return RestFulResult.success(true);
     }
-
-
 
 }
