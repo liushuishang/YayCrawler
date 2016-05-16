@@ -35,7 +35,6 @@ public class WorkerController {
     @ResponseBody
     public RestFulResult register(HttpServletRequest request,@RequestBody WorkerRegistration registration) {
         Assert.notNull(registration.getWorkerId());
-        registration.setWorkerContextPath(String.format("%s://%s:%s%s", request.getScheme(), request.getServerName(), request.getServerPort(), registration.getWorkerContextPath()));
         MasterContext.registeWorker(registration);
         return RestFulResult.success(true);
     }

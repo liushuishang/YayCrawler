@@ -20,15 +20,18 @@ public class MasterActor {
     @Value("${master.server.address}")
     private String masterServerAddress;
 
+    @Value("${context.path}")
+    private String contextPath;
+
     /**
      * Worker注册Master
      *
      * @return
      */
     public boolean register() {
-        WorkerRegistration workerRegistration = new WorkerRegistration(WorkerContext.workerId, WorkerContext.getContextPath());
+        WorkerRegistration workerRegistration = new WorkerRegistration(WorkerContext.workerId, contextPath);
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_REGISTER);
-        RestFulResult result =HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, workerRegistration);
+        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, workerRegistration);
         if (result.hasError())
             throw new WorkerRegisteFailureException(result.getMessage());
         return true;
@@ -42,12 +45,11 @@ public class MasterActor {
      */
     public boolean notifyCrawlerResult(CrawlerResult crawlerResult) {
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_RESULT_NOTIFY);
-        RestFulResult result =HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerResult);
+        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerResult);
         if (result.hasError())
             throw new WorkerResultNotifyFailureException(result.getMessage());
         return true;
     }
-
 
 
 }
