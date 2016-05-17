@@ -1,6 +1,7 @@
 package yaycrawler.master.dispatcher;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import yaycrawler.common.model.CrawlerRequest;
@@ -21,8 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class CrawlerTaskDispatcher {
 
-    @Autowired
-    private Environment environment;
+    @Value("${work.task.count}")
+    private Integer count;
 
     @Autowired
     private CrawlerQueueService queueService;
@@ -51,7 +52,6 @@ public class CrawlerTaskDispatcher {
     public void assingTask(WorkerHeartbeat workerHeartbeat) {
         ConcurrentHashMap<String, WorkerRegistration> workerListMap = MasterContext.workerRegistrationMap;
         WorkerRegistration workerRegistration = workerListMap.get(workerHeartbeat.getWorkerId());
-        int count = Integer.parseInt(environment.getProperty("work.task.count"));
         List<CrawlerRequest> crawlerRequests = queueService.listQueues(count - workerHeartbeat.getWaitTaskCount());
         boolean flag = workerActor.assignTasks(workerRegistration, crawlerRequests);
         if (flag) {

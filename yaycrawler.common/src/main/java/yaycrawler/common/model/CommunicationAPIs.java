@@ -15,7 +15,7 @@ public class CommunicationAPIs {
     public static final String WORKER_POST_MASTER_FAILURE_NOTIFY="/worker/crawlerFailureNotify";
 
     public static final String MASTER_POST_WORKER_TASK_ASSIGN = "/master/assignTasks";
-
+    public static final String ADMIN_POST_MASTER_TASK_REGEDIT = "/admin/registerQueues";
 
     public static String getFullRemoteUrl(String contextPath, String api) {
         if (!contextPath.endsWith("/")) contextPath += "/";

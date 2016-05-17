@@ -10,11 +10,13 @@ import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.script.DigestUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import yaycrawler.common.model.CrawlerRequest;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.net.URLEncoder;
 import java.util.List;
 
 
@@ -109,11 +111,24 @@ public class CrawlerQueueService {
         return ITEM_PREFIX + "data";
     }
 
-    public Object regeditQueues(List<CrawlerRequest> crawlerRequests) {
-        for (CrawlerRequest crawlerRequest : crawlerRequests) {
-            regeditQueue(crawlerRequest);
+    protected String getRandomUrl(CrawlerRequest crawlerRequest) {
+        StringBuilder urlBuilder = new StringBuilder(crawlerRequest.getUrl().trim());
+        String random = DigestUtils.sha1DigestAsHex(JSON.toJSONString(crawlerRequest.getData()));
+        urlBuilder.append(String.format("%s%s=%s",  urlBuilder.indexOf("?") > 0 ? "&" : "?","random", random));
+        return urlBuilder.toString();
+    }
+
+    public boolean regeditQueues(List<CrawlerRequest> crawlerRequests) {
+        try {
+            for (CrawlerRequest crawlerRequest : crawlerRequests) {
+                regeditQueue(crawlerRequest);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return crawlerRequests;
+
+        return true;
     }
 
     public Object regeditQueue(CrawlerRequest crawlerRequest) {
@@ -125,7 +140,8 @@ public class CrawlerQueueService {
             crawlerRequest.setHashCode(field);
             HashOperations hashOperations = redisTemplate.opsForHash();
             ListOperations listOperations = redisTemplate.opsForList();
-            listOperations.leftPush(queue, crawlerRequest.getUrl());
+            String url = getRandomUrl(crawlerRequest);
+            listOperations.leftPush(queue,url);
             String value = JSON.toJSONString(crawlerRequest);
             hashOperations.put(key, field, value);
         }
@@ -137,7 +153,7 @@ public class CrawlerQueueService {
         String uniqQueue = getSetKey();
         boolean isDuplicate = setOperations.isMember(uniqQueue, request.getUrl());
         if (!isDuplicate) {
-            String url = request.getUrl();
+            String url = getRandomUrl(request);
             String field = DigestUtils.sha1DigestAsHex(url.trim());
             setOperations.add(uniqQueue, field);
         }
