@@ -1,5 +1,6 @@
 package yaycrawler.worker.service;
 
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,7 @@ public class TaskScheduleService {
 
     public void doSchedule(List<CrawlerRequest> taskList) {
         try {
-            logger.info("worker接收到{}个任务", taskList.size());
+            logger.info("worker接收到{}个任务", JSON.toJSON(taskList));
             for (CrawlerRequest CrawlerRequest : taskList) {
                 String domain = CrawlerRequest.getDomain();
                 YaySpider spider = spiderMap.get(domain);

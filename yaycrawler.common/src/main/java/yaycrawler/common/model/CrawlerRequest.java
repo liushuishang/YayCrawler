@@ -13,6 +13,15 @@ public class CrawlerRequest {
     private String domain;
     private Long startTime;
     private String hashCode;
+    private String workerId;
+
+    public String getWorkerId() {
+        return workerId;
+    }
+
+    public void setWorkerId(String workerId) {
+        this.workerId = workerId;
+    }
 
     public String getHashCode() {
         return hashCode;

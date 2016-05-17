@@ -25,9 +25,9 @@ public class AdminController {
 
     @RequestMapping("/registerQueues")
     @ResponseBody
-    public boolean acceptAdminTask(@RequestBody List<CrawlerRequest> crawlerRequests)
+    public RestFulResult acceptAdminTask(@RequestBody List<CrawlerRequest> crawlerRequests)
     {
-        return crawlerQueueService.regeditQueues(crawlerRequests);
+        return RestFulResult.success(crawlerQueueService.regeditQueues(crawlerRequests));
     }
 
     @RequestMapping(value = "/retrievedWorkerRegistrations",method = RequestMethod.POST)

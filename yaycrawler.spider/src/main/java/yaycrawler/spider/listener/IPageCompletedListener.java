@@ -1,5 +1,6 @@
 package yaycrawler.spider.listener;
 
+import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Request;
 import yaycrawler.common.model.CrawlerRequest;
 
