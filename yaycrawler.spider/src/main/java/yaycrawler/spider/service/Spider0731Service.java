@@ -15,7 +15,7 @@ import java.util.UUID;
 public class Spider0731Service extends BaseSpiderService {
 
     public Spider0731Service(Site site, Scheduler scheduler, Downloader downloader, PageProcessor pageProcessor, Pipeline... pipelines) {
-        spider = new YaySpider("floor.0731fdc.com",site, pageProcessor);
+        spider = new YaySpider("floor.0731fdc.com",null, pageProcessor);
         spider.scheduler(scheduler);
         spider.setDownloader(downloader);
         spider.setExitWhenComplete(true);
