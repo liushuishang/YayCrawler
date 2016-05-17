@@ -16,8 +16,9 @@
     <div class="page-header-inner ">
         <!-- BEGIN LOGO -->
         <div class="page-logo">
-            <a href="index.html">
-                <img src="assets/layouts/layout/img/logo.png" alt="logo" class="logo-default"/> </a>
+            <a href="index">
+                <!--<img src="assets/layouts/layout/img/logo.png" alt="logo" class="logo-default"/> -->
+            </a>
             <div class="menu-toggler sidebar-toggler"></div>
         </div>
         <!-- END LOGO -->
@@ -443,29 +444,72 @@
                     </a>
                     <ul class="sub-menu">
                         <li class="nav-item start active open">
-                            <a href="index" class="nav-link ">
-                                <i class="icon-bar-chart"></i>
-                                <span class="title">页面规则配置</span>
-                                <span class="selected"></span>
-                            </a>
-                        </li>
+                        <a href="pageRuleManagement" class="nav-link ">
+                            <i class="icon-bar-chart"></i>
+                            <span class="title">页面规则配置</span>
+                            <span class="selected"></span>
+                        </a>
+                    </li>
+
+                    </ul>
+                </li>
+                <li class="nav-item start  ">
+                    <a href="javascript:;" class="nav-link nav-toggle">
+                        <i class="icon-diamond"></i>
+                        <span class="title">资源管理</span>
+                        <span class="selected"></span>
+                        <span class="arrow open"></span>
+                    </a>
+                    <ul class="sub-menu">
                         <li class="nav-item start ">
-                            <a href="dashboard_2.html" class="nav-link ">
+                            <a href="siteManagement" class="nav-link ">
                                 <i class="icon-bulb"></i>
-                                <span class="title">任务查看</span>
+                                <span class="title">Site信息管理</span>
                                 <span class="badge badge-success">1</span>
-                            </a>
-                        </li>
-                        <li class="nav-item start ">
-                            <a href="dashboard_3.html" class="nav-link ">
-                                <i class="icon-graph"></i>
-                                <span class="title">Work配置</span>
-                                <span class="badge badge-danger">5</span>
                             </a>
                         </li>
                     </ul>
                 </li>
-
+                <li class="nav-item start  ">
+                    <a href="javascript:;" class="nav-link nav-toggle">
+                        <i class="icon-bar-chart"></i>
+                        <span class="title">数据监控</span>
+                        <span class="selected"></span>
+                        <span class="arrow open"></span>
+                    </a>
+                    <ul class="sub-menu">
+                        <li class="nav-item start ">
+                            <a href="dashboard_3.html" class="nav-link ">
+                                <i class="icon-graph"></i>
+                                <span class="title">Worker信息</span>
+                                <!--<span class="badge badge-danger">5</span>-->
+                            </a>
+                        </li>
+                        <li class="nav-item start ">
+                            <a href="siteManagement" class="nav-link ">
+                                <i class="icon-bulb"></i>
+                                <span class="title">任务列表</span>
+                                <span class="badge badge-success">1</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item start  ">
+                    <a href="javascript:;" class="nav-link nav-toggle">
+                        <i class="icon-puzzle"></i>
+                        <span class="title">任务管理</span>
+                        <span class="selected"></span>
+                        <span class="arrow open"></span>
+                    </a>
+                    <ul class="sub-menu">
+                        <li class="nav-item start ">
+                            <a href="publishTask" class="nav-link ">
+                                <i class="icon-docs"></i>
+                                <span class="title">发布任务</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
             <!-- END SIDEBAR MENU -->
             <!-- END SIDEBAR MENU -->
@@ -481,36 +525,34 @@
 
             <!-- BEGIN PAGE BAR -->
             <!--<div class="page-bar">-->
-                <!--<ul class="page-breadcrumb">-->
-                    <!--<li>-->
-                        <!--<a href="index.html">Home</a>-->
-                        <!--<i class="fa fa-circle"></i>-->
-                    <!--</li>-->
-                    <!--<li>-->
-                        <!--<span>Dashboard</span>-->
-                    <!--</li>-->
-                <!--</ul>-->
-                <!--<div class="page-toolbar">-->
-                    <!--<div id="dashboard-report-range" class="pull-right tooltips btn btn-sm" data-container="body"-->
-                         <!--data-placement="bottom" data-original-title="Change dashboard date range">-->
-                        <!--<i class="icon-calendar"></i>nbsp;-->
-                        <!--<span class="thin uppercase hidden-xs"></span>nbsp;-->
-                        <!--<i class="fa fa-angle-down"></i>-->
-                    <!--</div>-->
-                <!--</div>-->
+            <!--<ul class="page-breadcrumb">-->
+            <!--<li>-->
+            <!--<a href="index.html">Home</a>-->
+            <!--<i class="fa fa-circle"></i>-->
+            <!--</li>-->
+            <!--<li>-->
+            <!--<span>Dashboard</span>-->
+            <!--</li>-->
+            <!--</ul>-->
+            <!--<div class="page-toolbar">-->
+            <!--<div id="dashboard-report-range" class="pull-right tooltips btn btn-sm" data-container="body"-->
+            <!--data-placement="bottom" data-original-title="Change dashboard date range">-->
+            <!--<i class="icon-calendar"></i>nbsp;-->
+            <!--<span class="thin uppercase hidden-xs"></span>nbsp;-->
+            <!--<i class="fa fa-angle-down"></i>-->
+            <!--</div>-->
+            <!--</div>-->
             <!--</div>-->
             <!-- END PAGE BAR -->
             <!-- BEGIN PAGE TITLE-->
-            <h3 class="page-title">
-                <small></small>
-            </h3>
+            <!--<h3 class="page-title ">-->
+            <!--<small id="pageTitle"></small>-->
+            <!--</h3>-->
             <!-- END PAGE TITLE-->
             <!-- END PAGE HEADER-->
             <!-- BEGIN DASHBOARD STATS 1-->
             <div class="row">
-                <div >
-                    <iframe style="width:100%;min-height: 680px" src="http://www.baidu.com"/>
-                </div>
+                <iframe id="contextFrame" style="width:100%;min-height: 680px;border: none" src=""/>
             </div>
             <div class="clearfix"></div>
             <!-- END DASHBOARD STATS 1-->
@@ -523,17 +565,37 @@
 <!-- END CONTAINER -->
 <!-- BEGIN FOOTER -->
 <div class="page-footer">
-    <div class="page-footer-inner"> 2014 copy; Metronic by keenthemes.
-        <a href="http://themeforest.net/item/metronic-responsive-admin-dashboard-template/4021469?ref=keenthemes"
-           title="Purchase Metronic just for 27$ and get lifetime updates for free" target="_blank">Purchase
-            Metronic!</a>
-    </div>
+    <!--<div class="page-footer-inner"> 2014 copy; Metronic by keenthemes.-->
+        <!--<a href="http://themeforest.net/item/metronic-responsive-admin-dashboard-template/4021469?ref=keenthemes"-->
+           <!--title="Purchase Metronic just for 27$ and get lifetime updates for free" target="_blank">Purchase-->
+            <!--Metronic!</a>-->
+    <!--</div>-->
     <div class="scroll-to-top">
         <i class="icon-arrow-up"></i>
     </div>
 </div>
 <!-- END FOOTER -->
 
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(function () {
+        $(".sub-menu").on("click", ".nav-link", null, function (evt) {
+            debugger
+            window.event ? window.event.returnValue = false : evt.preventDefault();
+
+            var url = $(this).attr("href");
+            if (url.indexOf("?") > 0) url += "&" + Date.parse(new Date());
+            else url += "?" + Date.parse(new Date());
+//                    $("#contextFrame").attr("src", url);
+            document.getElementById('contextFrame').src = url;
+            $("#pageTitle").text($(this).find("p").text());
+
+            return false;
+        });
+        $(".active a").click();
+    });
+    /*]]>*/
+</script>
 
 </body>
 </html>

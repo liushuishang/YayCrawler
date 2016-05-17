@@ -7,7 +7,7 @@
 <body>
 <div class="container">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-12">
             <div class="portlet box purple">
                 <div class="portlet-title">
                     <div class="caption">
@@ -117,7 +117,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
+    </div>
+    <div class="row">
+        <div class="col-md-12">
             <div id="toolbar" class="btn-group">
                 <!--<button id="btn_add" type="button" class="btn btn-default">-->
                 <!--<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增-->
@@ -225,31 +227,31 @@
         });
 
 //        删除
-       $("#btn_delete").click(function(){
-           debugger
-           var selectedRows =$('#tb_departments').bootstrapTable('getSelections');
-           var selectedIds = [];
-           $.each(selectedRows, function (i, item) {
-               selectedIds.push(item.id);
-           });
+        $("#btn_delete").click(function () {
+            debugger
+            var selectedRows = $('#tb_departments').bootstrapTable('getSelections');
+            var selectedIds = [];
+            $.each(selectedRows, function (i, item) {
+                selectedIds.push(item.id);
+            });
 
-           $.ajax({
-               type: "Post",
-               cache: false,
-               contentType: "application/json",
-               url: global.contextPath +"/deleteRuleByIds",
-               data: JSON.stringify(selectedIds),
-               dataType: 'json',
-               success: function (result) {     //回调函数，result，返回值
+            $.ajax({
+                type: "Post",
+                cache: false,
+                contentType: "application/json",
+                url: global.contextPath + "/deleteRuleByIds",
+                data: JSON.stringify(selectedIds),
+                dataType: 'json',
+                success: function (result) {     //回调函数，result，返回值
 //                    JSON.stringify(jsObj, null, "\t"); // 缩进一个tab
-                   alert(result == true ? "删除成功" : "删除失败");
-               },
-               error: function (msg) {
-                   alert(msg);
-               }
-           });
+                    alert(result == true ? "删除成功" : "删除失败");
+                },
+                error: function (msg) {
+                    alert(msg);
+                }
+            });
 
-       });
+        });
 
         //1.初始化Table
         var TableInit = function () {

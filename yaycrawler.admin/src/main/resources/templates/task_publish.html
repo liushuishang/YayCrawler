@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head xmlns:th="http://www.thymeleaf.org" th:include="master::head">
+    <title>发布任务</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="portlet-body form">
+                <form id="taskForm" action="publishTask" method="post">
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label class="control-label">页面URL</label>
+                            <input type="text" class="form-control" id="pageUrl" name="pageUrl" required="required"
+                                   value="http://floor.0731fdc.com/jggs.php"
+                                   placeholder="输入网页URL"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">请求方式</label>
+                            <select id="requestMethod" name="method" class="bootstrap-select bs-select"  required="required">
+                                <option value="GET" selected="selected">get方式</option>
+                                <option value="POST">post方式</option>
+                                <option value="PUT">put方式</option>
+                                <option value="DELETE">delete方式</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">请求参数（JSON）</label>
+                            <textarea id="urlParamsJson" name="urlParamsJson" class="form-control " rows="8"
+                                      value=""></textarea>
+                        </div>
+                        <div class="form-actions right">
+                            <!--<button type="button" class="btn default">Cancel</button>-->
+                            <button type="submit" class="btn green">提交</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(function () {
+        $('#taskForm').submit(function () {
+            var form = $(this);
+            var data = {};
+            form.serializeArray().map(function (x) {
+                data[x.name] = x.value;
+            });
+            $.ajax({
+                type: "Post",
+                cache: false,
+                contentType: "application/json",
+                url: form.attr("action"),
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function (result) {     //回调函数，result，返回值
+                    alert(result==true?"提交成功":"发布失败");
+                },
+                error: function (msg) {
+                    alert(msg);
+                }
+            });
+            return false; //此处必须返回false，阻止常规的form提交
+        });
+    });
+
+    /*]]>*/
+</script>
+
+</body>
+</html>
