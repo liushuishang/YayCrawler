@@ -1,6 +1,8 @@
 package yaycrawler.spider.processor;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
@@ -13,6 +15,7 @@ import yaycrawler.dao.domain.FieldParseRule;
 import yaycrawler.dao.domain.PageParseRegion;
 import yaycrawler.dao.domain.UrlParseRule;
 import yaycrawler.dao.service.PageParserRuleService;
+import yaycrawler.spider.listener.IPageCompletedListener;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
 
 import java.util.*;
@@ -22,6 +25,11 @@ import java.util.*;
  */
 @Component
 public class GenericPageProcessor implements PageProcessor {
+    private static Logger logger = LoggerFactory.getLogger(GenericPageProcessor.class);
+
+    @Autowired
+    private IPageCompletedListener completedListener;
+
     @Autowired
     private PageParserRuleService pageParseRuleService;
     private static String DEFAULT_PAGE_SELECTOR = "page";
@@ -32,20 +40,26 @@ public class GenericPageProcessor implements PageProcessor {
 
     @Override
     public void process(Page page) {
-        List<CrawlerRequest> childRequestList=new LinkedList<>();
-        String pageUrl = page.getRequest().getUrl();
-        List<PageParseRegion> regionList = getPageRegionList(pageUrl);
-        for (PageParseRegion pageParseRegion : regionList) {
-            Map<String, Object> result = parseOneRegion(page, pageParseRegion,childRequestList);
-            if (result != null)
-                page.putField(pageParseRegion.getName(), result);
+        try {
+            List<CrawlerRequest> childRequestList = new LinkedList<>();
+            String pageUrl = page.getRequest().getUrl();
+            List<PageParseRegion> regionList = getPageRegionList(pageUrl);
+            for (PageParseRegion pageParseRegion : regionList) {
+                Map<String, Object> result = parseOneRegion(page, pageParseRegion, childRequestList);
+                if (result != null)
+                    page.putField(pageParseRegion.getName(), result);
+            }
+            if (completedListener != null)
+                completedListener.onSuccess(page.getRequest(), childRequestList);
+        } catch (Exception ex) {
+            if (completedListener != null)
+                completedListener.onError(page.getRequest());
+            logger.error(ex.getMessage(), ex);
         }
-        //处理子级链接
-        page.putField("childRequests", childRequestList);
     }
 
     @SuppressWarnings("all")
-    public Map<String, Object> parseOneRegion(Page page, PageParseRegion pageParseRegion,List<CrawlerRequest> childRequestList) {
+    public Map<String, Object> parseOneRegion(Page page, PageParseRegion pageParseRegion, List<CrawlerRequest> childRequestList) {
         Selectable context = null;
         if (DEFAULT_PAGE_SELECTOR.equals(pageParseRegion.getSelectExpression()))
             context = page.getHtml();
@@ -62,7 +76,7 @@ public class GenericPageProcessor implements PageProcessor {
             }
 //            page.addTargetRequests(new ArrayList<>(childSet));
             for (String childUrl : childUrlSet) {
-                childRequestList.add(new CrawlerRequest(childUrl,  UrlUtils.getDomain(childUrl),"GET"));
+                childRequestList.add(new CrawlerRequest(childUrl, UrlUtils.getDomain(childUrl), "GET"));
             }
         }
 

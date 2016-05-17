@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.spider.persistent.IResultPersistentService;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -20,9 +19,7 @@ public class MongDBPersistentService implements IResultPersistentService {
     @Override
     public boolean saveCrawlerResult(String pageUrl, Map<String, Object> data) {
         String collectionName = UrlUtils.getDomain(pageUrl).replace(".", "_");
-        Map saveData = new HashMap<>(data);
-        saveData.remove("childRequests");
-        mongoTemplate.save(saveData, collectionName);
+        mongoTemplate.save(data, collectionName);
         return true;
     }
 }
