@@ -1,9 +1,6 @@
 package yaycrawler.master.service;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +12,7 @@ import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.script.DigestUtils;
 import org.springframework.stereotype.Service;
 import yaycrawler.common.model.CrawlerRequest;
+import yaycrawler.master.communication.WorkerActor;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -32,17 +30,6 @@ public class WorkInfoService {
 
     @Autowired
     private RedisTemplate redisTemplate;
-
-    private LoadingCache<String, String> cahceBuilder = CacheBuilder
-            .newBuilder()
-            .build(new CacheLoader<String, String>() {
-                @Override
-                public String load(String key) throws Exception {
-//                    String strProValue="hello "+key+"!";
-                    return key;
-                }
-
-            });
 
     private static final String QUEUE_PREFIX = "queue_";
 
@@ -125,13 +112,15 @@ public class WorkInfoService {
     public Object regeditWork(CrawlerRequest crawlerRequest) {
         boolean isDuplicate = isDuplicate(crawlerRequest);
         String queue = QUEUE_PREFIX + "data";
+        String key = ITEM_PREFIX + "data";
         if (!isDuplicate) {
             String field = DigestUtils.sha1DigestAsHex(crawlerRequest.getUrl());
+            crawlerRequest.setHashCode(field);
             HashOperations hashOperations = redisTemplate.opsForHash();
             ListOperations listOperations = redisTemplate.opsForList();
             listOperations.leftPush(queue, crawlerRequest.getUrl());
             String value = JSON.toJSONString(crawlerRequest);
-            hashOperations.put((ITEM_PREFIX + "data"), field, value);
+            hashOperations.put(key, field, value);
         }
         return crawlerRequest;
     }
@@ -142,18 +131,22 @@ public class WorkInfoService {
         boolean isDuplicate = setOperations.isMember(uniqQueue, request.getUrl());
         if (!isDuplicate) {
             String url = request.getUrl();
-            setOperations.add(uniqQueue, url);
+            String field = DigestUtils.sha1DigestAsHex(url.trim());
+            setOperations.add(uniqQueue,field);
         }
         return isDuplicate;
     }
 
     public List<CrawlerRequest> listWorks(String workId, long count) {
+        return null;
+    }
+
+    public List<CrawlerRequest> listWorks(long count) {
         SetOperations setOperations = redisTemplate.opsForSet();
         HashOperations hashOperations = redisTemplate.opsForHash();
         ListOperations listOperations = redisTemplate.opsForList();
         List<CrawlerRequest> crawlerRequests = Lists.newArrayList();
         String queue = QUEUE_PREFIX + "data";
-        String runningQueue = RUNNING_PREFIX + "data";
         String key = ITEM_PREFIX + "data";
         for (int i = 0; i < count; i++) {
             Object url = listOperations.leftPop(queue);
@@ -164,31 +157,41 @@ public class WorkInfoService {
                 crawlerRequests.add(crawlerRequest);
             }
         }
-        long startTime = System.currentTimeMillis();
-        for (CrawlerRequest crawlerRequest : crawlerRequests) {
-            crawlerRequest.setStartTime(startTime);
-            listOperations.leftPush(runningQueue, crawlerRequest);
-            String field = DigestUtils.sha1DigestAsHex(crawlerRequest.getUrl());
-            hashOperations.delete(key,field);
-        }
+//        workerActor.assignTasks(crawlerRequests);
         return crawlerRequests;
     }
 
-    public Object removeCraw(List<CrawlerRequest> crawlerRequests) {
+    public void moveRunningQueue(List<CrawlerRequest> crawlerRequests) {
+        long startTime = System.currentTimeMillis();
+        HashOperations hashOperations = redisTemplate.opsForHash();
+        String runningQueue = RUNNING_PREFIX + "data";
+        String key = ITEM_PREFIX + "data";
+        for (CrawlerRequest crawlerRequest : crawlerRequests) {
+            crawlerRequest.setStartTime(startTime);
+            String field = DigestUtils.sha1DigestAsHex(crawlerRequest.getUrl());
+            String value = JSON.toJSONString(crawlerRequest);
+            hashOperations.put(runningQueue, field, value);
+            hashOperations.delete(key,field);
+        }
 
+    }
+
+    public Object removeCrawler(String field) {
+        String key = ITEM_PREFIX + "data";
         SetOperations setOperations = redisTemplate.opsForSet();
         HashOperations hashOperations = redisTemplate.opsForHash();
-        ListOperations listOperations = redisTemplate.opsForList();
         String uniqQueue = SET_PREFIX + "data";
         String runningQueue = RUNNING_PREFIX + "data";
-        for (CrawlerRequest crawlerRequest : crawlerRequests) {
-            String domain = crawlerRequest.getDomain();
-            String key = ITEM_PREFIX + "data";
-            String url = crawlerRequest.getUrl();
-            String field = DigestUtils.sha1DigestAsHex(url.toString());
-            hashOperations.delete(key, field);
-            setOperations.remove(uniqQueue, url);
-            listOperations.remove(runningQueue, 1, url);
+        hashOperations.delete(key, field);
+        setOperations.remove(uniqQueue, field);
+        hashOperations.delete(runningQueue,field);
+        return false;
+    }
+
+    public Object removeCrawlers(List<String> fields) {
+
+        for (String field : fields) {
+            removeCrawler(field);
         }
         return false;
     }

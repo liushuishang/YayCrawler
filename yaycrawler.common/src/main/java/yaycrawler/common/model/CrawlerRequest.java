@@ -12,6 +12,15 @@ public class CrawlerRequest {
     private Map data;
     private String domain;
     private Long startTime;
+    private String hashCode;
+
+    public String getHashCode() {
+        return hashCode;
+    }
+
+    public void setHashCode(String hashCode) {
+        this.hashCode = hashCode;
+    }
 
     public CrawlerRequest() {
     }

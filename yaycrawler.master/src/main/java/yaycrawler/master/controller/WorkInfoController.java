@@ -37,14 +37,14 @@ public class WorkInfoController {
     }
 
     @RequestMapping(value = "/listWorks")
-    public Object listWorks(HttpServletRequest request,HttpServletResponse response, Integer count,String workId) {
-        List<CrawlerRequest> crawlerRequests = workInfoService.listWorks(workId,count);
+    public Object listWorks(HttpServletRequest request,HttpServletResponse response, Integer count) {
+        List<CrawlerRequest> crawlerRequests = workInfoService.listWorks(count);
         return crawlerRequests;
     }
 
     @RequestMapping(value = "/clearWorks")
     public Object clearWorks(HttpServletRequest request,HttpServletResponse response,@RequestBody List<CrawlerRequest> crawlerRequests) {
-        Object data = workInfoService.removeCraw(crawlerRequests);
+        Object data = workInfoService.removeCrawler(null);
         return data;
     }
 
