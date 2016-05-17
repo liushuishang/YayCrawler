@@ -4,7 +4,9 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 
-    <bean id="workerHeartbeatTask" class="yaycrawler.worker.tasks.HeartbeatTask"/>
+    <bean id="workerHeartbeatTask" class="yaycrawler.worker.tasks.HeartbeatTask">
+        <property name="masterActor" ref="masterActor"></property>
+    </bean>
 
     <!-- For times when you just need to invoke a method on a specific object -->
     <bean id="simpleJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">

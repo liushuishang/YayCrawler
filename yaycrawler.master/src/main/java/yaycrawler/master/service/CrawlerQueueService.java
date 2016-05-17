@@ -12,7 +12,6 @@ import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.script.DigestUtils;
 import org.springframework.stereotype.Service;
 import yaycrawler.common.model.CrawlerRequest;
-import yaycrawler.master.communication.WorkerActor;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -24,9 +23,9 @@ import java.util.List;
  */
 
 @Service
-public class WorkInfoService {
+public class CrawlerQueueService {
 
-    private static final Logger logger = LoggerFactory.getLogger(WorkInfoService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CrawlerQueueService.class);
 
     @Autowired
     private RedisTemplate redisTemplate;

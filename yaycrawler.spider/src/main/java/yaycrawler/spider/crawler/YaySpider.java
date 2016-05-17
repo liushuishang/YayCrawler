@@ -30,6 +30,7 @@ public class YaySpider extends Spider {
         Integer tryTimes= (Integer) request.getExtra("tryTimes");
         if(tryTimes==null) tryTimes=0;
         if(tryTimes==0) {
+            //TODO 异常恢复
             this.site = pageSiteService.getSite(domain, true);
             request.putExtra("tryTimes", tryTimes++);
             this.addRequest(request);
