@@ -60,7 +60,11 @@
 			<artifactId>yaycrawler-spider</artifactId>
 			<version>${yaycrawler.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 	
 	<build>

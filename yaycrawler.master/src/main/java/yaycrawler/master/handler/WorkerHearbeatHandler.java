@@ -15,13 +15,12 @@ public class WorkerHearbeatHandler {
     private CrawlerTaskDispatcher taskDispatcher;
 
     public void handler(WorkerHeartbeat heartbeat) {
-
         /**
          * 判断是否需要分派任务
          */
 
         //分派任务
-//        taskDispatch
+        taskDispatcher.assingTask(heartbeat);
 
     }
 }

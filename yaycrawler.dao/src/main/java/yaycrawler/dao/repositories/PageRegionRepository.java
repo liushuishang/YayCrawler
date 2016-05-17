@@ -2,6 +2,7 @@ package yaycrawler.dao.repositories;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 import yaycrawler.dao.domain.PageParseRegion;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 /**
  * Created by yuananyun on 2016/5/2.
  */
+@Repository
 public interface PageRegionRepository extends CrudRepository<PageParseRegion, String> {
 
     List<PageParseRegion> findByPageUrl(String pageUrl);

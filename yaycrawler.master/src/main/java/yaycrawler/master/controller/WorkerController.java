@@ -53,11 +53,12 @@ public class WorkerController {
     public RestFulResult heartBeat(HttpServletRequest request, @RequestBody WorkerHeartbeat heartbeat) {
         Assert.notNull(heartbeat.getWorkerId());
         MasterContext.receiveWorkerHeartbeat(heartbeat);
+        final WorkerHeartbeat workerHeartbeat = heartbeat;
         //TODO 检查Worker的任务情况，分派任务，多线程
         new Thread(new Runnable() {
             @Override
             public void run() {
-                hearbeatHandler.handler(heartbeat);
+                hearbeatHandler.handler(workerHeartbeat);
             }
         }).start();
         return RestFulResult.success(true);

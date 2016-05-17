@@ -36,7 +36,7 @@ public class CrawlerQueueService {
 
     private static final String ITEM_PREFIX = "item_";
     private static final String RUNNING_PREFIX = "running_";
-    private static final String SPIDER_DATA = "spider_data";
+    private static final String FAIL_PREFIX = "fail_";
 
     public String getIpAddress(HttpServletRequest request) {
         //
@@ -89,29 +89,37 @@ public class CrawlerQueueService {
         return ip;
     }
 
-//    protected String getSetKey(String domain) {
-//        return SET_PREFIX + domain;
-//    }
-//
-//    protected String getQueueKey(String domain) {
-//        return QUEUE_PREFIX + domain;
-//    }
-//
-//    protected String getRunningKey(String domain) {
-//        return RUNNING_PREFIX + domain;
-//    }
+    protected String getSetKey() {
+        return SET_PREFIX + "data";
+    }
 
-    public Object regeditWorks(List<CrawlerRequest> crawlerRequests) {
+    protected String getQueueKey() {
+        return QUEUE_PREFIX + "data";
+    }
+
+    protected String getRunningKey() {
+        return RUNNING_PREFIX + "data";
+    }
+
+    protected String getFailKey() {
+        return FAIL_PREFIX + "data";
+    }
+
+    protected String getItemKey() {
+        return ITEM_PREFIX + "data";
+    }
+
+    public Object regeditQueues(List<CrawlerRequest> crawlerRequests) {
         for (CrawlerRequest crawlerRequest : crawlerRequests) {
-            regeditWork(crawlerRequest);
+            regeditQueue(crawlerRequest);
         }
         return crawlerRequests;
     }
 
-    public Object regeditWork(CrawlerRequest crawlerRequest) {
+    public Object regeditQueue(CrawlerRequest crawlerRequest) {
         boolean isDuplicate = isDuplicate(crawlerRequest);
-        String queue = QUEUE_PREFIX + "data";
-        String key = ITEM_PREFIX + "data";
+        String queue = getQueueKey();
+        String key = getItemKey();
         if (!isDuplicate) {
             String field = DigestUtils.sha1DigestAsHex(crawlerRequest.getUrl());
             crawlerRequest.setHashCode(field);
@@ -126,27 +134,22 @@ public class CrawlerQueueService {
 
     public boolean isDuplicate(CrawlerRequest request) {
         SetOperations setOperations = redisTemplate.opsForSet();
-        String uniqQueue = SET_PREFIX + "data";
+        String uniqQueue = getSetKey();
         boolean isDuplicate = setOperations.isMember(uniqQueue, request.getUrl());
         if (!isDuplicate) {
             String url = request.getUrl();
             String field = DigestUtils.sha1DigestAsHex(url.trim());
-            setOperations.add(uniqQueue,field);
+            setOperations.add(uniqQueue, field);
         }
         return isDuplicate;
     }
 
-    public List<CrawlerRequest> listWorks(String workId, long count) {
-        return null;
-    }
-
-    public List<CrawlerRequest> listWorks(long count) {
-        SetOperations setOperations = redisTemplate.opsForSet();
+    public List<CrawlerRequest> listQueues(long count) {
         HashOperations hashOperations = redisTemplate.opsForHash();
         ListOperations listOperations = redisTemplate.opsForList();
         List<CrawlerRequest> crawlerRequests = Lists.newArrayList();
-        String queue = QUEUE_PREFIX + "data";
-        String key = ITEM_PREFIX + "data";
+        String queue = getQueueKey();
+        String key = getItemKey();
         for (int i = 0; i < count; i++) {
             Object url = listOperations.leftPop(queue);
             if (url != null) {
@@ -156,39 +159,49 @@ public class CrawlerQueueService {
                 crawlerRequests.add(crawlerRequest);
             }
         }
-//        workerActor.assignTasks(crawlerRequests);
         return crawlerRequests;
     }
 
     public void moveRunningQueue(List<CrawlerRequest> crawlerRequests) {
         long startTime = System.currentTimeMillis();
         HashOperations hashOperations = redisTemplate.opsForHash();
-        String runningQueue = RUNNING_PREFIX + "data";
-        String key = ITEM_PREFIX + "data";
+        String runningQueue = getRunningKey();
+        String key = getItemKey();
         for (CrawlerRequest crawlerRequest : crawlerRequests) {
             crawlerRequest.setStartTime(startTime);
             String field = DigestUtils.sha1DigestAsHex(crawlerRequest.getUrl());
             String value = JSON.toJSONString(crawlerRequest);
             hashOperations.put(runningQueue, field, value);
-            hashOperations.delete(key,field);
+            hashOperations.delete(key, field);
         }
+    }
 
+    public void moveFailQueue(String field) {
+        long startTime = System.currentTimeMillis();
+        HashOperations hashOperations = redisTemplate.opsForHash();
+        String failQueue = getFailKey();
+        String key = getRunningKey();
+        String data = hashOperations.get(key, field).toString();
+        CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
+        crawlerRequest.setStartTime(startTime);
+        String value = JSON.toJSONString(crawlerRequest);
+        hashOperations.put(failQueue, field, value);
+        hashOperations.delete(key, field);
     }
 
     public Object removeCrawler(String field) {
-        String key = ITEM_PREFIX + "data";
+        String key = getItemKey();
         SetOperations setOperations = redisTemplate.opsForSet();
         HashOperations hashOperations = redisTemplate.opsForHash();
-        String uniqQueue = SET_PREFIX + "data";
-        String runningQueue = RUNNING_PREFIX + "data";
+        String uniqQueue = getSetKey();
+        String runningQueue = getRunningKey();
         hashOperations.delete(key, field);
         setOperations.remove(uniqQueue, field);
-        hashOperations.delete(runningQueue,field);
+        hashOperations.delete(runningQueue, field);
         return false;
     }
 
     public Object removeCrawlers(List<String> fields) {
-
         for (String field : fields) {
             removeCrawler(field);
         }
