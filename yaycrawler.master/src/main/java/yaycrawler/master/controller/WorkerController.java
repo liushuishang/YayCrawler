@@ -1,5 +1,8 @@
 package yaycrawler.master.controller;
 
+import com.alibaba.fastjson.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -22,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 @RequestMapping(value = "/worker", produces = "application/json;charset=UTF-8")
 public class WorkerController {
+    private static Logger logger = LoggerFactory.getLogger(WorkerController.class);
 
     @Autowired
     private WorkerHearbeatHandler hearbeatHandler;
@@ -37,6 +41,7 @@ public class WorkerController {
     @RequestMapping("/register")
     @ResponseBody
     public RestFulResult register(HttpServletRequest request, @RequestBody WorkerRegistration registration) {
+        logger.info("接收到worker的注册信息：{}", JSON.toJSON(registration));
         Assert.notNull(registration.getWorkerId());
         MasterContext.registeWorker(registration);
         return RestFulResult.success(true);
@@ -68,6 +73,7 @@ public class WorkerController {
     @RequestMapping("/crawlerSuccessNotify")
     @ResponseBody
     public RestFulResult crawlerSuccessNotify(HttpServletRequest request, @RequestBody CrawlerResult crawlerResult) {
+        logger.info("接收到任务执行成功通知:{}", JSON.toJSON(crawlerResult));
         Assert.notNull(crawlerResult);
         taskDispatcher.dealResultNotify(crawlerResult);
         return RestFulResult.success(true);
@@ -76,6 +82,7 @@ public class WorkerController {
     @RequestMapping("/crawlerFailureNotify")
     @ResponseBody
     public RestFulResult crawlerFailureNotify(HttpServletRequest request, @RequestBody CrawlerResult crawlerResult) {
+        logger.info("接收到任务执行失败通知:{}", JSON.toJSON(crawlerResult));
         Assert.notNull(crawlerResult);
         taskDispatcher.dealResultNotify(crawlerResult);
         return RestFulResult.success(true);

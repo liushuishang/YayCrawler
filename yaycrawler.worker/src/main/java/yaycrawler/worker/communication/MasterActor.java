@@ -1,5 +1,7 @@
 package yaycrawler.worker.communication;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,9 @@ import yaycrawler.worker.model.WorkerContext;
  */
 @Component
 public class MasterActor {
+
+    private static Logger logger = LoggerFactory.getLogger(MasterActor.class);
+
     @Value("${master.server.address}")
     private String masterServerAddress;
 
@@ -27,11 +32,14 @@ public class MasterActor {
      * @return
      */
     public boolean register() {
+        logger.info("worker-{}开始向Master申请注册", WorkerContext.workerId);
         WorkerRegistration workerRegistration = new WorkerRegistration(WorkerContext.workerId, contextPath);
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_REGISTER);
         RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, workerRegistration);
-        if (result.hasError())
+        if (result.hasError()) {
+            logger.error("worker-{}注册Master失败！", WorkerContext.workerId);
             throw new WorkerRegisteFailureException(result.getMessage());
+        }
         return true;
     }
 
@@ -57,19 +65,25 @@ public class MasterActor {
      * @return
      */
     public boolean notifyTaskSuccess(CrawlerResult crawlerResult) {
+        logger.info("任务{}执行成功，现在通知Master……", crawlerResult.getKey());
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_SUCCESS_NOTIFY);
         RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerResult);
-        if (result.hasError())
+        if (result.hasError()) {
+            logger.error("任务{}执行成功，通知Master失败！", crawlerResult.getKey());
             throw new WorkerResultNotifyFailureException(result.getMessage());
+        }
         return true;
     }
 
 
     public boolean notifyTaskFailure(CrawlerResult crawlerResult) {
+        logger.info("任务{}执行失败，现在通知Master……", crawlerResult.getKey());
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_FAILURE_NOTIFY);
         RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerResult);
-        if (result.hasError())
+        if (result.hasError()) {
+            logger.error("任务{}执行失败，通知Master失败！", crawlerResult.getKey());
             throw new WorkerResultNotifyFailureException(result.getMessage());
+        }
         return true;
     }
 }

@@ -1,5 +1,6 @@
 package yaycrawler.admin.communication;
 
+import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -16,8 +17,6 @@ public class MasterActor {
     @Value("${master.server.address}")
     private String masterServerAddress;
 
-
-
     /**
      * Admin向Master发送任务
      *
@@ -28,4 +27,12 @@ public class MasterActor {
         RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerRequests);
         return result != null && !result.hasError();
     }
+
+    public String retrievedWorkerRegistrations()
+    {
+        String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.ADMIN_POST_MASTER_RETRIVED_WORKERS);
+        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, null);
+        return JSON.toJSONString(result.getData());
+    }
+
 }

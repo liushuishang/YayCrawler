@@ -49,6 +49,7 @@ public class TaskScheduleService {
 
     public void doSchedule(List<CrawlerRequest> taskList) {
         try {
+            logger.info("worker接收到{}个任务", taskList.size());
             for (CrawlerRequest CrawlerRequest : taskList) {
                 String domain = CrawlerRequest.getDomain();
                 YaySpider spider = spiderMap.get(domain);
@@ -58,6 +59,7 @@ public class TaskScheduleService {
                 if (spider.getStatus() != Spider.Status.Running)
                     spider.runAsync();
             }
+            logger.info("worker任务分配完成！");
         } catch (Exception ex) {
             logger.error(ex.getMessage());
         }
@@ -68,7 +70,7 @@ public class TaskScheduleService {
     }
 
     private YaySpider createSpider(String domain) {
-        YaySpider spider = new YaySpider(domain, pageSiteService,pageProcessor);
+        YaySpider spider = new YaySpider(domain, pageSiteService, pageProcessor);
         spider.setScheduler(new CrawlerQueueScheduler());
         spider.addPipeline(pipeline);
         spider.getSpiderListeners().add(failureListener);

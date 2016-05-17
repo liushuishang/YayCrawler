@@ -10,7 +10,7 @@
         </layout>
     </appender>
     <appender name="ERROR-OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${catalina.base}/logs/yaycrawler-worker-logs/error.log</file>
+        <file>${catalina.base}/logs/yaycrawler-master-logs/error.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} -
                 %msg%n
@@ -32,7 +32,7 @@
         </rollingPolicy>
     </appender>
     <appender name="INFO-OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${catalina.base}/logs/yaycrawler-worker-logs/info.log</file>
+        <file>${catalina.base}/logs/yaycrawler-master-logs/info.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} -
                 %msg%n
@@ -54,7 +54,7 @@
         </rollingPolicy>
     </appender>
     <appender name="DEBUG-OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${catalina.base}/logs/yaycrawler-worker-logs/debug.log</file>
+        <file>${catalina.base}/logs/yaycrawler-master-logs/debug.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} -
                 %msg%n
@@ -77,7 +77,7 @@
         </rollingPolicy>
     </appender>
     <appender name="MYBATIS-OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${catalina.base}/logs/yaycrawler-worker-logs/mybatis.log</file>
+        <file>${catalina.base}/logs/yaycrawler-master-logs/mybatis.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} -
                 %msg%n
