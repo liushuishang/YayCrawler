@@ -25,6 +25,9 @@ public class CrawlerTaskDispatcher {
     @Value("${work.task.count}")
     private Integer count;
 
+    @Value("${work.task.leftcount}")
+    private Long leftcount;
+
     @Autowired
     private CrawlerQueueService queueService;
 
@@ -53,10 +56,16 @@ public class CrawlerTaskDispatcher {
         ConcurrentHashMap<String, WorkerRegistration> workerListMap = MasterContext.workerRegistrationMap;
         WorkerRegistration workerRegistration = workerListMap.get(workerHeartbeat.getWorkerId());
         List<CrawlerRequest> crawlerRequests = queueService.listQueues(count - workerHeartbeat.getWaitTaskCount());
+        if(crawlerRequests.size() == 0)
+            return;
         boolean flag = workerActor.assignTasks(workerRegistration, crawlerRequests);
         if (flag) {
-            queueService.moveRunningQueue(crawlerRequests);
+            queueService.moveRunningQueue(workerHeartbeat,crawlerRequests);
         }
+    }
+
+    public void releaseQueue(WorkerHeartbeat workerHeartbeat) {
+        queueService.releseQueue(workerHeartbeat,leftcount);
     }
 
 }

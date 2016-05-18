@@ -13,10 +13,12 @@ import org.springframework.data.redis.core.script.DigestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import yaycrawler.common.model.CrawlerRequest;
+import yaycrawler.common.model.WorkerHeartbeat;
 
 import javax.servlet.http.HttpServletRequest;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -28,6 +30,9 @@ import java.util.List;
 public class CrawlerQueueService {
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlerQueueService.class);
+
+
+    private Long count;
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -112,6 +117,8 @@ public class CrawlerQueueService {
     }
 
     protected String getRandomUrl(CrawlerRequest crawlerRequest) {
+        if(crawlerRequest.getData() == null || crawlerRequest.getData().size() == 0)
+            return crawlerRequest.getUrl();
         StringBuilder urlBuilder = new StringBuilder(crawlerRequest.getUrl().trim());
         String random = DigestUtils.sha1DigestAsHex(JSON.toJSONString(crawlerRequest.getData()));
         urlBuilder.append(String.format("%s%s=%s",  urlBuilder.indexOf("?") > 0 ? "&" : "?","random", random));
@@ -136,12 +143,13 @@ public class CrawlerQueueService {
         String queue = getQueueKey();
         String key = getItemKey();
         if (!isDuplicate) {
-            String field = DigestUtils.sha1DigestAsHex(crawlerRequest.getUrl());
+            String url = getRandomUrl(crawlerRequest);
+            String field = DigestUtils.sha1DigestAsHex(url);
             crawlerRequest.setHashCode(field);
             HashOperations hashOperations = redisTemplate.opsForHash();
             ListOperations listOperations = redisTemplate.opsForList();
-            String url = getRandomUrl(crawlerRequest);
-            listOperations.leftPush(queue,url);
+            crawlerRequest.setUrl(url);
+            listOperations.leftPush(queue,field);
             String value = JSON.toJSONString(crawlerRequest);
             hashOperations.put(key, field, value);
         }
@@ -151,10 +159,12 @@ public class CrawlerQueueService {
     public boolean isDuplicate(CrawlerRequest request) {
         SetOperations setOperations = redisTemplate.opsForSet();
         String uniqQueue = getSetKey();
-        boolean isDuplicate = setOperations.isMember(uniqQueue, request.getUrl());
+        String url = getRandomUrl(request);
+        String field = DigestUtils.sha1DigestAsHex(url);
+        boolean isDuplicate = setOperations.isMember(uniqQueue, field);
         if (!isDuplicate) {
-            String url = getRandomUrl(request);
-            String field = DigestUtils.sha1DigestAsHex(url.trim());
+//            String url = getRandomUrl(request);
+//            String field = DigestUtils.sha1DigestAsHex(url.trim());
             setOperations.add(uniqQueue, field);
         }
         return isDuplicate;
@@ -163,29 +173,36 @@ public class CrawlerQueueService {
     public List<CrawlerRequest> listQueues(long count) {
         HashOperations hashOperations = redisTemplate.opsForHash();
         ListOperations listOperations = redisTemplate.opsForList();
-        List<CrawlerRequest> crawlerRequests = Lists.newArrayList();
+        List<CrawlerRequest> crawlerRequests = new ArrayList<>();
         String queue = getQueueKey();
         String key = getItemKey();
+        long size = listOperations.size(queue);
+        if(size == 0)
+            return crawlerRequests;
         for (int i = 0; i < count; i++) {
-            Object url = listOperations.leftPop(queue);
-            if (url != null) {
-                String field = DigestUtils.sha1DigestAsHex(url.toString());
-                String data = hashOperations.get(key, field).toString();
-                CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
+            Object field = listOperations.leftPop(queue);
+            if (field != null) {
+                Object data = hashOperations.get(key, field != null ?field.toString():"");
+                if(data == null)
+                    continue;
+                CrawlerRequest crawlerRequest = JSON.parseObject(data.toString(), CrawlerRequest.class);
                 crawlerRequests.add(crawlerRequest);
+            } else {
+                break;
             }
         }
         return crawlerRequests;
     }
 
-    public void moveRunningQueue(List<CrawlerRequest> crawlerRequests) {
+    public void moveRunningQueue(WorkerHeartbeat workerHeartbeat,List<CrawlerRequest> crawlerRequests) {
         long startTime = System.currentTimeMillis();
         HashOperations hashOperations = redisTemplate.opsForHash();
         String runningQueue = getRunningKey();
         String key = getItemKey();
         for (CrawlerRequest crawlerRequest : crawlerRequests) {
             crawlerRequest.setStartTime(startTime);
-            String field = DigestUtils.sha1DigestAsHex(crawlerRequest.getUrl());
+            crawlerRequest.setWorkerId(workerHeartbeat.getWorkerId());
+            String field = crawlerRequest.getHashCode();
             String value = JSON.toJSONString(crawlerRequest);
             hashOperations.put(runningQueue, field, value);
             hashOperations.delete(key, field);
@@ -222,5 +239,20 @@ public class CrawlerQueueService {
             removeCrawler(field);
         }
         return false;
+    }
+
+    public void releseQueue(WorkerHeartbeat workerHeartbeat,Long leftcount) {
+        HashOperations hashOperations = redisTemplate.opsForHash();
+        String failQueue = getFailKey();
+        String key = getRunningKey();
+        List<String> datas = hashOperations.values(key);
+        for (String data:datas) {
+            CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
+            long oldcount = System.currentTimeMillis() - crawlerRequest.getStartTime();
+            if(oldcount > leftcount) {
+                moveFailQueue(crawlerRequest.getHashCode());
+            }
+        }
+
     }
 }

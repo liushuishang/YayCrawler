@@ -21,6 +21,5 @@ public class WorkerHearbeatHandler {
 
         //分派任务
         taskDispatcher.assingTask(heartbeat);
-
     }
 }
