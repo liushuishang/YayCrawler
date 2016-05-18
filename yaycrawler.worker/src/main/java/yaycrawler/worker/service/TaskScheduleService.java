@@ -48,6 +48,15 @@ public class TaskScheduleService {
     public TaskScheduleService() {
     }
 
+    public Integer getRunningTaskCount() {
+        int count = 0;
+        for (Map.Entry<String, YaySpider> entry : spiderMap.entrySet()) {
+            CrawlerQueueScheduler crawlerQueueScheduler = (CrawlerQueueScheduler)entry.getValue().getScheduler();
+            count += crawlerQueueScheduler.getLeftRequestsCount(null);
+        }
+        return count;
+    }
+
     public void doSchedule(List<CrawlerRequest> taskList) {
         try {
             logger.info("worker接收到{}个任务", JSON.toJSON(taskList));

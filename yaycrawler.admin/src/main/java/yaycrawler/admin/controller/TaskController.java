@@ -15,7 +15,9 @@ import yaycrawler.admin.communication.MasterActor;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.utils.UrlUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,4 +53,49 @@ public class TaskController {
         return masterActor.publishTasks(crawlerRequest);
     }
 
+    @RequestMapping("/successQueueManagement")
+    public ModelAndView successQueueManagement() {
+        ModelAndView modelAndView = new ModelAndView("queue_management");
+        modelAndView.addObject("queue","success");
+        return modelAndView;
+    }
+
+    @RequestMapping("/failQueueManagement")
+    public ModelAndView failQueueManagement() {
+        ModelAndView modelAndView = new ModelAndView("queue_management");
+        modelAndView.addObject("queue","fail");
+        return modelAndView;
+    }
+
+    @RequestMapping("/itemQueueManagement")
+    public ModelAndView itemQueueManagement() {
+        ModelAndView modelAndView = new ModelAndView("queue_management");
+        modelAndView.addObject("queue","item");
+        return modelAndView;
+    }
+
+    @RequestMapping("/runningQueueManagement")
+    public ModelAndView runningQueueManagement() {
+        ModelAndView modelAndView = new ModelAndView("queue_management");
+        modelAndView.addObject("queue","running");
+        return modelAndView;
+    }
+
+
+
+    @RequestMapping("/queryQueueByName")
+    @ResponseBody
+    public Object queryQueueByName(String name) {
+        Object data = "";
+        if(StringUtils.equalsIgnoreCase(name,"fail")) {
+            data = masterActor.retrievedFailQueueRegistrations();
+        } else if(StringUtils.equalsIgnoreCase(name,"success")) {
+            data = masterActor.retrievedSuccessQueueRegistrations();
+        } else if(StringUtils.equalsIgnoreCase(name,"item")) {
+            data = masterActor.retrievedItemQueueRegistrations();
+        } else if(StringUtils.equalsIgnoreCase(name,"running")) {
+            data = masterActor.retrievedRunningQueueRegistrations();
+        }
+        return data;
+    }
 }

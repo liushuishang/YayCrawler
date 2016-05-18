@@ -55,6 +55,9 @@ public class CrawlerTaskDispatcher {
     public void assingTask(WorkerHeartbeat workerHeartbeat) {
         ConcurrentHashMap<String, WorkerRegistration> workerListMap = MasterContext.workerRegistrationMap;
         WorkerRegistration workerRegistration = workerListMap.get(workerHeartbeat.getWorkerId());
+        int leftCount = count - workerHeartbeat.getWaitTaskCount();
+        if(leftCount <= 0)
+            return;
         List<CrawlerRequest> crawlerRequests = queueService.listQueues(count - workerHeartbeat.getWaitTaskCount());
         if(crawlerRequests.size() == 0)
             return;
