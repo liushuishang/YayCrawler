@@ -13,6 +13,15 @@ import java.sql.Date;
 @Table(name = "res_site_cookie")
 public class SiteCookie {
 
+    public SiteCookie() {
+    }
+
+    public SiteCookie(String siteId,String domain, String cookie) {
+        this.siteId = siteId;
+        this.domain = domain;
+        this.cookie = cookie;
+    }
+
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
@@ -29,6 +38,7 @@ public class SiteCookie {
     @NotNull
     private String domain;
 
+//    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "createdDate", columnDefinition = "timestamp default now()")
     private Date createdDate;
 
@@ -67,13 +77,7 @@ public class SiteCookie {
         this.domain = domain;
     }
 
-    public Date getCreatedDate() {
-        return createdDate;
-    }
 
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
 
     public Date getLastUpdatedDate() {
         return lastUpdatedDate;
@@ -81,5 +85,13 @@ public class SiteCookie {
 
     public void setLastUpdatedDate(Date lastUpdatedDate) {
         this.lastUpdatedDate = lastUpdatedDate;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
     }
 }

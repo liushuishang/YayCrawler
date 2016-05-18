@@ -465,7 +465,7 @@
                             <a href="siteManagement" class="nav-link ">
                                 <i class="icon-bulb"></i>
                                 <span class="title">Site信息管理</span>
-                                <span class="badge badge-success">1</span>
+                                <!--<span class="badge badge-success">1</span>-->
                             </a>
                         </li>
                     </ul>
@@ -489,7 +489,7 @@
                             <a href="siteManagement" class="nav-link ">
                                 <i class="icon-bulb"></i>
                                 <span class="title">任务列表</span>
-                                <span class="badge badge-success">1</span>
+                                <!--<span class="badge badge-success">1</span>-->
                             </a>
                         </li>
                     </ul>
@@ -552,7 +552,7 @@
             <!-- END PAGE HEADER-->
             <!-- BEGIN DASHBOARD STATS 1-->
             <div class="row">
-                <iframe id="contextFrame" style="width:100%;min-height: 680px;border: none" src=""/>
+                <iframe id="contextFrame" style="width:100%;min-height: 630px;border: none" src=""/>
             </div>
             <div class="clearfix"></div>
             <!-- END DASHBOARD STATS 1-->
@@ -580,7 +580,6 @@
     /*<![CDATA[*/
     $(function () {
         $(".sub-menu").on("click", ".nav-link", null, function (evt) {
-            debugger
             window.event ? window.event.returnValue = false : evt.preventDefault();
 
             var url = $(this).attr("href");
