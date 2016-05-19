@@ -31,7 +31,7 @@
                     toolbar: '#toolbar',                //工具按钮用哪个容器
                     striped: true,                      //是否显示行间隔色
                     cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
-                    pagination: false,                   //是否显示分页（*）
+                    pagination: true,                   //是否显示分页（*）
                     sortable: false,                     //是否启用排序
                     sortOrder: "asc",                   //排序方式
                     queryParams: oTableInit.queryParams,//传递参数（*）
@@ -60,19 +60,30 @@
                         title: '请求方法'
                     }, {
                         field: 'startTime',
-                        title: '时间'
-                    }, {
-                        field: 'hashCode',
-                        title: '任务标志'
-                    },{
-                        field: 'workerId',
-                        title: 'workerId'
+                        title: '任务完成时间',
+                        formatter:function(value,row,index) {
+                    var timestamp = value;
+                    var d = new Date(timestamp);    //根据时间戳生成的时间对象
+                    var date = (d.getFullYear()) + "-" +
+                            (d.getMonth() + 1) + "-" +
+                            (d.getDate()) + " " +
+                            (d.getHours()) + ":" +
+                            (d.getMinutes()) + ":" +
+                            (d.getSeconds());
+                    return date;
+                }
                     },{
                         field: 'url',
                         title: '请求URL'
                     },{
                         field: 'param',
                         title: '请求参数'
+                    },{
+                        field: 'workerId',
+                        title: 'workerId'
+                    } ,{
+                        field: 'hashCode',
+                        title: '任务标志'
                     }]
                 });
             };

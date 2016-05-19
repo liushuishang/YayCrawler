@@ -232,14 +232,19 @@ public class CrawlerQueueService {
         HashOperations hashOperations = redisTemplate.opsForHash();
         String uniqQueue = getSetKey();
         String runningQueue = getRunningKey();
-        String successQueue = getSuccessKey();
-//        hashOperations.delete(key, field);
         setOperations.remove(uniqQueue, field);
         String data = hashOperations.get(runningQueue, field).toString();
         CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
         crawlerRequest.setStartTime(System.currentTimeMillis());
-        hashOperations.put(successQueue,field, JSON.toJSONString(crawlerRequest));
+        moveSuccessQueue(crawlerRequest);
         hashOperations.delete(runningQueue, field);
+        return false;
+    }
+
+    public Object moveSuccessQueue(CrawlerRequest crawlerRequest) {
+        HashOperations hashOperations = redisTemplate.opsForHash();
+        String successQueue = getSuccessKey();
+        hashOperations.put(successQueue,crawlerRequest.getHashCode(), JSON.toJSONString(crawlerRequest));
         return false;
     }
 
@@ -250,16 +255,18 @@ public class CrawlerQueueService {
         return false;
     }
 
-    public void releseQueue(WorkerHeartbeat workerHeartbeat,Long leftcount) {
+    public void releseQueue(Long leftTime) {
         HashOperations hashOperations = redisTemplate.opsForHash();
-        String failQueue = getFailKey();
         String key = getRunningKey();
         List<String> datas = hashOperations.values(key);
         for (String data:datas) {
             CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
-            long oldcount = System.currentTimeMillis() - crawlerRequest.getStartTime();
-            if(oldcount > leftcount) {
-                moveFailQueue(crawlerRequest.getHashCode());
+            long oldTime = System.currentTimeMillis() - crawlerRequest.getStartTime();
+            if(oldTime > leftTime) {
+                crawlerRequest.setStartTime(null);
+                crawlerRequest.setWorkerId(null);
+                removeCrawler(crawlerRequest.getHashCode());
+                regeditQueue(crawlerRequest);
             }
         }
 

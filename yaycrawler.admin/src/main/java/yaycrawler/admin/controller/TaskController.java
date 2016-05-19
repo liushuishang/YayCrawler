@@ -55,28 +55,28 @@ public class TaskController {
 
     @RequestMapping("/successQueueManagement")
     public ModelAndView successQueueManagement() {
-        ModelAndView modelAndView = new ModelAndView("queue_management");
+        ModelAndView modelAndView = new ModelAndView("successqueue_management");
         modelAndView.addObject("queue","success");
         return modelAndView;
     }
 
     @RequestMapping("/failQueueManagement")
     public ModelAndView failQueueManagement() {
-        ModelAndView modelAndView = new ModelAndView("queue_management");
+        ModelAndView modelAndView = new ModelAndView("failqueue_management");
         modelAndView.addObject("queue","fail");
         return modelAndView;
     }
 
     @RequestMapping("/itemQueueManagement")
     public ModelAndView itemQueueManagement() {
-        ModelAndView modelAndView = new ModelAndView("queue_management");
+        ModelAndView modelAndView = new ModelAndView("itemqueue_management");
         modelAndView.addObject("queue","item");
         return modelAndView;
     }
 
     @RequestMapping("/runningQueueManagement")
     public ModelAndView runningQueueManagement() {
-        ModelAndView modelAndView = new ModelAndView("queue_management");
+        ModelAndView modelAndView = new ModelAndView("runningqueue_management");
         modelAndView.addObject("queue","running");
         return modelAndView;
     }

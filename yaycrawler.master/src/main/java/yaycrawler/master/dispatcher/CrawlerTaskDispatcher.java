@@ -67,8 +67,8 @@ public class CrawlerTaskDispatcher {
         }
     }
 
-    public void releaseQueue(WorkerHeartbeat workerHeartbeat) {
-        queueService.releseQueue(workerHeartbeat,leftcount);
+    public void releaseQueue() {
+        queueService.releseQueue(leftcount);
     }
 
 }
