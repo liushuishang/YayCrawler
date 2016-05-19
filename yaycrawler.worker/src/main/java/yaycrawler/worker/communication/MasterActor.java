@@ -59,7 +59,7 @@ public class MasterActor {
         heartbeat.setLastTime(System.currentTimeMillis());
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(WorkerContext.masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_HEARTBEAT);
         heartbeat.setWaitTaskCount(taskScheduleService.getRunningTaskCount());
-        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, heartbeat);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(secret,targetUrl, HttpMethod.POST, heartbeat);
         if (result.hasError())
             throw new WorkerHeartbeatFailureException();
         return true;
