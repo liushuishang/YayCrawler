@@ -2,6 +2,7 @@ package yaycrawler.worker.communication;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import yaycrawler.worker.exception.WorkerHeartbeatFailureException;
 import yaycrawler.worker.exception.WorkerRegisteFailureException;
 import yaycrawler.worker.exception.WorkerResultNotifyFailureException;
 import yaycrawler.worker.model.WorkerContext;
+import yaycrawler.worker.service.TaskScheduleService;
 
 /**
  * Created by ucs_yuananyun on 2016/5/13.
@@ -25,6 +27,9 @@ public class MasterActor {
 
     @Value("${context.path}")
     private String contextPath;
+
+    @Autowired
+    private TaskScheduleService taskScheduleService;
 
     @Value("${signature.token}")
     private String secret;
@@ -52,9 +57,9 @@ public class MasterActor {
         WorkerHeartbeat heartbeat = new WorkerHeartbeat();
         heartbeat.setWorkerId(WorkerContext.workerId);
         heartbeat.setLastTime(System.currentTimeMillis());
-
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(WorkerContext.masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_HEARTBEAT);
-        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, heartbeat);
+        heartbeat.setWaitTaskCount(taskScheduleService.getRunningTaskCount());
+        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, heartbeat);
         if (result.hasError())
             throw new WorkerHeartbeatFailureException();
         return true;

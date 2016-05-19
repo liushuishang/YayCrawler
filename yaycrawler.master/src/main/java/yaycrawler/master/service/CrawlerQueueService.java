@@ -1,7 +1,7 @@
 package yaycrawler.master.service;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,16 +10,16 @@ import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.script.DigestUtils;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.WorkerHeartbeat;
 
 import javax.servlet.http.HttpServletRequest;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -44,6 +44,7 @@ public class CrawlerQueueService {
     private static final String ITEM_PREFIX = "item_";
     private static final String RUNNING_PREFIX = "running_";
     private static final String FAIL_PREFIX = "fail_";
+    private static final String SUCCESS_PREFIX = "success_";
 
     public String getIpAddress(HttpServletRequest request) {
         //
@@ -114,6 +115,9 @@ public class CrawlerQueueService {
 
     protected String getItemKey() {
         return ITEM_PREFIX + "data";
+    }
+    protected String getSuccessKey() {
+        return SUCCESS_PREFIX + "data";
     }
 
     protected String getRandomUrl(CrawlerRequest crawlerRequest) {
@@ -223,14 +227,24 @@ public class CrawlerQueueService {
     }
 
     public Object removeCrawler(String field) {
-        String key = getItemKey();
+//        String key = getRunningKey();
         SetOperations setOperations = redisTemplate.opsForSet();
         HashOperations hashOperations = redisTemplate.opsForHash();
         String uniqQueue = getSetKey();
         String runningQueue = getRunningKey();
-        hashOperations.delete(key, field);
         setOperations.remove(uniqQueue, field);
+        String data = hashOperations.get(runningQueue, field).toString();
+        CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
+        crawlerRequest.setStartTime(System.currentTimeMillis());
+        moveSuccessQueue(crawlerRequest);
         hashOperations.delete(runningQueue, field);
+        return false;
+    }
+
+    public Object moveSuccessQueue(CrawlerRequest crawlerRequest) {
+        HashOperations hashOperations = redisTemplate.opsForHash();
+        String successQueue = getSuccessKey();
+        hashOperations.put(successQueue,crawlerRequest.getHashCode(), JSON.toJSONString(crawlerRequest));
         return false;
     }
 
@@ -241,18 +255,58 @@ public class CrawlerQueueService {
         return false;
     }
 
-    public void releseQueue(WorkerHeartbeat workerHeartbeat,Long leftcount) {
+    public void releseQueue(Long leftTime) {
         HashOperations hashOperations = redisTemplate.opsForHash();
-        String failQueue = getFailKey();
         String key = getRunningKey();
         List<String> datas = hashOperations.values(key);
         for (String data:datas) {
             CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
-            long oldcount = System.currentTimeMillis() - crawlerRequest.getStartTime();
-            if(oldcount > leftcount) {
-                moveFailQueue(crawlerRequest.getHashCode());
+            long oldTime = System.currentTimeMillis() - crawlerRequest.getStartTime();
+            if(oldTime > leftTime) {
+                crawlerRequest.setStartTime(null);
+                crawlerRequest.setWorkerId(null);
+                removeCrawler(crawlerRequest.getHashCode());
+                regeditQueue(crawlerRequest);
             }
         }
 
+    }
+
+    protected Object getDatas(String name) {
+        HashOperations hashOperations = redisTemplate.opsForHash();
+        Set set = hashOperations.keys(name);
+        List<CrawlerRequest> crawlerRequests = new ArrayList<>();
+        List<String> datas = hashOperations.values(name);
+        for(String data:datas) {
+            CrawlerRequest crawlerRequest = JSON.parseObject(data,CrawlerRequest.class);
+            crawlerRequests.add(crawlerRequest);
+        }
+//        List<Map> datas = hashOperations.multiGet("item_data",set);
+        return crawlerRequests;
+    }
+
+    public Object queryQueues(String name) {
+        SetOperations setOperations = redisTemplate.opsForSet();
+        HashOperations hashOperations = redisTemplate.opsForHash();
+        ListOperations listOperations = redisTemplate.opsForList();
+        if(StringUtils.equalsIgnoreCase(name,"quue_data")) {
+            long size = listOperations.size("queue_data");
+            return listOperations.range("queue_data",0,size);
+        } else if(StringUtils.equalsIgnoreCase(name,"set_data")){
+            return setOperations.members("set_data");
+        } else if(StringUtils.equalsIgnoreCase(name,"item_data")) {
+            Object datas = getDatas(name);
+            return datas;
+        } else if(StringUtils.equalsIgnoreCase(name,"fail_data")) {
+            Object datas = getDatas(name);
+            return datas;
+        } else if(StringUtils.equalsIgnoreCase(name,"running_data")) {
+            Object datas = getDatas(name);
+            return datas;
+        } else if(StringUtils.equalsIgnoreCase(name,"success_data")) {
+            Object datas = getDatas(name);
+            return datas;
+        }
+        return null;
     }
 }

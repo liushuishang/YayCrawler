@@ -12,6 +12,7 @@ import yaycrawler.master.model.MasterContext;
 import yaycrawler.master.service.CrawlerQueueService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ucs_yuananyun on 2016/5/12.
@@ -35,6 +36,34 @@ public class AdminController {
     public Object retrievedWorkerRegistrations()
     {
         return RestFulResult.success(MasterContext.workerRegistrationMap);
+    }
+
+    @RequestMapping(value = "/retrievedSuccessQueueRegistrations",method = RequestMethod.POST)
+    @ResponseBody
+    public RestFulResult retrievedSuccessQueueRegistrations()
+    {
+        return RestFulResult.success(crawlerQueueService.queryQueues("success_data"));
+    }
+
+    @RequestMapping(value = "/retrievedFailQueueRegistrations",method = RequestMethod.POST)
+    @ResponseBody
+    public RestFulResult retrievedFailQueueRegistrations()
+    {
+        return RestFulResult.success(crawlerQueueService.queryQueues("fail_data"));
+    }
+
+    @RequestMapping(value = "/retrievedRunningQueueRegistrations",method = RequestMethod.POST)
+    @ResponseBody
+    public RestFulResult retrievedRunningQueueRegistrations()
+    {
+        return RestFulResult.success(crawlerQueueService.queryQueues("running_data"));
+    }
+
+    @RequestMapping(value = "/retrievedItemQueueRegistrations",method = RequestMethod.POST)
+    @ResponseBody
+    public RestFulResult retrievedItemQueueRegistrations()
+    {
+        return RestFulResult.success(crawlerQueueService.queryQueues("item_data"));
     }
 
 }

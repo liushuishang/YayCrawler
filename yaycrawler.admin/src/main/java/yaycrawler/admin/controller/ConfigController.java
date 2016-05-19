@@ -12,6 +12,8 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import us.codecraft.webmagic.Request;
+import yaycrawler.admin.communication.MasterActor;
+import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.PageParseRegion;
