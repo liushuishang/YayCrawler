@@ -5,18 +5,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import yaycrawler.common.utils.UrlUtils;
-import yaycrawler.dao.domain.FieldParseRule;
-import yaycrawler.dao.domain.PageInfo;
-import yaycrawler.dao.domain.PageParseRegion;
-import yaycrawler.dao.domain.UrlParseRule;
-import yaycrawler.dao.repositories.FieldParseRuleRepository;
-import yaycrawler.dao.repositories.PageInfoRepository;
-import yaycrawler.dao.repositories.PageRegionRepository;
-import yaycrawler.dao.repositories.UrlParseRuleRepository;
+import yaycrawler.dao.domain.*;
+import yaycrawler.dao.repositories.*;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +38,9 @@ public class PageParserRuleService {
 
     @Autowired
     private UrlParseRuleRepository urlParseRuleRepository;
+
+    @Autowired
+    private PageSiteRepository siteRepository;
 
 
     private Map<String, List<PageParseRegion>> urlPageParseRuleMap = new HashedMap();
@@ -134,5 +133,21 @@ public class PageParserRuleService {
                 urlParseRuleRepository.delete(id);
         }
         return true;
+    }
+
+    public Page<PageSite> querySites(int pageIndex, int pageSize) {
+        return siteRepository.findAll(new PageRequest(pageIndex,pageSize));
+    }
+
+    public boolean deleteSiteByIds(List<String> deleteIds) {
+        for (String deleteId : deleteIds) {
+            //先删除cookies
+            siteRepository.delete(deleteId);
+        }
+        return true;
+    }
+
+    public boolean addSite(PageSite pageSite) {
+        return siteRepository.save(pageSite)!=null;
     }
 }

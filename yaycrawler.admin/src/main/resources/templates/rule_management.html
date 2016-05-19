@@ -234,6 +234,7 @@
             $.each(selectedRows, function (i, item) {
                 selectedIds.push(item.id);
             });
+            if(selectedIds.length==0) return false;
 
             $.ajax({
                 type: "Post",

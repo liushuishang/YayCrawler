@@ -103,6 +103,8 @@
     <script src="assets/global/plugins/bootstrap-table-master/locale/bootstrap-table-zh-CN.min.js"></script>
     <!--END table-->
 
+    <!--jquery form-->
+    <script src="assets/global/plugins/jquery-form/jquery.form.js"></script>
 
     <script th:inline="javascript">
         /*<![CDATA[*/
@@ -116,7 +118,7 @@
         .bars, .chart, .pie {
             overflow: hidden;
             height: 40px;
-            width: 100%;
+            width: 400px;
             font-size: 14px;
         }
 
@@ -128,7 +130,34 @@
 
 
 
-
+<div th:fragment="itemDel">
+    <link rel="stylesheet" href="assets/global/plugins/jquery-confirm/jquery-confirm.min.css"/>
+    <script src="assets/global/plugins/jquery-confirm/jquery-confirm.min.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function delItem(delFunction) {
+            $.confirm({
+                title: '确定删除?',
+                content: '删除后数据将无法恢复!',
+                confirmButtonClass: 'btn-info',
+                cancelButtonClass: 'btn-danger',
+                animation: 'zoom',
+                closeAnimation: 'scale',
+                autoClose: 'cancel|5000',
+                confirmButton: '确定',
+                cancelButton: '取消',
+                closeIcon: true,
+                confirm: function () {
+                    if(delFunction)
+                        delFunction();
+                },
+                cancel: function () {
+                }
+            });
+        }
+        /*]]>*/
+    </script>
+</div>
 
 </body>
 </html>

@@ -27,7 +27,7 @@ import java.util.*;
 public class GenericPageProcessor implements PageProcessor {
     private static Logger logger = LoggerFactory.getLogger(GenericPageProcessor.class);
 
-    @Autowired
+    @Autowired(required = false)
     private IPageCompletedListener completedListener;
 
     @Autowired

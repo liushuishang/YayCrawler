@@ -6,7 +6,9 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import us.codecraft.webmagic.Request;
@@ -15,6 +17,7 @@ import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.PageParseRegion;
+import yaycrawler.dao.domain.PageSite;
 import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.service.ConfigSpiderService;
 import yaycrawler.spider.utils.RequestHelper;
@@ -36,6 +39,7 @@ public class ConfigController {
     @Autowired
     private PageParserRuleService pageParseRuleService;
 
+
     @Autowired
     private ConfigSpiderService configSpiderService;
 
@@ -44,10 +48,6 @@ public class ConfigController {
         return new ModelAndView("rule_management");
     }
 
-    @RequestMapping("/siteManagement")
-    public ModelAndView siteManagement() {
-        return new ModelAndView("site_management");
-    }
 
     @RequestMapping("/getPageRegionRules")
     @ResponseBody
@@ -156,6 +156,41 @@ public class ConfigController {
     @ResponseBody
     public Object deleteRuleByIds(@RequestBody String[] idArray) {
         return pageParseRuleService.deleteRuleByIds(idArray);
+    }
+
+    @RequestMapping("/siteManagement")
+    public ModelAndView siteManagement() {
+        return new ModelAndView("site_management");
+    }
+
+    @RequestMapping(value = "/queryPageSites", method = RequestMethod.GET)
+    @ResponseBody
+    public Object querySites(int pageIndex,int pageSize)
+    {
+        Map<String,Object> result=new HashMap<>();
+        Page<PageSite> data = pageParseRuleService.querySites(pageIndex, pageSize);
+        result.put("rows", data.getContent());
+        result.put("total", data.getTotalElements());
+
+        return result;
+    }
+
+    @RequestMapping(value = "/addSite", method = RequestMethod.POST)
+    @ResponseBody
+    public Object deleteSites(PageSite pageSite)
+    {
+        if (StringUtils.isBlank(pageSite.getDomain())) {
+            return false;
+        }
+       return  pageParseRuleService.addSite(pageSite);
+    }
+
+    @RequestMapping(value = "/deleteSites", method = RequestMethod.POST)
+    @ResponseBody
+    public Object deleteSites(@RequestBody  List<String> deleteIds)
+    {
+        Assert.notNull(deleteIds);
+        return pageParseRuleService.deleteSiteByIds(deleteIds);
     }
 
 
