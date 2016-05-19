@@ -52,7 +52,7 @@ public class UrlUtils {
 
         if (url.contains("?")) url += "&nonce=" + nonce;
         else url += "?nonce=" + nonce;
-        url += "&timstamp=" + timestamp;
+        url += "&timestamp=" + timestamp;
         url += "&signature=" + signature;
 
         return url;

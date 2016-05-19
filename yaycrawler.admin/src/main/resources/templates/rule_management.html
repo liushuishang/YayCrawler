@@ -103,6 +103,15 @@
                                         <label class="control-label">Url解析表达式</label>
                                         <input type="text" class="form-control" id="urlRule" name="rule"
                                                value="links().regex(.*dxx.php?.*).all()"/></div>
+                                    <div class="form-group">
+                                        <label class="control-label">请求方式</label>
+                                        <select name="method" class="bootstrap-select bs-select">
+                                            <option value="GET" selected="selected">get方式</option>
+                                            <option value="POST">post方式</option>
+                                            <option value="PUT">put方式</option>
+                                            <option value="DELETE">delete方式</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="form-actions">
                                     <button type="button" class="btn green test">测试</button>
@@ -234,7 +243,7 @@
             $.each(selectedRows, function (i, item) {
                 selectedIds.push(item.id);
             });
-            if(selectedIds.length==0) return false;
+            if (selectedIds.length == 0) return false;
 
             $.ajax({
                 type: "Post",

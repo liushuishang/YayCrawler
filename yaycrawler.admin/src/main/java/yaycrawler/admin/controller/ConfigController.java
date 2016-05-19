@@ -12,8 +12,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import us.codecraft.webmagic.Request;
-import yaycrawler.admin.communication.MasterActor;
-import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.PageParseRegion;
@@ -144,7 +142,8 @@ public class ConfigController {
 
             Map urlParseRuleMap = MapUtils.getMap(params, "urlParseRule");
             String rule = MapUtils.getString(urlParseRuleMap, "rule");
-            return pageParseRuleService.saveUrlParseRule(pageUrl, pageMethod, urlParamsJson, pageRegionName, regionSelectExpression, rule);
+            String ruleMethod=MapUtils.getString(urlParseRuleMap, "method");
+            return pageParseRuleService.saveUrlParseRule(pageUrl, pageMethod, urlParamsJson, pageRegionName, regionSelectExpression, rule,ruleMethod);
 
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);

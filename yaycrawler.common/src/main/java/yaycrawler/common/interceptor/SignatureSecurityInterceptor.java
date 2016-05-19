@@ -1,10 +1,11 @@
-package yaycrawler.master.communication;
+package yaycrawler.common.interceptor;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import yaycrawler.common.utils.SignatureUtils;
@@ -20,14 +21,14 @@ import java.util.Map;
 public class SignatureSecurityInterceptor implements HandlerInterceptor {
     private static Logger logger = LoggerFactory.getLogger(SignatureSecurityInterceptor.class);
 
-    @Value("${signature.token}")
-    private String secret;
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String nonce = request.getParameter("nonce");
         String timestamp = request.getParameter("timestamp");
         String signature = request.getParameter("signature");
+
+        WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(request.getSession(true).getServletContext());
+        String secret = context.getEnvironment().getProperty("signature.token");
 
         if (StringUtils.isBlank(nonce) || StringUtils.isBlank(timestamp) || StringUtils.isBlank(signature)) {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -41,8 +42,7 @@ public class SignatureSecurityInterceptor implements HandlerInterceptor {
         paramMap.put("secret", secret);
 
         String localSignature = SignatureUtils.signWithSHA1(paramMap);
-        if(!signature.equals(localSignature))
-        {
+        if (!signature.equals(localSignature)) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             logger.error("{} 签名不匹配", request.getRequestURI());
             return false;

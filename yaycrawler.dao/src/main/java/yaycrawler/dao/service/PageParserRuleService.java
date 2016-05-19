@@ -71,13 +71,16 @@ public class PageParserRuleService {
         return fieldParseRuleRepository.save(fieldParseRule) != null;
     }
 
-    public boolean saveUrlParseRule(String pageUrl, String pageMethod, String urlParamsJson, String pageRegionName, String regionSelectExpression, String rule) {
+    public boolean saveUrlParseRule(String pageUrl, String pageMethod, String urlParamsJson, String pageRegionName,
+                                    String regionSelectExpression, String rule, String ruleMethod) {
 
         PageInfo pageInfo = createOrUpdatePageInfo(pageUrl, pageMethod, urlParamsJson);
         PageParseRegion region = createOrUpdateRegion(pageInfo.getId(), pageUrl, pageRegionName, regionSelectExpression);
 
+        if(StringUtils.isBlank(ruleMethod)) ruleMethod = "GET";
         UrlParseRule urlParseRule = new UrlParseRule(rule);
         urlParseRule.setRegionId(region.getId());
+        urlParseRule.setMethod(ruleMethod.toUpperCase());
         return urlParseRuleRepository.save(urlParseRule) != null;
     }
 
