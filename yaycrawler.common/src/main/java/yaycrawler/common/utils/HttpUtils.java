@@ -59,7 +59,8 @@ public class HttpUtils {
             return RestFulResult.failure(ex.getMessage());
         }
     }
-    public static  RestFulResult doHttpExecute(String targetUrl, HttpMethod method, Object data) {
+    public static  RestFulResult doSignedHttpExecute(String secret,String targetUrl, HttpMethod method, Object data) {
+        targetUrl = UrlUtils.generateSignaturedUrl(targetUrl, secret);
         int tryCount = 3;
         RestFulResult result = null;
         while (tryCount > 0) {

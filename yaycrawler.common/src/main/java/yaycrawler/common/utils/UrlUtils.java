@@ -2,6 +2,8 @@ package yaycrawler.common.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -27,10 +29,39 @@ public class UrlUtils {
         return domain;
     }
 
+    /**
+     * 生成附件前面参数的Url
+     *
+     * @param url
+     * @param secret
+     * @return
+     */
+    public static String generateSignaturedUrl(String url, String secret) {
+        if (StringUtils.isBlank(url) || StringUtils.isBlank(secret)) return url;
+
+        String nonce = CharacterUtils.getRandomString(8);
+        long timestamp = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>();
+//        paramMap.put("url", url);
+        paramMap.put("timestamp", timestamp);
+        paramMap.put("nonce", nonce);
+        paramMap.put("secret", secret);
+
+        String signature = SignatureUtils.signWithSHA1(paramMap);
+
+        if (url.contains("?")) url += "&nonce=" + nonce;
+        else url += "?nonce=" + nonce;
+        url += "&timstamp=" + timestamp;
+        url += "&signature=" + signature;
+
+        return url;
+    }
+
+
     public static String removeProtocol(String url) {
         return patternForProtocal.matcher(url).replaceAll("");
     }
-
 
 
 }

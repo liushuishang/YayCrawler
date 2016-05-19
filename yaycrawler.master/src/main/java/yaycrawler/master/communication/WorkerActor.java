@@ -1,5 +1,6 @@
 package yaycrawler.master.communication;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import yaycrawler.common.model.CommunicationAPIs;
@@ -16,9 +17,12 @@ import java.util.List;
 @Component
 public class WorkerActor {
 
+    @Value("${signature.token}")
+    private String secret;
+
     public boolean assignTasks(WorkerRegistration workerRegistration, List<CrawlerRequest> taskList) {
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(workerRegistration.getWorkerContextPath(), CommunicationAPIs.MASTER_POST_WORKER_TASK_ASSIGN);
-        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, taskList);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, taskList);
         return result != null && !result.hasError();
     }
 

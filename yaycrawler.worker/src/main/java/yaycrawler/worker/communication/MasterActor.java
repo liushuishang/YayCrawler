@@ -26,6 +26,9 @@ public class MasterActor {
     @Value("${context.path}")
     private String contextPath;
 
+    @Value("${signature.token}")
+    private String secret;
+
     /**
      * Worker注册Master
      *
@@ -35,7 +38,7 @@ public class MasterActor {
         logger.info("worker-{}开始向Master申请注册", WorkerContext.workerId);
         WorkerRegistration workerRegistration = new WorkerRegistration(WorkerContext.workerId, contextPath);
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_REGISTER);
-        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, workerRegistration);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, workerRegistration);
         if (result.hasError()) {
             logger.error("worker-{}注册Master失败！", WorkerContext.workerId);
             throw new WorkerRegisteFailureException(result.getMessage());
@@ -51,7 +54,7 @@ public class MasterActor {
         heartbeat.setLastTime(System.currentTimeMillis());
 
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(WorkerContext.masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_HEARTBEAT);
-        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, heartbeat);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, heartbeat);
         if (result.hasError())
             throw new WorkerHeartbeatFailureException();
         return true;
@@ -67,7 +70,7 @@ public class MasterActor {
     public boolean notifyTaskSuccess(CrawlerResult crawlerResult) {
         logger.info("任务{}执行成功，现在通知Master……", crawlerResult.getKey());
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_SUCCESS_NOTIFY);
-        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerResult);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, crawlerResult);
         if (result.hasError()) {
             logger.error("任务{}执行成功，通知Master失败！", crawlerResult.getKey());
             throw new WorkerResultNotifyFailureException(result.getMessage());
@@ -79,7 +82,7 @@ public class MasterActor {
     public boolean notifyTaskFailure(CrawlerResult crawlerResult) {
         logger.info("任务{}执行失败，现在通知Master……", crawlerResult.getKey());
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.WORKER_POST_MASTER_FAILURE_NOTIFY);
-        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerResult);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, crawlerResult);
         if (result.hasError()) {
             logger.error("任务{}执行失败，通知Master失败！", crawlerResult.getKey());
             throw new WorkerResultNotifyFailureException(result.getMessage());

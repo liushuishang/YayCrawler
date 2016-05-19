@@ -24,14 +24,14 @@ public class MasterActor {
      */
     public boolean publishTasks(CrawlerRequest ... crawlerRequests) {
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.ADMIN_POST_MASTER_TASK_REGEDIT);
-        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, crawlerRequests);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(targetUrl, HttpMethod.POST, crawlerRequests);
         return result != null && !result.hasError();
     }
 
     public String retrievedWorkerRegistrations()
     {
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.ADMIN_POST_MASTER_RETRIVED_WORKERS);
-        RestFulResult result = HttpUtils.doHttpExecute(targetUrl, HttpMethod.POST, null);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(targetUrl, HttpMethod.POST, null);
         return JSON.toJSONString(result.getData());
     }
 
