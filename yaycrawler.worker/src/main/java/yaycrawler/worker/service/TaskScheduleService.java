@@ -39,6 +39,9 @@ public class TaskScheduleService {
     @Autowired
     private TaskFailureListener failureListener;
 
+    @Value("${worker.spider.threadCount}")
+    private int spiderThreadCount;
+
 
 
     private Map<String, YaySpider> spiderMap = new HashMap<>();
@@ -80,6 +83,7 @@ public class TaskScheduleService {
     private YaySpider createSpider(String domain) {
         YaySpider spider = new YaySpider(domain, pageSiteService, pageProcessor);
         spider.setScheduler(new CrawlerQueueScheduler());
+        spider.thread(spiderThreadCount);
         spider.addPipeline(pipeline);
         spider.getSpiderListeners().add(failureListener);
         spiderMap.put(domain, spider);

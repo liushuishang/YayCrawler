@@ -27,7 +27,6 @@ public class YaySpider extends Spider {
         //不需要把子连接加入到本地队列，因为我们的队列由Master统一管理
         spawnUrl=false;
         this.domain = domain;
-        this.thread(3);
     }
 
     @Override
