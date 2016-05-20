@@ -132,7 +132,7 @@ public class CrawlerQueueService {
     public boolean regeditQueues(List<CrawlerRequest> crawlerRequests) {
         try {
             for (CrawlerRequest crawlerRequest : crawlerRequests) {
-                Map<String,String> parameter = crawlerRequest.getData();
+//                Map<String,String> parameter = crawlerRequest.getData();
                 regeditQueue(crawlerRequest);
             }
         } catch (Exception e) {
@@ -184,17 +184,13 @@ public class CrawlerQueueService {
         long size = listOperations.size(queue);
         if(size == 0)
             return crawlerRequests;
-        for (int i = 0; i < count; i++) {
-            Object field = listOperations.leftPop(queue);
-            if (field != null) {
-                Object data = hashOperations.get(key, field != null ?field.toString():"");
-                if(data == null)
-                    continue;
-                CrawlerRequest crawlerRequest = JSON.parseObject(data.toString(), CrawlerRequest.class);
-                crawlerRequests.add(crawlerRequest);
-            } else {
-                break;
-            }
+        List<String> queueStr = listOperations.range(queue,0,count-1);
+        for (String field:queueStr) {
+            Object data = hashOperations.get(key, field);
+            if(data == null)
+                continue;
+            CrawlerRequest crawlerRequest = JSON.parseObject(data.toString(), CrawlerRequest.class);
+            crawlerRequests.add(crawlerRequest);
         }
         return crawlerRequests;
     }
@@ -204,6 +200,8 @@ public class CrawlerQueueService {
         HashOperations hashOperations = redisTemplate.opsForHash();
         String runningQueue = getRunningKey();
         String key = getItemKey();
+        String queue = getQueueKey();
+        ListOperations listOperations = redisTemplate.opsForList();
         for (CrawlerRequest crawlerRequest : crawlerRequests) {
             crawlerRequest.setStartTime(startTime);
             crawlerRequest.setWorkerId(workerHeartbeat.getWorkerId());
@@ -211,6 +209,7 @@ public class CrawlerQueueService {
             String value = JSON.toJSONString(crawlerRequest);
             hashOperations.put(runningQueue, field, value);
             hashOperations.delete(key, field);
+            listOperations.remove(queue,0,field);
         }
     }
 
@@ -219,7 +218,9 @@ public class CrawlerQueueService {
         HashOperations hashOperations = redisTemplate.opsForHash();
         String failQueue = getFailKey();
         String key = getRunningKey();
-        String data = hashOperations.get(key, field).toString();
+        String data = hashOperations.get(key, field)!=null?hashOperations.get(key, field).toString():null;
+        if(StringUtils.isEmpty(data))
+            return;
         CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
         crawlerRequest.setStartTime(startTime);
         String value = JSON.toJSONString(crawlerRequest);
