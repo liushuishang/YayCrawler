@@ -26,14 +26,6 @@ public class MasterContext {
             heartbeat.setLastTime(currentTime);
             workerHeartbeatMap.put(heartbeat.getWorkerId(), heartbeat);
         }
-
-        //移除已经超时的Worker
-        for (WorkerRegistration registration : workerRegistrationMap.values()) {
-            Long lastTime = workerHeartbeatMap.get(registration.getWorkerId()).getLastTime();
-            if (currentTime - lastTime >= 2 * registration.getHeartbeatInteval()) {
-                workerRegistrationMap.remove(registration.getWorkerId());
-            }
-        }
     }
 
 

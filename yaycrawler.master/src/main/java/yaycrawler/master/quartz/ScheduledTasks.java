@@ -1,16 +1,20 @@
 package yaycrawler.master.quartz;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import yaycrawler.common.model.WorkerHeartbeat;
+import yaycrawler.common.model.WorkerRegistration;
 import yaycrawler.master.dispatcher.CrawlerTaskDispatcher;
-import yaycrawler.master.service.CrawlerQueueService;
+import yaycrawler.master.model.MasterContext;
 
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,16 +24,32 @@ import java.util.concurrent.Executors;
 @Component
 @Configurable
 @EnableScheduling
-public class ScheduledTasks{
+public class ScheduledTasks {
 
     @Resource
     private CrawlerTaskDispatcher crawlerTaskDispatcher;
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduledTasks.class);
 
-    @Scheduled(cron = "0 */30 * * * *")
-    public void reflashQueueCurrentByCron(){
-        logger.info ("reflash Queue By Cron: The time is now " + dateFormat ().format (new Date()));
+    @Scheduled(cron = "0 */1 * * * *")
+    public void refreshWorker() {
+        //移除已经超时的Worker
+        ConcurrentHashMap<String, WorkerRegistration> workerRegistrationMap = MasterContext.workerRegistrationMap;
+        ConcurrentHashMap<String, WorkerHeartbeat> workerHeartbeatMap = MasterContext.workerHeartbeatMap;
+        long currentTime = System.currentTimeMillis();
+
+        for (WorkerRegistration registration : workerRegistrationMap.values()) {
+            Long lastTime = workerHeartbeatMap.get(registration.getWorkerId()).getLastTime();
+            if (currentTime - lastTime >= 2 * registration.getHeartbeatInteval()) {
+                workerRegistrationMap.remove(registration.getWorkerId());
+            }
+        }
+    }
+
+
+    @Scheduled(cron = "0 */5 * * * *")
+    public void refreshQueueCurrentByCron() {
+        logger.info("reflash Queue By Cron: The time is now " + dateFormat().format(new Date()));
         logger.info("Start job");
         ExecutorService exec = Executors.newFixedThreadPool(1);
 
@@ -55,8 +75,8 @@ public class ScheduledTasks{
     }
 
 
-    private SimpleDateFormat dateFormat(){
-        return new SimpleDateFormat ("YYYY-MM-dd HH:mm:ss");
+    private SimpleDateFormat dateFormat() {
+        return new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
     }
 
 }

@@ -57,7 +57,7 @@ public class CrawlerTaskDispatcher {
         int leftCount = batchSize - workerHeartbeat.getWaitTaskCount();
         if(leftCount <= 0)
             return;
-        List<CrawlerRequest> crawlerRequests = queueService.listQueues(batchSize - workerHeartbeat.getWaitTaskCount());
+        List<CrawlerRequest> crawlerRequests = queueService.listQueues(leftCount);
         if(crawlerRequests.size() == 0)
             return;
         boolean flag = workerActor.assignTasks(workerRegistration, crawlerRequests);

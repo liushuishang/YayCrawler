@@ -39,8 +39,6 @@ public class TaskScheduleService {
     @Autowired
     private TaskFailureListener failureListener;
 
-    @Value("${worker.spider.maxIdleTime}")
-    private long maxIdleTime;
 
 
     private Map<String, YaySpider> spiderMap = new HashMap<>();
