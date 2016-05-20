@@ -10,7 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by ucs_yuananyun on 2016/5/13.
  */
 public class MasterContext {
-    public  static ConcurrentHashMap<String, WorkerRegistration> workerRegistrationMap = new ConcurrentHashMap<>();
+
+    public static ConcurrentHashMap<String, WorkerRegistration> workerRegistrationMap = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<String, WorkerHeartbeat> workerHeartbeatMap = new ConcurrentHashMap<>();
 
     public static void registeWorker(WorkerRegistration registration) {
@@ -20,9 +21,19 @@ public class MasterContext {
 
 
     public static void receiveWorkerHeartbeat(WorkerHeartbeat heartbeat) {
-        if (workerRegistrationMap.containsKey(heartbeat.getWorkerId()))
+        long currentTime = System.currentTimeMillis();
+        if (workerRegistrationMap.containsKey(heartbeat.getWorkerId())) {
+            heartbeat.setLastTime(currentTime);
             workerHeartbeatMap.put(heartbeat.getWorkerId(), heartbeat);
-        else throw new RuntimeException(String.format("worker %s 未注册，但是却发送了心跳！", heartbeat.getWorkerId()));
+        }
+
+        //移除已经超时的Worker
+        for (WorkerRegistration registration : workerRegistrationMap.values()) {
+            Long lastTime = workerHeartbeatMap.get(registration.getWorkerId()).getLastTime();
+            if (currentTime - lastTime >= 2 * registration.getHeartbeatInteval()) {
+                workerRegistrationMap.remove(registration.getWorkerId());
+            }
+        }
     }
 
 

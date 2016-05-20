@@ -19,7 +19,6 @@ public class ServletInitializer extends SpringBootServletInitializer {
 	protected WebApplicationContext run(SpringApplication application) {
 		WebApplicationContext context = super.run(application);
 		WorkerContext.webApplicationContext = context;
-		WorkerContext.masterServerAddress = context.getEnvironment().getProperty("master.server.address");
 
 		MasterActor masterActor = context.getBean(MasterActor.class);
 		WorkerContext.isSuccessRegisted=masterActor.register();

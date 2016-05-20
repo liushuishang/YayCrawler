@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
+import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Selectable;
@@ -61,18 +62,23 @@ public class GenericPageProcessor implements PageProcessor {
     @SuppressWarnings("all")
     public Map<String, Object> parseOneRegion(Page page, PageParseRegion pageParseRegion, List<CrawlerRequest> childRequestList) {
         Selectable context = null;
+        Request request = page.getRequest();
         if (DEFAULT_PAGE_SELECTOR.equals(pageParseRegion.getSelectExpression()))
             context = page.getHtml();
-        else
-            context = SelectorExpressionResolver.resolve(page.getHtml(), pageParseRegion.getSelectExpression());
+        else {
+            context = SelectorExpressionResolver.resolve(request, page.getHtml(), pageParseRegion.getSelectExpression());
+        }
         if (context == null) return null;
         List<UrlParseRule> urlParseRuleList = pageParseRegion.getUrlParseRules();
         if (urlParseRuleList != null && urlParseRuleList.size() > 0) {
             Set<String> childUrlSet = new HashSet<>();
             for (UrlParseRule urlParseRule : urlParseRuleList) {
-                Collection<? extends String> urlList = SelectorExpressionResolver.resolve(context, urlParseRule.getRule());
-                if (urlList != null && urlList.size() > 0)
-                    childUrlSet.addAll(urlList);
+                Object v = SelectorExpressionResolver.resolve(request,context, urlParseRule.getRule());
+                if (v instanceof Collection) {
+                    Collection<String> urlList = (Collection<String>) v;
+                    if (urlList != null && urlList.size() > 0)
+                        childUrlSet.addAll(urlList);
+                } else childUrlSet.add(String.valueOf(v));
             }
 //            page.addTargetRequests(new ArrayList<>(childSet));
             for (String childUrl : childUrlSet) {
@@ -88,7 +94,7 @@ public class GenericPageProcessor implements PageProcessor {
             for (Selectable node : nodes) {
                 HashedMap childMap = new HashedMap();
                 for (FieldParseRule fieldParseRule : fieldParseRuleList) {
-                    childMap.put(fieldParseRule.getFieldName(), SelectorExpressionResolver.resolve(node, fieldParseRule.getRule()));
+                    childMap.put(fieldParseRule.getFieldName(), SelectorExpressionResolver.resolve(request,node, fieldParseRule.getRule()));
                 }
                 resultMap.put(String.valueOf(i++), childMap);
             }

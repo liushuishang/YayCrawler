@@ -1,6 +1,7 @@
 package yaycrawler.spider.resolver;
 
 import org.apache.commons.lang3.StringUtils;
+import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.selector.Selectable;
 
 import java.util.LinkedList;
@@ -17,7 +18,7 @@ public class SelectorExpressionResolver {
 
 
 
-    public static <T> T resolve(Selectable selector, String expression) {
+    public static <T> T resolve(Request request,Selectable selector, String expression) {
         if (selector == null) return null;
 
         Object localObject = selector;
@@ -42,7 +43,7 @@ public class SelectorExpressionResolver {
                     paramArray[0] = param;
                 }
 
-                localObject = execute((Selectable) localObject, methodName, paramArray);
+                localObject = execute(request,(Selectable) localObject, methodName, paramArray);
 
                 if (!(localObject instanceof Selectable))
                     return (T) localObject;
@@ -52,7 +53,7 @@ public class SelectorExpressionResolver {
     }
 
 
-    private static Object execute(Selectable selector, String methodName, Object... paramArray) {
+    private static Object execute(Request request,Selectable selector, String methodName, Object... paramArray) {
         String lowerMethodName = methodName.toLowerCase();
         Selectable selectable = selector;
         try {
@@ -70,11 +71,22 @@ public class SelectorExpressionResolver {
             }
 
             /**
-             * 自定义
+             * 自定义常量字段
              */
             if ("constant".equals(lowerMethodName)) {
                 return params[0];
             }
+
+            /**
+             * 自定义Url解析
+             */
+            if ("customurl".equals(lowerMethodName)) {
+                String url = params[0];
+                if (url.contains("REQUEST("))
+                    url = ParamResolver.resolverFromRequest(request, url);
+                return url;
+            }
+
             //应该有四个参数（template,varName,start,end)
             if ("paging".equals(lowerMethodName)) {
                 List<String> dl = new LinkedList<>();

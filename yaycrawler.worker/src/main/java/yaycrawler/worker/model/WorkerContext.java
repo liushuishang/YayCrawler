@@ -9,16 +9,28 @@ import java.util.UUID;
  */
 public class WorkerContext {
     public static final String workerId= UUID.randomUUID().toString();
-    public static  String masterServerAddress;
     public static boolean isSuccessRegisted=false;
     public static WebApplicationContext webApplicationContext;
 
 
-
     public static String getContextPath()
     {
-        if(webApplicationContext==null) throw new RuntimeException("WebApplicationContext 未设置值");
-        return webApplicationContext.getServletContext().getContextPath();
+        return webApplicationContext.getEnvironment().getProperty("context.path");
     }
+    public static String getMasterServerAddress()
+    {
+        return webApplicationContext.getEnvironment().getProperty("master.server.address");
+    }
+
+    public static  long getHeartbeatInteval()
+    {
+        return Long.parseLong(webApplicationContext.getEnvironment().getProperty("worker.heartbeat.inteval"));
+    }
+
+    public static String getSignatureSecret()
+    {
+        return webApplicationContext.getEnvironment().getProperty("signature.token");
+    }
+
 
 }

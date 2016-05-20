@@ -9,6 +9,10 @@ public class WorkerHeartbeat {
     private Long lastTime;
 
 
+    public WorkerHeartbeat(String workerId) {
+        this.workerId = workerId;
+    }
+
     public WorkerHeartbeat() {
 
     }

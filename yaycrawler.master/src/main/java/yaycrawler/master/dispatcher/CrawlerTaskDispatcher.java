@@ -2,7 +2,6 @@ package yaycrawler.master.dispatcher;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.CrawlerResult;
@@ -22,11 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class CrawlerTaskDispatcher {
 
-    @Value("${work.task.count}")
-    private Integer count;
+    @Value("${worker.task.batchSize}")
+    private Integer batchSize;
 
-    @Value("${work.task.leftcount}")
-    private Long leftcount;
+    @Value("${task.queue.timeOut}")
+    private Long queueTimeOut;
 
     @Autowired
     private CrawlerQueueService queueService;
@@ -55,10 +54,10 @@ public class CrawlerTaskDispatcher {
     public void assingTask(WorkerHeartbeat workerHeartbeat) {
         ConcurrentHashMap<String, WorkerRegistration> workerListMap = MasterContext.workerRegistrationMap;
         WorkerRegistration workerRegistration = workerListMap.get(workerHeartbeat.getWorkerId());
-        int leftCount = count - workerHeartbeat.getWaitTaskCount();
+        int leftCount = batchSize - workerHeartbeat.getWaitTaskCount();
         if(leftCount <= 0)
             return;
-        List<CrawlerRequest> crawlerRequests = queueService.listQueues(count - workerHeartbeat.getWaitTaskCount());
+        List<CrawlerRequest> crawlerRequests = queueService.listQueues(batchSize - workerHeartbeat.getWaitTaskCount());
         if(crawlerRequests.size() == 0)
             return;
         boolean flag = workerActor.assignTasks(workerRegistration, crawlerRequests);
@@ -68,7 +67,7 @@ public class CrawlerTaskDispatcher {
     }
 
     public void releaseQueue() {
-        queueService.releseQueue(leftcount);
+        queueService.releseQueue(queueTimeOut);
     }
 
 }

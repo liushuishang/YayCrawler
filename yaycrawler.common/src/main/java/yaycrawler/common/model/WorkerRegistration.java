@@ -7,6 +7,7 @@ public class WorkerRegistration {
 
     private  String workerId;
     private String workerContextPath;
+    private Long heartbeatInteval;
 
     public WorkerRegistration() {
     }
@@ -30,5 +31,13 @@ public class WorkerRegistration {
 
     public void setWorkerContextPath(String workerContextPath) {
         this.workerContextPath = workerContextPath;
+    }
+
+    public Long getHeartbeatInteval() {
+        return heartbeatInteval;
+    }
+
+    public void setHeartbeatInteval(Long heartbeatInteval) {
+        this.heartbeatInteval = heartbeatInteval;
     }
 }

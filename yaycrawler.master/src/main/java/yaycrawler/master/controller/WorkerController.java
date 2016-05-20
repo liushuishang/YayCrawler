@@ -59,7 +59,6 @@ public class WorkerController {
         Assert.notNull(heartbeat.getWorkerId());
         MasterContext.receiveWorkerHeartbeat(heartbeat);
         final WorkerHeartbeat workerHeartbeat = heartbeat;
-        //TODO 检查Worker的任务情况，分派任务，多线程
         new Thread(new Runnable() {
             @Override
             public void run() {
