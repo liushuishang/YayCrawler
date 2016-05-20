@@ -132,6 +132,11 @@ public class CrawlerQueueService {
     public boolean regeditQueues(List<CrawlerRequest> crawlerRequests) {
         try {
             for (CrawlerRequest crawlerRequest : crawlerRequests) {
+                Map<String,String> parameter = crawlerRequest.getData();
+                List<CrawlerRequest> crawlerRequestList = new ArrayList<>();
+                for (Map.Entry<String, String> entry : parameter.entrySet()) {
+
+                }
                 regeditQueue(crawlerRequest);
             }
         } catch (Exception e) {

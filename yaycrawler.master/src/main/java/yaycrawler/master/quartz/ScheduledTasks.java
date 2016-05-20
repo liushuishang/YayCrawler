@@ -27,36 +27,9 @@ public class ScheduledTasks{
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduledTasks.class);
 
-    @Scheduled(fixedRate = 1000 * 30)
-    public void reportCurrentTime(){
-        logger.info ("Scheduling Tasks Examples: The time is now " + dateFormat ().format (new Date ()));
-        logger.info("Start job");
-        ExecutorService exec = Executors.newFixedThreadPool(1);
-
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                logger.info("thread start");
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                logger.info("thread end");
-            }
-        });
-        exec.execute(thread);
-        exec.shutdown();
-        while (!exec.isTerminated()) {
-            // 等待所有子线程结束，才退出主线程
-        }
-        logger.info("end job");
-    }
-
     @Scheduled(cron = "0 */30 * * * *")
-    public void reflashCookieCurrentByCron(){
-        logger.info ("reflash Cookie By Cron: The time is now " + dateFormat ().format (new Date()));
+    public void reflashQueueCurrentByCron(){
+        logger.info ("reflash Queue By Cron: The time is now " + dateFormat ().format (new Date()));
         logger.info("Start job");
         ExecutorService exec = Executors.newFixedThreadPool(1);
 
