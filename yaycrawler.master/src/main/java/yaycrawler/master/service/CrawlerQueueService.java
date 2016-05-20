@@ -234,7 +234,7 @@ public class CrawlerQueueService {
         HashOperations hashOperations = redisTemplate.opsForHash();
         String uniqQueue = getSetKey();
         String runningQueue = getRunningKey();
-        setOperations.remove(uniqQueue, field);
+//        setOperations.remove(uniqQueue, field);
         String data = hashOperations.get(runningQueue, field).toString();
         CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
         crawlerRequest.setStartTime(System.currentTimeMillis());
@@ -259,7 +259,9 @@ public class CrawlerQueueService {
 
     public void releseQueue(Long leftTime) {
         HashOperations hashOperations = redisTemplate.opsForHash();
+        SetOperations setOperations = redisTemplate.opsForSet();
         String key = getRunningKey();
+        String uniqQueue = getSetKey();
         List<String> datas = hashOperations.values(key);
         for (String data:datas) {
             CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
@@ -268,6 +270,7 @@ public class CrawlerQueueService {
                 crawlerRequest.setStartTime(null);
                 crawlerRequest.setWorkerId(null);
                 removeCrawler(crawlerRequest.getHashCode());
+                setOperations.remove(uniqQueue, crawlerRequest.getHashCode());
                 regeditQueue(crawlerRequest);
             }
         }
