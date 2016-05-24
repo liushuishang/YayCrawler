@@ -40,4 +40,13 @@ public class WorkerRegistration {
     public void setHeartbeatInteval(Long heartbeatInteval) {
         this.heartbeatInteval = heartbeatInteval;
     }
+
+    @Override
+    public String toString() {
+        return "WorkerRegistration{" +
+                "workerId='" + workerId + '\'' +
+                ", workerContextPath='" + workerContextPath + '\'' +
+                ", heartbeatInteval=" + heartbeatInteval +
+                '}';
+    }
 }

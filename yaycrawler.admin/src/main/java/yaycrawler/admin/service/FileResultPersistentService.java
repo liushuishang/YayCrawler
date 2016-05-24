@@ -10,6 +10,7 @@ import java.util.Map;
  */
 @Component
 public class FileResultPersistentService implements IResultPersistentService {
+
     @Override
     public boolean saveCrawlerResult(String pageUrl, Map<String, Object> data) {
         return false;
