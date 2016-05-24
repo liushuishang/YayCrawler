@@ -17,4 +17,10 @@ public interface IResultPersistentService {
      */
     boolean saveCrawlerResult(String pageUrl, Map<String, Object> data);
 
+    /**
+     * 获取支持的持久化数据类型（普通数据，图片，文档等）
+     * @return
+     */
+    String getSupportedDataType();
+
 }

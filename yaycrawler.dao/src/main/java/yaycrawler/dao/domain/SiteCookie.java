@@ -28,7 +28,7 @@ public class SiteCookie {
     private String id;
 
     @NotNull
-    @Column(name = "cookie", columnDefinition = "varchar(200)")
+    @Column(name = "cookie", columnDefinition = "text")
     private String cookie;
 
     @NotNull

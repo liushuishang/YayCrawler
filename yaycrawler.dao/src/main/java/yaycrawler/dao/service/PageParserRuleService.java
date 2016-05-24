@@ -60,10 +60,10 @@ public class PageParserRuleService {
 
 
     public boolean saveFieldParseRule(String pageUrl, String pageMethod, String urlParamsJson,
-                                      String pageRegionName, String regionSelectExpression,
+                                      String pageRegionName, String regionSelectExpression,String regionDataType,
                                       String fieldName, String rule) {
         PageInfo pageInfo = createOrUpdatePageInfo(pageUrl, pageMethod, urlParamsJson);
-        PageParseRegion region = createOrUpdateRegion(pageInfo.getId(), pageUrl, pageRegionName, regionSelectExpression);
+        PageParseRegion region = createOrUpdateRegion(pageInfo.getId(), pageUrl, pageRegionName, regionSelectExpression,regionDataType);
 
         FieldParseRule fieldParseRule = new FieldParseRule(fieldName, rule);
         fieldParseRule.setRegionId(region.getId());
@@ -71,11 +71,12 @@ public class PageParserRuleService {
         return fieldParseRuleRepository.save(fieldParseRule) != null;
     }
 
-    public boolean saveUrlParseRule(String pageUrl, String pageMethod, String urlParamsJson, String pageRegionName,
-                                    String regionSelectExpression, String rule, String ruleMethod) {
+    public boolean saveUrlParseRule(String pageUrl, String pageMethod, String urlParamsJson,
+                                    String pageRegionName, String regionSelectExpression,String regionDataType,
+                                    String rule, String ruleMethod) {
 
         PageInfo pageInfo = createOrUpdatePageInfo(pageUrl, pageMethod, urlParamsJson);
-        PageParseRegion region = createOrUpdateRegion(pageInfo.getId(), pageUrl, pageRegionName, regionSelectExpression);
+        PageParseRegion region = createOrUpdateRegion(pageInfo.getId(), pageUrl, pageRegionName, regionSelectExpression, regionDataType);
 
         if(StringUtils.isBlank(ruleMethod)) ruleMethod = "GET";
         UrlParseRule urlParseRule = new UrlParseRule(rule);
@@ -84,7 +85,7 @@ public class PageParserRuleService {
         return urlParseRuleRepository.save(urlParseRule) != null;
     }
 
-    private PageParseRegion createOrUpdateRegion(String pageId, String pageUrl, String pageRegionName, String regionSelectExpression) {
+    private PageParseRegion createOrUpdateRegion(String pageId, String pageUrl, String pageRegionName, String regionSelectExpression, String regionDataType) {
         Assert.notNull(pageId);
         Assert.notNull(pageUrl);
         Assert.notNull(regionSelectExpression);
@@ -96,6 +97,7 @@ public class PageParserRuleService {
         region.setPageId(pageId);
         region.setName(pageRegionName);
         region.setSelectExpression(regionSelectExpression);
+        region.setDataType(regionDataType);
 
         return regionRepository.save(region);
     }

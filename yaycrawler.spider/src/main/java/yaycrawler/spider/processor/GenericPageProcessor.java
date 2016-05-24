@@ -1,6 +1,7 @@
 package yaycrawler.spider.processor;
 
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
+import us.codecraft.webmagic.selector.Json;
 import us.codecraft.webmagic.selector.Selectable;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.utils.UrlUtils;
@@ -27,7 +29,6 @@ import java.util.*;
 @Component
 public class GenericPageProcessor implements PageProcessor {
     private static Logger logger = LoggerFactory.getLogger(GenericPageProcessor.class);
-
     @Autowired(required = false)
     private IPageCompletedListener completedListener;
 
@@ -47,8 +48,10 @@ public class GenericPageProcessor implements PageProcessor {
             List<PageParseRegion> regionList = getPageRegionList(pageUrl);
             for (PageParseRegion pageParseRegion : regionList) {
                 Map<String, Object> result = parseOneRegion(page, pageParseRegion, childRequestList);
-                if (result != null)
+                if (result != null) {
+                    result.put("dataType", pageParseRegion.getDataType());
                     page.putField(pageParseRegion.getName(), result);
+                }
             }
             if (completedListener != null)
                 completedListener.onSuccess(page.getRequest(), childRequestList);
@@ -63,12 +66,14 @@ public class GenericPageProcessor implements PageProcessor {
     public Map<String, Object> parseOneRegion(Page page, PageParseRegion pageParseRegion, List<CrawlerRequest> childRequestList) {
         Selectable context = null;
         Request request = page.getRequest();
-        if (DEFAULT_PAGE_SELECTOR.equals(pageParseRegion.getSelectExpression()))
+        String selectExpression = pageParseRegion.getSelectExpression();
+
+        if (StringUtils.isBlank(selectExpression) || DEFAULT_PAGE_SELECTOR.equals(selectExpression))
             context = page.getHtml();
-        else {
-            context = SelectorExpressionResolver.resolve(request, page.getHtml(), pageParseRegion.getSelectExpression());
-        }
+        else
+            context = SelectorExpressionResolver.resolve(request, page.getHtml(), selectExpression);
         if (context == null) return null;
+
         List<UrlParseRule> urlParseRuleList = pageParseRegion.getUrlParseRules();
         if (urlParseRuleList != null && urlParseRuleList.size() > 0) {
             Set<String> childUrlSet = new HashSet<>();
@@ -90,7 +95,11 @@ public class GenericPageProcessor implements PageProcessor {
         if (fieldParseRuleList != null && fieldParseRuleList.size() > 0) {
             int i = 0;
             HashedMap resultMap = new HashedMap();
-            List<Selectable> nodes = context.nodes();
+            List<Selectable> nodes = new LinkedList<>();
+            if (context instanceof Json)
+                nodes.add(context);
+            else nodes.addAll(context.nodes());
+
             for (Selectable node : nodes) {
                 HashedMap childMap = new HashedMap();
                 for (FieldParseRule fieldParseRule : fieldParseRuleList) {

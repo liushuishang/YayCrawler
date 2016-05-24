@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.spider.persistent.IResultPersistentService;
+import yaycrawler.spider.persistent.PersistentDataType;
 
 import java.util.Map;
 
@@ -21,5 +22,10 @@ public class MongDBPersistentService implements IResultPersistentService {
         String collectionName = UrlUtils.getDomain(pageUrl).replace(".", "_");
         mongoTemplate.save(data, collectionName);
         return true;
+    }
+
+    @Override
+    public String getSupportedDataType() {
+        return PersistentDataType.MAP;
     }
 }

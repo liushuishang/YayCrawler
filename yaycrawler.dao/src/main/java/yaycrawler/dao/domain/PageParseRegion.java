@@ -32,6 +32,9 @@ public class PageParseRegion implements Serializable {
     private String urlParamsJson;
     @Column(name = "name",nullable = false)
     private String name;
+    @Column(name = "dataType",nullable = false,columnDefinition = "varchar(38) default 'MAP'")
+    private String dataType;
+
     /**
      * 区域选择表达式
      */
@@ -136,5 +139,13 @@ public class PageParseRegion implements Serializable {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
     }
 }

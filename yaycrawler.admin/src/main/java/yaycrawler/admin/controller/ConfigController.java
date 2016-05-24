@@ -80,11 +80,11 @@ public class ConfigController {
     }
 
 
-    @RequestMapping(value = "/testPageWithRule", method = RequestMethod.POST)
+    @RequestMapping(value = "/testPageWithRule")
     @ResponseBody
-    public Object testPage(HttpServletRequest httpServletRequest, @RequestParam(required = true) String targetUrl,
+    public Object testPage(HttpServletRequest httpServletRequest,
                            @RequestBody PageParseRegion region) {
-
+        String targetUrl = region.getPageUrl();
         String urlParamsJson = region.getUrlParamsJson();
         Map<String, Object> paramsMap = null;
         if (!StringUtils.isBlank(urlParamsJson)) {
@@ -112,13 +112,14 @@ public class ConfigController {
 
             String pageRegionName = MapUtils.getString(params, "regionName");
             String regionSelectExpression = MapUtils.getString(params, "selectExpression");
+            String retgionDataType=MapUtils.getString(params, "dataType");
 
 
             Map fieldParseRuleMap = MapUtils.getMap(params, "fieldParseRule");
             String fieldName = MapUtils.getString(fieldParseRuleMap, "fieldName");
             String rule = MapUtils.getString(fieldParseRuleMap, "rule");
 
-            return pageParseRuleService.saveFieldParseRule(pageUrl, pageMethod, urlParamsJson, pageRegionName, regionSelectExpression, fieldName, rule);
+            return pageParseRuleService.saveFieldParseRule(pageUrl, pageMethod, urlParamsJson, pageRegionName, regionSelectExpression,retgionDataType, fieldName, rule);
 
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -139,11 +140,12 @@ public class ConfigController {
 
             String pageRegionName = MapUtils.getString(params, "regionName");
             String regionSelectExpression = MapUtils.getString(params, "selectExpression");
+            String retgionDataType=MapUtils.getString(params, "dataType");
 
             Map urlParseRuleMap = MapUtils.getMap(params, "urlParseRule");
             String rule = MapUtils.getString(urlParseRuleMap, "rule");
             String ruleMethod=MapUtils.getString(urlParseRuleMap, "method");
-            return pageParseRuleService.saveUrlParseRule(pageUrl, pageMethod, urlParamsJson, pageRegionName, regionSelectExpression, rule,ruleMethod);
+            return pageParseRuleService.saveUrlParseRule(pageUrl, pageMethod, urlParamsJson, pageRegionName, regionSelectExpression,retgionDataType, rule,ruleMethod);
 
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);

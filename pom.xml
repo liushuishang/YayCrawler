@@ -39,6 +39,7 @@
         <java.version>1.8</java.version>
         <webmagic.version>0.5.3</webmagic.version>
         <yaycrawler.version>1.0.0-SNAPSHOT</yaycrawler.version>
+        <json-path.version>0.8.1</json-path.version>
     </properties>
 
     <dependencies>
