@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head xmlns:th="http://www.thymeleaf.org" th:include="master::head">
+    <title>添加PageInfo</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <form class="form" action="savePageInfo">
+            <div class="form-body">
+                <div class="form-group">
+                    <label class="control-label">页面URL</label>
+                    <input type="text" class="form-control" id="pageUrl" name="pageUrl"
+                           value="http://floor.0731fdc.com/jggs.php"
+                           placeholder="输入网页URL"/>
+                    <!--<button type="button" class="btn primary query">规则查询</button>-->
+                </div>
+                <div class="form-group">
+                    <label class="control-label">Url正则表达式</label>
+                    <input type="text" class="form-control" id="urlRgx" name="urlRgx"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">请求方式</label>
+                    <select id="requestMethod" name="method" class="bootstrap-select bs-select">
+                        <option value="GET" selected="selected">get方式</option>
+                        <option value="POST">post方式</option>
+                        <option value="PUT">put方式</option>
+                        <option value="DELETE">delete方式</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">请求参数（JSON）</label>
+                                <textarea id="urlParamsJson" name="urlParamsJson" class="form-control " rows="3" value="{
+'name':'yuananyn'
+                                }"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <!--<button type="button" class="btn green test">测试</button>-->
+                <button id="btnSubmit" type="button" class="btn primary save">保存</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(function () {
+        $("#btnSubmit").click(function () {
+            $(".form").ajaxSubmit({
+                success: function (data) {
+                    alert(data);
+                }
+            });
+        });
+    });
+
+    /*]]>*/
+</script>
+
+</body>
+</html>

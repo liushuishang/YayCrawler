@@ -1,7 +1,6 @@
 package yaycrawler.dao.domain;
 
 
-import com.sun.istack.internal.NotNull;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -16,16 +15,15 @@ import java.util.List;
 @Entity
 @Table(name = "conf_page_region")
 public class PageParseRegion implements Serializable {
-
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
     private String id;
     @Column(name = "pageId",nullable = false,columnDefinition = "varchar(38)")
     private String pageId;
-    @NotNull
-    @Column(name = "pageUrl")
-    private String pageUrl;
+//    @NotNull
+//    @Column(name = "pageUrl")
+//    private String pageUrl;
     @Transient
     private String method;
     @Transient
@@ -54,13 +52,6 @@ public class PageParseRegion implements Serializable {
         urlParseRules = new LinkedList<>();
     }
 
-    public PageParseRegion(String name, String pageUrl, String CSSSelector) {
-        this();
-        this.name = name;
-        this.pageUrl = pageUrl;
-        this.selectExpression = CSSSelector;
-    }
-
     public String getId() {
         return id;
     }
@@ -75,14 +66,6 @@ public class PageParseRegion implements Serializable {
 
     public void setPageId(String pageId) {
         this.pageId = pageId;
-    }
-
-    public String getPageUrl() {
-        return pageUrl;
-    }
-
-    public void setPageUrl(String pageUrl) {
-        this.pageUrl = pageUrl;
     }
 
     public String getMethod() {

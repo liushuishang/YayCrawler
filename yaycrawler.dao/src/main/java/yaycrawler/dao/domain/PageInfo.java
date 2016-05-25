@@ -26,6 +26,10 @@ public class PageInfo {
     private String pageUrl;
 
     @NotNull
+    @Column(name = "urlRgx",columnDefinition = "varchar(100)")
+    private String urlRgx;
+
+    @NotNull
     @Column(name = "method", columnDefinition = "varchar(10) default 'GET' ")
     private String method;
 
@@ -101,5 +105,14 @@ public class PageInfo {
 
     public void setPageParseRegionList(List<PageParseRegion> pageParseRegionList) {
         this.pageParseRegionList = pageParseRegionList;
+    }
+
+
+    public String getUrlRgx() {
+        return urlRgx;
+    }
+
+    public void setUrlRgx(String urlRgx) {
+        this.urlRgx = urlRgx;
     }
 }

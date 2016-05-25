@@ -39,7 +39,7 @@ public class SelectorExpressionResolver {
                 String param = matcher.group(2);
                 if (param != null) {
 //                    param = param.replaceAll("\"([^\"]*)\"", "$1");//去掉双引号
-                    paramArray = param.split("$$");
+                    paramArray = param.split("\\$\\$");
                 }
                 if (paramArray == null) {
                     paramArray = new String[1];

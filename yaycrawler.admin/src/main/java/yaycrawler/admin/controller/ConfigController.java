@@ -9,11 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import us.codecraft.webmagic.Request;
 import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.utils.UrlUtils;
+import yaycrawler.dao.domain.PageInfo;
 import yaycrawler.dao.domain.PageParseRegion;
 import yaycrawler.dao.domain.PageSite;
 import yaycrawler.dao.service.PageParserRuleService;
@@ -47,12 +51,27 @@ public class ConfigController {
     }
 
 
-    @RequestMapping("/getPageRegionRules")
+    @RequestMapping(value = "/queryPageInfos", method = RequestMethod.GET)
     @ResponseBody
-    public List<PageParseRegion> getPageRegionsByUrl(String url) {
-        List<PageParseRegion> pageRegions = pageParseRuleService.getPageRegionList(url);
-        return pageRegions;
+    public Object queryPageInfos(int pageIndex,int pageSize)
+    {
+        Map<String,Object> result=new HashMap<>();
+        Page<PageInfo> data = pageParseRuleService.queryPageInfos(pageIndex, pageSize);
+        result.put("rows", data.getContent());
+        result.put("total", data.getTotalElements());
+        return result;
     }
+
+    @RequestMapping(value = "/addPageInfo",method = RequestMethod.GET)
+    public ModelAndView addPageInfo() {
+        return new ModelAndView("add_page_info");
+    }
+    @RequestMapping(value = "/savePageInfo",method = RequestMethod.POST)
+    @ResponseBody
+    public Object savePageInfo(@RequestBody PageInfo pageInfo) {
+        return false;
+    }
+
 
     @RequestMapping("/queryPageRulesByUrl")
     @ResponseBody
@@ -82,9 +101,7 @@ public class ConfigController {
 
     @RequestMapping(value = "/testPageWithRule")
     @ResponseBody
-    public Object testPage(HttpServletRequest httpServletRequest,
-                           @RequestBody PageParseRegion region) {
-        String targetUrl = region.getPageUrl();
+    public Object testPage(HttpServletRequest httpServletRequest,String targetUrl, @RequestBody PageParseRegion region) {
         String urlParamsJson = region.getUrlParamsJson();
         Map<String, Object> paramsMap = null;
         if (!StringUtils.isBlank(urlParamsJson)) {
@@ -109,6 +126,7 @@ public class ConfigController {
 
             String pageMethod = MapUtils.getString(params, "method");
             String urlParamsJson = MapUtils.getString(params, "urlParamsJson");
+            String urlRegex=MapUtils.getString(params, "urlRegex");
 
             String pageRegionName = MapUtils.getString(params, "regionName");
             String regionSelectExpression = MapUtils.getString(params, "selectExpression");
@@ -119,7 +137,8 @@ public class ConfigController {
             String fieldName = MapUtils.getString(fieldParseRuleMap, "fieldName");
             String rule = MapUtils.getString(fieldParseRuleMap, "rule");
 
-            return pageParseRuleService.saveFieldParseRule(pageUrl, pageMethod, urlParamsJson, pageRegionName, regionSelectExpression,retgionDataType, fieldName, rule);
+            return pageParseRuleService.saveFieldParseRule(pageUrl,urlRegex, pageMethod, urlParamsJson,
+                    pageRegionName, regionSelectExpression,retgionDataType, fieldName, rule);
 
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -137,6 +156,7 @@ public class ConfigController {
 
             String pageMethod = MapUtils.getString(params, "method");
             String urlParamsJson = MapUtils.getString(params, "urlParamsJson");
+            String urlRegex=MapUtils.getString(params, "urlRegex");
 
             String pageRegionName = MapUtils.getString(params, "regionName");
             String regionSelectExpression = MapUtils.getString(params, "selectExpression");
@@ -145,7 +165,8 @@ public class ConfigController {
             Map urlParseRuleMap = MapUtils.getMap(params, "urlParseRule");
             String rule = MapUtils.getString(urlParseRuleMap, "rule");
             String ruleMethod=MapUtils.getString(urlParseRuleMap, "method");
-            return pageParseRuleService.saveUrlParseRule(pageUrl, pageMethod, urlParamsJson, pageRegionName, regionSelectExpression,retgionDataType, rule,ruleMethod);
+            return pageParseRuleService.saveUrlParseRule(pageUrl,urlRegex, pageMethod, urlParamsJson,
+                    pageRegionName, regionSelectExpression,retgionDataType, rule,ruleMethod);
 
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);

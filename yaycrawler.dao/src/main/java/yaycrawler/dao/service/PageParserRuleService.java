@@ -1,21 +1,16 @@
 package yaycrawler.dao.service;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.*;
 import yaycrawler.dao.repositories.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 用于管理页面字段和Url抽取规则
@@ -25,7 +20,7 @@ import java.util.Map;
 @Transactional
 public class PageParserRuleService {
 
-    private static Logger logger = LoggerFactory.getLogger(PageParserRuleService.class);
+//    private static Logger logger = LoggerFactory.getLogger(PageParserRuleService.class);
 
     @Autowired
     private PageInfoRepository pageInfoRepository;
@@ -43,27 +38,19 @@ public class PageParserRuleService {
     private PageSiteRepository siteRepository;
 
 
-    private Map<String, List<PageParseRegion>> urlPageParseRuleMap = new HashedMap();
-
     public List<PageParseRegion> getPageRegionList(String pageUrl) {
         if (StringUtils.isBlank(pageUrl)) return null;
-        String url = UrlUtils.getContextPath(pageUrl);
 
-        List<PageParseRegion> regionList = urlPageParseRuleMap.get(url);
-        if (regionList == null) {
-            regionList = regionRepository.findByPageUrl(url);
-            if (regionList != null)
-                urlPageParseRuleMap.put(url, regionList);
-        }
-        return regionList;
+        PageInfo pageInfo = pageInfoRepository.findOneByUrlRgx(pageUrl);
+        return pageInfo.getPageParseRegionList();
     }
 
 
-    public boolean saveFieldParseRule(String pageUrl, String pageMethod, String urlParamsJson,
+    public boolean saveFieldParseRule(String pageUrl,String urlRegex, String pageMethod, String urlParamsJson,
                                       String pageRegionName, String regionSelectExpression,String regionDataType,
                                       String fieldName, String rule) {
-        PageInfo pageInfo = createOrUpdatePageInfo(pageUrl, pageMethod, urlParamsJson);
-        PageParseRegion region = createOrUpdateRegion(pageInfo.getId(), pageUrl, pageRegionName, regionSelectExpression,regionDataType);
+        PageInfo pageInfo = createOrUpdatePageInfo(pageUrl,urlRegex, pageMethod, urlParamsJson);
+        PageParseRegion region = createOrUpdateRegion(pageInfo.getId(), pageRegionName, regionSelectExpression,regionDataType);
 
         FieldParseRule fieldParseRule = new FieldParseRule(fieldName, rule);
         fieldParseRule.setRegionId(region.getId());
@@ -71,12 +58,12 @@ public class PageParserRuleService {
         return fieldParseRuleRepository.save(fieldParseRule) != null;
     }
 
-    public boolean saveUrlParseRule(String pageUrl, String pageMethod, String urlParamsJson,
+    public boolean saveUrlParseRule(String pageUrl, String urlRegex,String pageMethod, String urlParamsJson,
                                     String pageRegionName, String regionSelectExpression,String regionDataType,
                                     String rule, String ruleMethod) {
 
-        PageInfo pageInfo = createOrUpdatePageInfo(pageUrl, pageMethod, urlParamsJson);
-        PageParseRegion region = createOrUpdateRegion(pageInfo.getId(), pageUrl, pageRegionName, regionSelectExpression, regionDataType);
+        PageInfo pageInfo = createOrUpdatePageInfo(pageUrl,urlRegex, pageMethod, urlParamsJson);
+        PageParseRegion region = createOrUpdateRegion(pageInfo.getId(), pageRegionName, regionSelectExpression, regionDataType);
 
         if(StringUtils.isBlank(ruleMethod)) ruleMethod = "GET";
         UrlParseRule urlParseRule = new UrlParseRule(rule);
@@ -85,15 +72,13 @@ public class PageParserRuleService {
         return urlParseRuleRepository.save(urlParseRule) != null;
     }
 
-    private PageParseRegion createOrUpdateRegion(String pageId, String pageUrl, String pageRegionName, String regionSelectExpression, String regionDataType) {
+    private PageParseRegion createOrUpdateRegion(String pageId, String pageRegionName, String regionSelectExpression, String regionDataType) {
         Assert.notNull(pageId);
-        Assert.notNull(pageUrl);
         Assert.notNull(regionSelectExpression);
 
-        PageParseRegion region = regionRepository.findOneByPageUrlAndSelectExpression(pageUrl, regionSelectExpression);
+        PageParseRegion region = regionRepository.findOneByPageIdAndSelectExpression(pageId, regionSelectExpression);
         if (region == null)
             region = new PageParseRegion();
-        region.setPageUrl(pageUrl);
         region.setPageId(pageId);
         region.setName(pageRegionName);
         region.setSelectExpression(regionSelectExpression);
@@ -103,13 +88,14 @@ public class PageParserRuleService {
     }
 
 
-    private PageInfo createOrUpdatePageInfo(String pageUrl, String pageMethod, String urlParamsJson) {
+    private PageInfo createOrUpdatePageInfo(String pageUrl, String urlRegex,String pageMethod, String urlParamsJson) {
         Assert.notNull(pageUrl);
-        PageInfo pageInfo = pageInfoRepository.findOneByPageUrl(pageUrl);
+        PageInfo pageInfo = pageInfoRepository.findOneByUrlRgx(pageUrl);
         if (pageInfo == null) {
             pageInfo = new PageInfo();
         }
         pageInfo.setPageUrl(pageUrl);
+        pageInfo.setUrlRgx(urlRegex);
         pageInfo.setMethod(pageMethod);
         pageInfo.setParamsJson(urlParamsJson);
         return pageInfoRepository.save(pageInfo);
@@ -117,16 +103,19 @@ public class PageParserRuleService {
 
 
     public List queryAllRule() {
-        List data = regionRepository.queryAllFieldRules();
-        data.addAll(regionRepository.queryAllUrlRules());
-        return data;
+//        List data = regionRepository.queryAllFieldRules();
+//        data.addAll(regionRepository.queryAllUrlRules());
+//        return data;
+
+        return null;
     }
 
     public List queryRulesByUrl(String url) {
         Assert.notNull(url);
-        List data = regionRepository.queryFieldRulesByUrl(url);
-        data.addAll(regionRepository.queryUrlRulesByUrl(url));
-        return data;
+//        List data = regionRepository.queryFieldRulesByUrl(url);
+//        data.addAll(regionRepository.queryUrlRulesByUrl(url));
+//        return data;
+        return null;
     }
 
     public boolean deleteRuleByIds(String[] idArray) {
@@ -154,5 +143,11 @@ public class PageParserRuleService {
 
     public boolean addSite(PageSite pageSite) {
         return siteRepository.save(pageSite)!=null;
+    }
+
+
+
+    public Page<PageInfo> queryPageInfos(int pageIndex, int pageSize) {
+        return pageInfoRepository.findAll(new PageRequest(pageIndex, pageSize));
     }
 }

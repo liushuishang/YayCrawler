@@ -1,9 +1,12 @@
 package yaycrawler.dao.repositories;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import yaycrawler.dao.domain.PageInfo;
+import yaycrawler.dao.domain.PageSite;
 
 
 /**
@@ -12,8 +15,10 @@ import yaycrawler.dao.domain.PageInfo;
 @Repository
 public interface PageInfoRepository extends CrudRepository<PageInfo, String> {
 
-    PageInfo findOneByPageUrl(String pageUr);
+    @Query(value="select *  from conf_page_info pi where ? REGEXP  pi.url_rgx",nativeQuery = true)
+    PageInfo findOneByUrlRgx(String url);
 
+    Page<PageInfo> findAll(Pageable pageable);
 
 
 }
