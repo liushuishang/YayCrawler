@@ -1,11 +1,12 @@
 package yaycrawler.common.utils;
 
 import com.alibaba.fastjson.JSON;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -14,6 +15,7 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import yaycrawler.common.model.RestFulResult;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +37,7 @@ public class HttpUtils {
         messageConverters.add(new FormHttpMessageConverter());
 //        messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
         messageConverters.add(new MappingJackson2HttpMessageConverter());
-
-        RestTemplate restTemplate = new RestTemplate(messageConverters);
+        restTemplate = new RestTemplate(messageConverters);
         restTemplate.setRequestFactory(requestFactory);
         restTemplate.setErrorHandler(new DefaultResponseErrorHandler());
     }
@@ -72,5 +73,5 @@ public class HttpUtils {
         return result;
     }
 
-
 }
+

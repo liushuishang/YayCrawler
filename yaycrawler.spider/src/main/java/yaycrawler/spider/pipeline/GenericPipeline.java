@@ -36,7 +36,6 @@ public class GenericPipeline implements Pipeline {
         try {
             String pageUrl = resultItems.getRequest().getUrl();
             Map<String, Object> pageDataMap = resultItems.getAll();
-            String _id = DigestUtils.shaHex(pageUrl);
 
             /**
              * 先按照dataType分组
@@ -60,8 +59,6 @@ public class GenericPipeline implements Pipeline {
                     IResultPersistentService persistentService = persistentServiceFactory.getPersistentServiceByDataType(groupedDataEntry.getKey());
                     if (persistentService != null) {
                         Map dataMap = groupedDataEntry.getValue();
-                        dataMap.put("pageUrl", pageUrl);
-                        dataMap.put("_id", _id);
                         persistentService.saveCrawlerResult(pageUrl, dataMap);
                     }
                 } catch (Exception ex) {
@@ -76,7 +73,10 @@ public class GenericPipeline implements Pipeline {
     private void addToDataTypeGroup(Map<String, Map<String, Object>> groupedDataMapList, String dataType, Map.Entry<String, Object> regionDataMap) {
         if (StringUtils.isBlank(dataType)) return;
         Map<String, Object> groupedMap = groupedDataMapList.get(dataType);
-        if (groupedMap == null) groupedMap = new HashMap<>();
+        if (groupedMap == null) {
+            groupedMap = new HashMap<>();
+            groupedDataMapList.put(dataType, groupedMap);
+        }
         groupedMap.put(regionDataMap.getKey(), regionDataMap.getValue());
     }
 

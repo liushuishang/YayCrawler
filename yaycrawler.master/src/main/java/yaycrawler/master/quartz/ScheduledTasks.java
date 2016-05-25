@@ -25,11 +25,11 @@ import java.util.concurrent.Executors;
 @Configurable
 @EnableScheduling
 public class ScheduledTasks {
+    private static final Logger logger = LoggerFactory.getLogger(ScheduledTasks.class);
 
     @Resource
     private CrawlerTaskDispatcher crawlerTaskDispatcher;
 
-    private static final Logger logger = LoggerFactory.getLogger(ScheduledTasks.class);
 
     @Scheduled(cron = "0 */1 * * * *")
     public void refreshWorker() {
@@ -41,6 +41,7 @@ public class ScheduledTasks {
         for (WorkerRegistration registration : workerRegistrationMap.values()) {
             Long lastTime = workerHeartbeatMap.get(registration.getWorkerId()).getLastTime();
             if (currentTime - lastTime >= 2 * registration.getHeartbeatInteval()) {
+                logger.info("{}心跳已经超时，Master移除该Worker！",registration.toString());
                 workerRegistrationMap.remove(registration.getWorkerId());
             }
         }
