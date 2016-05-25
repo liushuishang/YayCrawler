@@ -6,33 +6,30 @@
 <body>
 <div class="container">
     <div class="row">
-        <form class="form" action="savePageInfo" method="post">
+        <form class="form" action="savePageRegion" method="post">
             <div class="form-body">
                 <div class="form-group">
-                    <label class="control-label">页面URL</label>
-                    <input type="text" class="form-control" id="pageUrl" name="pageUrl"
-                           value="http://floor.0731fdc.com/jggs.php"
-                           placeholder="输入网页URL"/>
-                    <!--<button type="button" class="btn primary query">规则查询</button>-->
+                    <input type="hidden" th:value="${pageInfo.id}" name="pageId"/>
+                    <label class="control-label">页面匹配正则表达式</label>
+                    <input type="text" class="form-control" th:value="${pageInfo.urlRgx}" readonly="readonly"/>
                 </div>
                 <div class="form-group">
-                    <label class="control-label">Url正则表达式</label>
-                    <input type="text" class="form-control" id="urlRgx" name="urlRgx"/>
+                    <label class="control-label">区域名称</label>
+                    <input type="text" class="form-control" id="regionName" name="name"
+                           value="楼盘列表" placeholder="输入页面区域名称"/>
                 </div>
                 <div class="form-group">
-                    <label class="control-label">请求方式</label>
-                    <select id="requestMethod" name="method" class="bootstrap-select bs-select">
-                        <option value="GET" selected="selected">get方式</option>
-                        <option value="POST">post方式</option>
-                        <option value="PUT">put方式</option>
-                        <option value="DELETE">delete方式</option>
+                    <label class="control-label">区域选择表达式</label>
+                    <input type="text" class="form-control" id="selectExpression" name="selectExpression"
+                           placeholder="输入区域选择表达式" value="css(.list-con)" required="required"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">区域选择表达式</label>
+                    <select id="dataType" name="dataType" class="bootstrap-select bs-select">
+                        <option value="MAP" selected="selected">数据Map</option>
+                        <option value="IMAGE">图片下载</option>
+                        <option value="DOCUMENT">文档下载</option>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label class="control-label">请求参数（JSON）</label>
-                                <textarea id="urlParamsJson" name="urlParamsJson" class="form-control " rows="3" value="{
-'name':'yuananyn'
-                                }"></textarea>
                 </div>
             </div>
             <div class="form-actions">
@@ -68,7 +65,6 @@
                     console.log(msg);
                 }
             });
-
         });
     });
 

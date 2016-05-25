@@ -12,6 +12,7 @@ import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.dao.domain.PageParseRegion;
 import yaycrawler.spider.downloader.CrawlerHttpClientDownloader;
 import yaycrawler.spider.processor.GenericPageProcessor;
+import yaycrawler.spider.utils.RequestHelper;
 
 import java.util.*;
 
@@ -36,14 +37,14 @@ public class ConfigSpiderService {
     /**
      * 测试一个页面区域解析规则
      *
-     * @param request
+     * @param crawlerRequest
      * @param parseRegion
      * @param page
      * @return
      */
-    public Map<String, Object> test(final Request request, PageParseRegion parseRegion, Page page, Site site) {
-        if (pageProcessor == null) return null;
-
+    public Map<String, Object> test(CrawlerRequest crawlerRequest, PageParseRegion parseRegion, Page page, Site site) {
+        Request request = RequestHelper.createRequest(crawlerRequest.getUrl(), crawlerRequest.getMethod(), crawlerRequest.getData());
+        if (pageProcessor == null||request==null) return null;
         if (page == null) {
             final Site finalSite = site;
             page = downloader.download(request, new Task() {
@@ -62,8 +63,10 @@ public class ConfigSpiderService {
         List<CrawlerRequest> childRequestList=new LinkedList<>();
         Map<String, Object> data = pageProcessor.parseOneRegion(page, parseRegion,childRequestList);
         Map<String, Object> result = new HashMap<>();
-        result.put("data", data);
-        result.put("childRequests", childRequestList);
+        if (data != null)
+            result.put("data", data);
+        if (childRequestList.size() > 0)
+            result.put("childRequests", childRequestList);
         return result;
     }
 

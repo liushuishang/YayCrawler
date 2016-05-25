@@ -23,11 +23,7 @@ public class PageParseRegion implements Serializable {
     private String pageId;
 //    @NotNull
 //    @Column(name = "pageUrl")
-//    private String pageUrl;
-    @Transient
-    private String method;
-    @Transient
-    private String urlParamsJson;
+
     @Column(name = "name",nullable = false)
     private String name;
     @Column(name = "dataType",nullable = false,columnDefinition = "varchar(38) default 'MAP'")
@@ -68,21 +64,6 @@ public class PageParseRegion implements Serializable {
         this.pageId = pageId;
     }
 
-    public String getMethod() {
-        return method;
-    }
-
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
-    public String getUrlParamsJson() {
-        return urlParamsJson;
-    }
-
-    public void setUrlParamsJson(String urlParamsJson) {
-        this.urlParamsJson = urlParamsJson;
-    }
 
     public String getName() {
         return name;

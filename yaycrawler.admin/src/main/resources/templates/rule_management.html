@@ -21,7 +21,7 @@
                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
                 </button>
             </div>
-            <table id="tb_sites"></table>
+            <table id="tb_page"></table>
         </div>
 
 
@@ -38,7 +38,7 @@
                     <h4 class="modal-title" id="modalLabel">
                     </h4>
                 </div>
-                <div class="modal-body" >
+                <div class="modal-body">
                     <iframe src="" style="width:100%;height:460px;border: none">
                     </iframe>
                 </div>
@@ -61,25 +61,11 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
-                $("#btnSubmit").click(function () {
-                    $("#cookieForm").ajaxSubmit({
-                        success: function (data) {
-                            $('#cookieAddModal').modal('hide');
-                            $('#tb_sites').bootstrapTable('refresh');
-                        }
-                    });
-                });
-                $("#btnSiteSubmit").click(function () {
-                    $("#siteForm").ajaxSubmit({
-                        success: function (data) {
-                            $('#divModal').modal('hide');
-                            $('#tb_sites').bootstrapTable('refresh');
-                        }
-                    });
-                });
-
+//                $('#divModal').on('hidden.bs.modal', function () {
+//                    $('#tb_page').bootstrapTable('refresh');
+//                });
                 $("#btn_add").click(function () {
-                    $("#modalLabel").html("添加测试Page");
+                    $("#modalLabel").html("添加待抽取Page");
                     $('#divModal iframe').attr("src", "addPageInfo");
                     $('#divModal').modal({
                         keyboard: false
@@ -87,8 +73,7 @@
                 });
                 $("#btn_delete").click(function () {
                     delItem(function () {
-                        debugger
-                        var selectedRows = $('#tb_sites').bootstrapTable('getSelections');
+                        var selectedRows = $('#tb_page').bootstrapTable('getSelections');
                         var selectedIds = [];
                         $.each(selectedRows, function (i, item) {
                             selectedIds.push(item.id);
@@ -99,12 +84,12 @@
                             type: "Post",
                             cache: false,
                             contentType: "application/json",
-                            url: global.contextPath + "/deleteSites",
+                            url: global.contextPath + "/deletePageInfoByIds",
                             data: JSON.stringify(selectedIds),
                             dataType: 'json',
                             success: function (result) {     //回调函数，result，返回值
                                 if (result == true)
-                                    $('#tb_sites').bootstrapTable('refresh');
+                                    $('#tb_page').bootstrapTable('refresh');
                                 else
                                     alert("删除失败");
                             },
@@ -120,79 +105,332 @@
                     var oTableInit = new Object();
                     //初始化Table
                     oTableInit.Init = function () {
-                        $('#tb_sites').bootstrapTable($.extend(global.bootstrapTableOptions, {
+                        $('#tb_page').bootstrapTable($.extend(global.bootstrapTableOptions, {
                                     url: global.contextPath + '/queryPageInfos',
                                     columns: [{
                                         checkbox: true
                                     }, {
                                         field: 'pageUrl',
-                                        title: '页面Url'
+                                        title: '页面Url',
+                                        editable: {
+                                            type: 'text',
+                                            validate: function (value) {
+                                                if ($.trim(value) == '') {
+                                                    return '页面Url不能为空';
+                                                }
+                                            }
+                                        }
                                     }, {
                                         field: 'urlRgx',
                                         title: 'Url匹配正则表达式',
                                         editable: {
-                                            type: 'text'
+                                            type: 'text',
+                                            validate: function (value) {
+                                                if ($.trim(value) == '') {
+                                                    return '表达式值不能为空';
+                                                }
+                                            }
                                         }
                                     }, {
                                         field: 'method',
                                         title: '请求方式',
                                         editable: {
-                                            type: 'text'
+                                            type: 'select',
+                                            source: [
+                                                {value: 'GET', text: 'GET'},
+                                                {value: 'POST', text: 'POST'}
+                                            ],
+                                            validate: function (value) {
+                                                if ($.trim(value) == '') {
+                                                    return '测量值不能为空';
+                                                }
+                                            }
                                         }
                                     }, {
                                         field: 'paramsJson',
                                         title: '请求参数',
                                         editable: {
-                                            type: 'text'
+                                            type: 'textarea'
                                         }
                                     },
                                         {
                                             field: 'action',
                                             title: '操作',
-                                            formatter: oTableInit.actionFormatter,
-                                            events: oTableInit.actionEvents
+                                            formatter: function (value, row, index) {
+                                                return [
+                                                    '<a  href="javascript:void(0)" class="addRegion btn btn-sm green" title="添加解析区域">',
+                                                    '<i class="fa fa-plus">添加解析区域</i>',
+                                                    '</a>'
+                                                ].join('');
+                                            },
+                                            events: {
+                                                'click .addRegion': function (e, value, row, index) {
+
+                                                    $("#modalLabel").html("添加页面解析区域");
+                                                    $('#divModal iframe').attr("src", "addPageRegion?pageId=" + row.id + "&random=" + Math.random());
+                                                    $('#divModal').modal({
+                                                        keyboard: false
+                                                    });
+                                                }
+                                            }
                                         }
                                     ],
                                     //注册加载子表的事件。注意下这里的三个参数！
                                     onExpandRow: function (index, row, $detail) {
-                                        var cookieList = row.cookieList;
-                                        if (!cookieList || cookieList.length == 0) return;
+                                        var regionData = row.pageParseRegionList;
+                                        if (!regionData || regionData.length == 0) return false;
 
-                                        var tdDom = '<table class="table table-bordered table-condensed">' +
-                                                '<thead>' +
-                                                '<tr>' +
-                                                '<th>序号</th>' +
-                                                '<th>所属域名</th>' +
-                                                '<th>cookie</th>' +
-                                                '<th>创建时间</th>' +
-                                                '</tr>' +
-                                                '</thead>' +
-                                                '<tbody>';
-                                        $.each(cookieList, function (index, item) {
-                                            tdDom += '<tr><td>' + index + '</td><td>' + item.domain +
-                                                    '</td><td>' + item.cookie + '</td><td>' + item.createdDate + '</td></tr>';
+                                        var cur_table = $detail.html('<table id="region_' + row.id + '"></table>').find('table');
+                                        $(cur_table).bootstrapTable({
+                                            clickToSelect: false,
+                                            detailView: true,//父子表
+                                            data: regionData,
+                                            uniqueId: "id",
+                                            pagination: false,
+                                            striped: true,
+                                            search: false,
+                                            columns: [{
+                                                checkbox: false
+                                            }, {
+                                                field: 'name',
+                                                title: '区域名称',
+                                                editable: {
+                                                    type: 'text',
+                                                    validate: function (value) {
+                                                        if ($.trim(value) == '') {
+                                                            return '区域名称不能为空';
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                                {
+                                                    field: 'selectExpression',
+                                                    title: '区域选择表达式',
+                                                    editable: {
+                                                        type: 'text',
+                                                        validate: function (value) {
+                                                            if ($.trim(value) == '') {
+                                                                return '区域选择表达式不能为空';
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    field: 'dataType',
+                                                    title: '数据类型',
+                                                    editable: {
+                                                        type: 'select',
+                                                        source: [
+                                                            {value: 'MAP', text: '属性数据'},
+                                                            {value: 'IMAGE', text: '图片下载'},
+                                                            {value: 'DOCUMENT', text: '文档下载'}
+                                                        ],
+                                                        validate: function (value) {
+                                                            if ($.trim(value) == '') {
+                                                                return '数据类型不能为空';
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    field: 'action',
+                                                    title: '操作',
+                                                    formatter: function (value, row, index) {
+                                                        return [
+                                                            '<a  href="javascript:void(0)" class="addFieldRule btn btn-sm yellow" title="添加字段规则">',
+                                                            '<i class="fa fa-plus">添加字段规则</i>',
+                                                            '</a>',
+                                                            '<a  href="javascript:void(0)" class="addUrlRule btn btn-sm blue" title="添加Url规则">',
+                                                            '<i class="fa fa-plus">添加Url规则</i>',
+                                                            '</a>',
+                                                            '<a  href="javascript:void(0)" class="deleteRegion btn btn-sm red" title="删除此区域">',
+                                                            '<i class="fa fa-times">删除区域</i>',
+                                                            '</a>'
+                                                        ].join('');
+                                                    },
+                                                    events: {
+                                                        'click .addFieldRule': function (e, value, row, index) {
+
+                                                            $("#modalLabel").html("添加区域解析字段规则");
+                                                            $('#divModal iframe').attr("src", "addFieldRule?regionId=" + row.id + "&random=" + Math.random());
+                                                            $('#divModal').modal({
+                                                                keyboard: false
+                                                            });
+                                                        },
+                                                        'click .addUrlRule': function (e, value, row, index) {
+
+                                                            $("#modalLabel").html("添加区域解析Url规则");
+                                                            $('#divModal iframe').attr("src", "addUrlRule?regionId=" + row.id + "&random=" + Math.random());
+                                                            $('#divModal').modal({
+                                                                keyboard: false
+                                                            });
+                                                        },
+                                                        'click .deleteRegion': function (e, value, row, index) {
+                                                            delItem(function () {
+                                                                var selectedIds = [];
+                                                                selectedIds.push(row.id);
+                                                                $.ajax({
+                                                                    type: "Post",
+                                                                    cache: false,
+                                                                    contentType: "application/json",
+                                                                    url: global.contextPath + "/deletePageRegionByIds",
+                                                                    data: JSON.stringify(selectedIds),
+                                                                    dataType: 'json',
+                                                                    success: function (result) {     //回调函数，result，返回值
+                                                                        if (result == true)
+                                                                            $('#tb_page').bootstrapTable('refresh');
+                                                                        else
+                                                                            alert("删除失败");
+                                                                    },
+                                                                    error: function (msg) {
+                                                                        alert(JSON.stringify(msg));
+                                                                    }
+                                                                });
+                                                            });
+
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            onEditableSave: function (field, row, oldValue, $el) {
+
+                                                $.ajax({
+                                                    type: "post",
+                                                    contentType: "application/json",
+                                                    dataType: "json",
+                                                    url: global.contextPath + "/savePageRegion",
+                                                    data: JSON.stringify(row),
+                                                    success: function (data, status) {
+                                                        if (status == "success") {
+                                                        }
+                                                    },
+                                                    error: function () {
+                                                        alert("保存失败！");
+                                                    }
+                                                });
+                                            },
+                                            //无线循环取子表，直到子表里面没有记录
+                                            onExpandRow: function (index, row, $Subdetail) {
+
+                                                var fieldRules = row.fieldParseRules;
+                                                var urlRules = row.urlParseRules;
+                                                var ruleData = fieldRules.concat(urlRules);
+                                                if (!ruleData || ruleData.length == 0) return false;
+
+                                                var rule_table = $Subdetail.html('<table class="ruleTable"></table>').find('table');
+                                                $(rule_table).bootstrapTable({
+                                                    clickToSelect: false,
+                                                    detailView: false,//父子表
+                                                    data: ruleData,
+                                                    uniqueId: "id",
+                                                    pagination: false,
+                                                    striped: true,
+                                                    search: false,
+                                                    columns: [{
+                                                        checkbox: false
+                                                    }, {
+                                                        field: 'rule',
+                                                        title: '规则内容',
+                                                        editable: {
+                                                            type: 'text',
+                                                            validate: function (value) {
+                                                                if ($.trim(value) == '') {
+                                                                    return '规则内容不能为空';
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                        {
+                                                            field: 'fieldName',
+                                                            title: '字段名称'
+                                                        },
+                                                        {
+                                                            field: 'action',
+                                                            title: '操作',
+                                                            formatter: function (value, row, index) {
+                                                                return [
+                                                                    '<a  href="javascript:void(0)" class="testRule btn btn-sm green" title="测试规则">',
+                                                                    '<i class="fa fa-plus">测试规则</i>',
+                                                                    '</a>',
+                                                                    '<a  href="javascript:void(0)" class="deleteRule btn btn-sm green" title="删除规则">',
+                                                                    '<i class="fa fa-plus">删除规则</i>',
+                                                                    '</a>'
+                                                                ].join('');
+                                                            },
+                                                            events: {
+                                                                'click .testRule': function (e, value, row, index) {
+
+                                                                    var data = row;
+                                                                    if (row.fieldName != null) data.ruleType = "fieldRule";
+                                                                    else data.ruleType = "urlRule";
+                                                                    $.ajax({
+                                                                        type: "post",
+                                                                        cache: false,
+                                                                        contentType: "application/json",
+                                                                        url: global.contextPath + "/testPageWithRule",
+                                                                        data: JSON.stringify(data),
+                                                                        dataType: 'json',
+                                                                        success: function (result) {     //回调函数，result，返回值
+                                                                            alert(JSON.stringify(result, null, "\t"));
+                                                                        },
+                                                                        error: function (msg) {
+                                                                            alert("测试出现异常！");
+                                                                            console.log(msg);
+                                                                        }
+                                                                    });
+                                                                },
+                                                                'click .deleteRule': function (e, value, row, index) {
+                                                                    delItem(function () {
+                                                                        var selectedIds = [];
+                                                                        selectedIds.push(row.id);
+                                                                        var targetUrl = global.contextPath;
+                                                                        if (row.fieldName != null)
+                                                                            targetUrl += "/deleteFieldRuleByIds";
+                                                                        else   targetUrl += "/deleteUrlRuleByIds";
+                                                                        $.ajax({
+                                                                            type: "Post",
+                                                                            cache: false,
+                                                                            contentType: "application/json",
+                                                                            url: targetUrl,
+                                                                            data: JSON.stringify(selectedIds),
+                                                                            dataType: 'json',
+                                                                            success: function (result) {     //回调函数，result，返回值
+                                                                                if (result == true)
+                                                                                    $('#tb_page').bootstrapTable('refresh');
+                                                                                else
+                                                                                    alert("删除失败");
+                                                                            },
+                                                                            error: function (msg) {
+                                                                                alert(JSON.stringify(msg));
+                                                                            }
+                                                                        });
+                                                                    });
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                });
+                                            }
                                         });
-                                        tdDom += '</tbody></table>';
-                                        $detail.append(tdDom).fadeIn(500);
+                                    },
+                                    onEditableSave: function (field, row, oldValue, $el) {
+                                        $.ajax({
+                                            type: "post",
+                                            contentType: "application/json",
+                                            dataType: "json",
+                                            url: global.contextPath + "/savePageInfo",
+                                            data: JSON.stringify(row),
+                                            success: function (data, status) {
+                                                if (status == "success") {
+                                                }
+                                            },
+                                            error: function () {
+                                                alert("保存失败！");
+                                            }
+                                        });
                                     }
                                 }
                         ));
-                    };
-                    oTableInit.actionFormatter = function (value, row, index) {
-                        return [
-                            '<a  href="javascript:void(0)" class="addCookie btn btn-sm green" title="添加cookie">',
-                            '<i class="fa fa-plus">添加cookie</i>',
-                            '</a>'
-                        ].join('');
-                    };
-                    oTableInit.actionEvents = {
-                        'click .addCookie': function (e, value, row, index) {
-                            $("#cookieForm #siteId").val(row.id);
-                            $("#cookieForm #domain").val(row.domain);
-                            $('#cookieAddModal').modal({
-                                keyboard: false
-                            });
-                        }
                     };
                     return oTableInit;
                 };

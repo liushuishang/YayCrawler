@@ -14,7 +14,8 @@ import java.util.Map;
  * Created by ucs_yuananyun on 2016/5/10.
  */
 @Entity
-@Table(name = "conf_page_info", uniqueConstraints = {@UniqueConstraint(columnNames = {"pageUrl"})})
+@Table(name = "conf_page_info",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"urlRgx"})})
 public class PageInfo {
     @Id
     @GeneratedValue(generator = "uuid")
@@ -26,7 +27,7 @@ public class PageInfo {
     private String pageUrl;
 
     @NotNull
-    @Column(name = "urlRgx",columnDefinition = "varchar(100)")
+    @Column(name = "urlRgx", columnDefinition = "varchar(100)")
     private String urlRgx;
 
     @NotNull
@@ -36,6 +37,10 @@ public class PageInfo {
     @Column(name = "paramsJson", columnDefinition = "varchar(500)")
     private String paramsJson;
 
+    @NotNull
+    @Column(name = "needJsAssist", columnDefinition = "tinyint default 0 ")
+    private boolean needJsAssist;
+
 
     @Column(name = "createdDate", columnDefinition = "timestamp default now()")
     private Date createdDate;
@@ -43,7 +48,7 @@ public class PageInfo {
     @Transient
     private Map<String, Object> paramsMap;
 
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "pageId", insertable = false, updatable = false)
     private List<PageParseRegion> pageParseRegionList;
 
@@ -54,7 +59,6 @@ public class PageInfo {
     public void setId(String id) {
         this.id = id;
     }
-
 
 
     public String getMethod() {
@@ -71,7 +75,10 @@ public class PageInfo {
 
     public void setParamsJson(String paramsJson) {
         this.paramsJson = paramsJson;
-//        paramsMap = JSON.parseObject(paramsJson, Map.class);
+        try {
+            paramsMap = JSON.parseObject(paramsJson, Map.class);
+        } catch (Exception ex) {
+        }
     }
 
     public Map<String, Object> getParamsMap() {

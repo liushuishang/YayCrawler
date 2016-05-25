@@ -6,46 +6,62 @@
 <body>
 <div class="container">
     <div class="row">
-        <form class="form" action="savePageInfo" method="post">
+        <form class="form" action="saveUrlRule" method="post">
             <div class="form-body">
                 <div class="form-group">
-                    <label class="control-label">页面URL</label>
-                    <input type="text" class="form-control" id="pageUrl" name="pageUrl"
-                           value="http://floor.0731fdc.com/jggs.php"
-                           placeholder="输入网页URL"/>
-                    <!--<button type="button" class="btn primary query">规则查询</button>-->
+                    <input type="hidden" th:value="${regionInfo.id}" name="regionId"/>
+                    <input type="hidden" value="urlRule" name="ruleType"/>
+                    <label class="control-label">区域名称</label>
+                    <input type="text" class="form-control" th:value="${regionInfo.name}" readonly="readonly"/>
                 </div>
                 <div class="form-group">
-                    <label class="control-label">Url正则表达式</label>
-                    <input type="text" class="form-control" id="urlRgx" name="urlRgx"/>
-                </div>
+                    <label class="control-label">Url解析表达式</label>
+                    <input type="text" class="form-control" id="urlRule" name="rule"
+                           value="links().regex(.*dxx.php?.*).all()"/></div>
                 <div class="form-group">
                     <label class="control-label">请求方式</label>
-                    <select id="requestMethod" name="method" class="bootstrap-select bs-select">
+                    <select name="method" class="bootstrap-select bs-select">
                         <option value="GET" selected="selected">get方式</option>
                         <option value="POST">post方式</option>
                         <option value="PUT">put方式</option>
                         <option value="DELETE">delete方式</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label class="control-label">请求参数（JSON）</label>
-                                <textarea id="urlParamsJson" name="urlParamsJson" class="form-control " rows="3" value="{
-'name':'yuananyn'
-                                }"></textarea>
-                </div>
             </div>
             <div class="form-actions">
-                <!--<button type="button" class="btn green test">测试</button>-->
+                <button id="btnTest" type="button" class="btn green test">测试</button>
                 <button id="btnSubmit" type="button" class="btn primary save">保存</button>
             </div>
         </form>
+        <textarea class="testResult form-control " rows="10"></textarea>
     </div>
 
 </div>
 <script th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
+        $("#btnTest").click(function () {
+            var form = $(this).closest("form");
+            var data = {};
+            form.serializeArray().map(function (x) {
+                data[x.name] = x.value;
+            });
+            $.ajax({
+                type: "post",
+                cache: false,
+                contentType: "application/json",
+                url: global.contextPath + "/testPageWithRule",
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function (result) {     //回调函数，result，返回值
+                    $(".testResult").html(JSON.stringify(result, null, "\t"));
+                },
+                error: function (msg) {
+                    alert("测试出现异常！");
+                    console.log(msg);
+                }
+            });
+        });
         $("#btnSubmit").click(function () {
             var form = $(this).closest("form");
             var data = {};
@@ -68,7 +84,6 @@
                     console.log(msg);
                 }
             });
-
         });
     });
 
