@@ -38,8 +38,8 @@ public class PageInfo {
     private String paramsJson;
 
     @NotNull
-    @Column(name = "needJsAssist", columnDefinition = "tinyint default 0 ")
-    private boolean needJsAssist;
+    @Column(name = "isJsRendering", columnDefinition = "char default '0' ")
+    private String isJsRendering;
 
 
     @Column(name = "createdDate", columnDefinition = "timestamp default now()")
@@ -121,5 +121,13 @@ public class PageInfo {
 
     public void setUrlRgx(String urlRgx) {
         this.urlRgx = urlRgx;
+    }
+
+    public String getIsJsRendering() {
+        return isJsRendering;
+    }
+
+    public void setIsJsRendering(String isJsRendering) {
+        this.isJsRendering = isJsRendering;
     }
 }

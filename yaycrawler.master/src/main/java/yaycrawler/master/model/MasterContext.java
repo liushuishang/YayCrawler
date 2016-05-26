@@ -22,8 +22,10 @@ public class MasterContext {
 
     public static void receiveWorkerHeartbeat(WorkerHeartbeat heartbeat) {
         long currentTime = System.currentTimeMillis();
-        if (workerRegistrationMap.containsKey(heartbeat.getWorkerId())) {
-            heartbeat.setLastTime(currentTime);
+        WorkerRegistration registration = workerRegistrationMap.get(heartbeat.getWorkerId());
+        if (registration!=null) {
+            registration.setLastHeartbeatTime(currentTime);
+            registration.setWaitTaskCount(heartbeat.getWaitTaskCount());
             workerHeartbeatMap.put(heartbeat.getWorkerId(), heartbeat);
         }
     }

@@ -62,6 +62,7 @@ public class ConfigController {
     @ResponseBody
     public Object savePageInfo(@RequestBody PageInfo pageInfo) {
         Assert.notNull(pageInfo.getPageUrl());
+        Assert.notNull(pageInfo.getUrlRgx());
         return pageParseRuleService.savePageInfo(pageInfo);
     }
     @RequestMapping(value = "/deletePageInfoByIds",method = RequestMethod.POST)

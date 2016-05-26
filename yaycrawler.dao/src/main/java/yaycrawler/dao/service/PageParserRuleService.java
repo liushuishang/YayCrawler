@@ -19,8 +19,6 @@ import java.util.List;
 @Transactional
 public class PageParserRuleService {
 
-//    private static Logger logger = LoggerFactory.getLogger(PageParserRuleService.class);
-
     @Autowired
     private PageInfoRepository pageInfoRepository;
 
@@ -44,16 +42,7 @@ public class PageParserRuleService {
         return pageInfo.getPageParseRegionList();
     }
 
-//    public boolean deleteRuleByIds(String[] idArray) {
-//        for (int i = 0; i < idArray.length; i++) {
-//            String id = idArray[i];
-//            if (fieldParseRuleRepository.exists(id))
-//                fieldParseRuleRepository.delete(id);
-//            else
-//                urlParseRuleRepository.delete(id);
-//        }
-//        return true;
-//    }
+
 
     public Page<PageSite> querySites(int pageIndex, int pageSize) {
         return siteRepository.findAll(new PageRequest(pageIndex,pageSize));

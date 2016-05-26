@@ -11,13 +11,20 @@
                 <div class="form-group">
                     <label class="control-label">页面URL</label>
                     <input type="text" class="form-control" id="pageUrl" name="pageUrl"
-                           value="http://floor.0731fdc.com/jggs.php"
+                           value="http://floor.0731fdc.com/jggs.php" required="required"
                            placeholder="输入网页URL"/>
                     <!--<button type="button" class="btn primary query">规则查询</button>-->
                 </div>
                 <div class="form-group">
                     <label class="control-label">Url正则表达式</label>
-                    <input type="text" class="form-control" id="urlRgx" name="urlRgx"/>
+                    <input type="text" class="form-control" id="urlRgx" name="urlRgx" required="required"/>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">是否JS渲染</label>
+                    <select name="isJsRendering" class="select bootstrap-select bs-select">
+                        <option value="0" selected="selected">否</option>
+                        <option value="1">是</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label class="control-label">请求方式</label>
@@ -37,7 +44,7 @@
             </div>
             <div class="form-actions">
                 <!--<button type="button" class="btn green test">测试</button>-->
-                <button id="btnSubmit" type="button" class="btn primary save">保存</button>
+                <button id="btnSubmit" type="submit" class="btn blue save">保存</button>
             </div>
         </form>
     </div>
@@ -46,8 +53,8 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
-        $("#btnSubmit").click(function () {
-            var form = $(this).closest("form");
+        $(".form").submit(function () {
+            var form = $(this);
             var data = {};
             form.serializeArray().map(function (x) {
                 data[x.name] = x.value;
@@ -68,7 +75,7 @@
                     console.log(msg);
                 }
             });
-
+            return false;
         });
     });
 

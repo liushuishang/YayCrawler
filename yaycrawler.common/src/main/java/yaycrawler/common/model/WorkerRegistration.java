@@ -8,6 +8,11 @@ public class WorkerRegistration {
     private  String workerId;
     private String workerContextPath;
     private Long heartbeatInteval;
+    private int waitTaskCount;
+    /**
+     * 最后的心跳时间
+     */
+    private Long lastHeartbeatTime;
 
     public WorkerRegistration() {
     }
@@ -48,5 +53,21 @@ public class WorkerRegistration {
                 ", workerContextPath='" + workerContextPath + '\'' +
                 ", heartbeatInteval=" + heartbeatInteval +
                 '}';
+    }
+
+    public Long getLastHeartbeatTime() {
+        return lastHeartbeatTime;
+    }
+
+    public void setLastHeartbeatTime(Long lastHeartbeatTime) {
+        this.lastHeartbeatTime = lastHeartbeatTime;
+    }
+
+    public int getWaitTaskCount() {
+        return waitTaskCount;
+    }
+
+    public void setWaitTaskCount(int waitTaskCount) {
+        this.waitTaskCount = waitTaskCount;
     }
 }

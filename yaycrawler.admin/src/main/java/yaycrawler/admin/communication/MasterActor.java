@@ -1,6 +1,5 @@
 package yaycrawler.admin.communication;
 
-import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -30,10 +29,14 @@ public class MasterActor {
         return result != null && !result.hasError();
     }
 
-    public String retrievedWorkerRegistrations() {
+    /**
+     * 查询worker的注册信息
+     * @return
+     */
+    public Object retrievedWorkerRegistrations() {
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.ADMIN_POST_MASTER_RETRIVED_WORKERS);
         RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, null);
-        return JSON.toJSONString(result.getData());
+        return result.getData();
     }
 
     public Object retrievedItemQueueRegistrations() {

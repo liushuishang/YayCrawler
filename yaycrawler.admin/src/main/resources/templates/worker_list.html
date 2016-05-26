@@ -6,8 +6,8 @@
 <body>
 <div class="container">
     <div class="row">
-        <div class="col-md-8">
-            <textarea th:text="${workersInfo}" rows="20" cols="50" style="width:100%"/>
+        <div class="col-md-12">
+            <table id="tb_workers"></table>
         </div>
     </div>
 
@@ -15,7 +15,41 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
-
+        $('#tb_workers').bootstrapTable($.extend({}, {
+            url: global.contextPath + '/queryWorkers',         //请求后台的URL（*）
+            method: 'get',                      //请求方式（*）
+            uniqueId: "workerId",
+            undefinedText: "",
+            escape: true,
+            showRefresh: true,
+            columns: [{
+                field: 'workerContextPath',
+                title: '通信地址'
+            }, {
+                field: 'heartbeatInteval',
+                title: '心跳间隔'
+            },
+                {
+                    field: 'lastHeartbeatTime',
+                    title: '最后心跳时间',
+                    formatter: function (value, row, index) {
+                        var timestamp = value;
+                        var d = new Date(timestamp);    //根据时间戳生成的时间对象
+                        var date = (d.getFullYear()) + "-" +
+                                (d.getMonth() + 1) + "-" +
+                                (d.getDate()) + " " +
+                                (d.getHours()) + ":" +
+                                (d.getMinutes()) + ":" +
+                                (d.getSeconds());
+                        return date;
+                    }
+                },
+                {
+                    field: 'waitTaskCount',
+                    title: '剩余任务数'
+                }
+            ]
+        }));
     });
 
     /*]]>*/

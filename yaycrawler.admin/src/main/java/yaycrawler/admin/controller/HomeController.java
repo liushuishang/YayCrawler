@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import yaycrawler.admin.communication.MasterActor;
 
@@ -23,8 +24,13 @@ public class HomeController {
     @RequestMapping(value = {"/workerList"}, method = RequestMethod.GET)
     public ModelAndView workerList() {
         ModelAndView mv = new ModelAndView("worker_list");
-        mv.addObject("workersInfo", masterActor.retrievedWorkerRegistrations());
         return mv;
+    }
+    @RequestMapping(value = {"/queryWorkers"}, method = RequestMethod.GET)
+    @ResponseBody
+    public Object queryWorkers()
+    {
+        return masterActor.retrievedWorkerRegistrations();
     }
 
 }

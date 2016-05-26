@@ -6,7 +6,6 @@ package yaycrawler.common.model;
 public class WorkerHeartbeat {
     private String workerId;
     private int waitTaskCount;
-    private Long lastTime;
 
 
     public WorkerHeartbeat(String workerId) {
@@ -33,11 +32,4 @@ public class WorkerHeartbeat {
         this.waitTaskCount = waitTaskCount;
     }
 
-    public Long getLastTime() {
-        return lastTime;
-    }
-
-    public void setLastTime(Long lastTime) {
-        this.lastTime = lastTime;
-    }
 }

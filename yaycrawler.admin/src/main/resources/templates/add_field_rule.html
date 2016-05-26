@@ -11,8 +11,7 @@
                 <div class="form-group">
                     <input type="hidden" th:value="${regionInfo.id}" name="regionId"/>
                     <input type="hidden" value="fieldRule" name="ruleType"/>
-                    <label class="control-label">区域名称</label>
-                    <input type="text" class="form-control" th:value="${regionInfo.name}" readonly="readonly"/>
+                    <label class="control-label" th:text="${'区域名称:'+regionInfo.name}">  </label>
                 </div>
                 <div class="form-group ">
                     <label class="control-label">字段名称</label>
@@ -27,10 +26,10 @@
             </div>
             <div class="form-actions">
                 <button id="btnTest" type="button" class="btn green test">测试</button>
-                <button id="btnSubmit" type="button" class="btn primary save">保存</button>
+                <button id="btnSubmit" type="submit" class="btn primary save">保存</button>
             </div>
         </form>
-        <textarea class="testResult form-control " rows="10"></textarea>
+        <textarea class="testResult form-control " rows="7"></textarea>
     </div>
 
 </div>
@@ -47,7 +46,7 @@
                 type: "post",
                 cache: false,
                 contentType: "application/json",
-                url: global.contextPath+"/testPageWithRule",
+                url: global.contextPath + "/testPageWithRule",
                 data: JSON.stringify(data),
                 dataType: 'json',
                 success: function (result) {     //回调函数，result，返回值
@@ -60,8 +59,8 @@
             });
         });
 
-        $("#btnSubmit").click(function () {
-            var form = $(this).closest("form");
+        $(".form").submit(function () {
+            var form = $(this);
             var data = {};
             form.serializeArray().map(function (x) {
                 data[x.name] = x.value;
@@ -82,6 +81,7 @@
                     console.log(msg);
                 }
             });
+            return false;
         });
     });
 

@@ -136,6 +136,8 @@
             pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
             search: true,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
             strictSearch: true,
+            undefinedText:"",
+            escape:true,
             showColumns: true,                  //是否显示所有的列
             showRefresh: true,                  //是否显示刷新按钮
             minimumCountColumns: 2,             //最少允许的列数
@@ -144,7 +146,15 @@
             uniqueId: "id",                     //每一行的唯一标识，一般为主键列
             showToggle: true,                    //是否显示详细视图和列表视图的切换按钮
             cardView: false,                    //是否显示详细视图
-            detailView: true                 //是否显示父子表
+            detailView: true          //是否显示父子表
+
+
+
+
+
+
+
+
 //            columns: [{
 //                checkbox: true
 //            },

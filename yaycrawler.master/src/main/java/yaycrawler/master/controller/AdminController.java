@@ -12,7 +12,6 @@ import yaycrawler.master.model.MasterContext;
 import yaycrawler.master.service.CrawlerQueueService;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by ucs_yuananyun on 2016/5/12.
@@ -35,7 +34,7 @@ public class AdminController {
     @ResponseBody
     public Object retrievedWorkerRegistrations()
     {
-        return RestFulResult.success(MasterContext.workerRegistrationMap);
+        return RestFulResult.success(MasterContext.workerRegistrationMap.values());
     }
 
     @RequestMapping(value = "/retrievedSuccessQueueRegistrations",method = RequestMethod.POST)

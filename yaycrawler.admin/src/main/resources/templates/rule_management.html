@@ -42,15 +42,15 @@
                     <iframe src="" style="width:100%;height:460px;border: none">
                     </iframe>
                 </div>
-                <!--<div class="modal-footer">-->
-                <!--<button type="button" class="btn btn-default"-->
-                <!--data-dismiss="modal">-->
-                <!--关闭-->
-                <!--</button>-->
-                <!--<button id="btnSiteSubmit" type="button" class="btn btn-primary">-->
-                <!--保存-->
-                <!--</button>-->
-                <!--</div>-->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default"
+                            data-dismiss="modal">
+                        关闭
+                    </button>
+                    <!--<button id="btnSiteSubmit" type="button" class="btn btn-primary">-->
+                    <!--保存-->
+                    <!--</button>-->
+                </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
@@ -61,9 +61,9 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
-//                $('#divModal').on('hidden.bs.modal', function () {
-//                    $('#tb_page').bootstrapTable('refresh');
-//                });
+                $('#divModal').on('hidden.bs.modal', function () {
+                    $('#tb_page').bootstrapTable('refresh');
+                });
                 $("#btn_add").click(function () {
                     $("#modalLabel").html("添加待抽取Page");
                     $('#divModal iframe').attr("src", "addPageInfo");
@@ -131,28 +131,40 @@
                                                 }
                                             }
                                         }
-                                    }, {
-                                        field: 'method',
-                                        title: '请求方式',
-                                        editable: {
-                                            type: 'select',
-                                            source: [
-                                                {value: 'GET', text: 'GET'},
-                                                {value: 'POST', text: 'POST'}
-                                            ],
-                                            validate: function (value) {
-                                                if ($.trim(value) == '') {
-                                                    return '测量值不能为空';
+                                    },
+                                        {
+                                            field: 'isJsRendering',
+                                            title: '是否JS渲染',
+                                            editable: {
+                                                type: 'select',
+                                                source: [
+                                                    {value: "0", text: '否'},
+                                                    {value: "1", text: '是'}
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            field: 'method',
+                                            title: '请求方式',
+                                            editable: {
+                                                type: 'select',
+                                                source: [
+                                                    {value: 'GET', text: 'GET'},
+                                                    {value: 'POST', text: 'POST'}
+                                                ],
+                                                validate: function (value) {
+                                                    if ($.trim(value) == '') {
+                                                        return '测量值不能为空';
+                                                    }
                                                 }
                                             }
-                                        }
-                                    }, {
-                                        field: 'paramsJson',
-                                        title: '请求参数',
-                                        editable: {
-                                            type: 'textarea'
-                                        }
-                                    },
+                                        }, {
+                                            field: 'paramsJson',
+                                            title: '请求参数',
+                                            editable: {
+                                                type: 'textarea'
+                                            }
+                                        },
                                         {
                                             field: 'action',
                                             title: '操作',
@@ -183,6 +195,8 @@
                                         var cur_table = $detail.html('<table id="region_' + row.id + '"></table>').find('table');
                                         $(cur_table).bootstrapTable({
                                             clickToSelect: false,
+                                            undefinedText:"",
+                                            escape:true,
                                             detailView: true,//父子表
                                             data: regionData,
                                             uniqueId: "id",
@@ -311,7 +325,6 @@
                                             },
                                             //无线循环取子表，直到子表里面没有记录
                                             onExpandRow: function (index, row, $Subdetail) {
-
                                                 var fieldRules = row.fieldParseRules;
                                                 var urlRules = row.urlParseRules;
                                                 var ruleData = fieldRules.concat(urlRules);
@@ -320,6 +333,8 @@
                                                 var rule_table = $Subdetail.html('<table class="ruleTable"></table>').find('table');
                                                 $(rule_table).bootstrapTable({
                                                     clickToSelect: false,
+                                                    undefinedText:"",
+                                                    escape:true,
                                                     detailView: false,//父子表
                                                     data: ruleData,
                                                     uniqueId: "id",
@@ -349,17 +364,16 @@
                                                             title: '操作',
                                                             formatter: function (value, row, index) {
                                                                 return [
-                                                                    '<a  href="javascript:void(0)" class="testRule btn btn-sm green" title="测试规则">',
+                                                                    '<a  href="javascript:void(0)" class="testRule btn btn-sm purple" title="测试规则">',
                                                                     '<i class="fa fa-plus">测试规则</i>',
                                                                     '</a>',
-                                                                    '<a  href="javascript:void(0)" class="deleteRule btn btn-sm green" title="删除规则">',
+                                                                    '<a  href="javascript:void(0)" class="deleteRule btn btn-sm red" title="删除规则">',
                                                                     '<i class="fa fa-plus">删除规则</i>',
                                                                     '</a>'
                                                                 ].join('');
                                                             },
                                                             events: {
                                                                 'click .testRule': function (e, value, row, index) {
-
                                                                     var data = row;
                                                                     if (row.fieldName != null) data.ruleType = "fieldRule";
                                                                     else data.ruleType = "urlRule";
@@ -408,7 +422,26 @@
                                                                 }
                                                             }
                                                         }
-                                                    ]
+                                                    ],
+                                                    onEditableSave: function (field, row, oldValue, $el) {
+                                                        var targetUrl = global.contextPath;
+                                                        if (row.fieldName != null) targetUrl += "/saveFieldRule";
+                                                        else targetUrl += "/saveUrlRule";
+                                                        $.ajax({
+                                                            type: "post",
+                                                            contentType: "application/json",
+                                                            dataType: "json",
+                                                            url: targetUrl,
+                                                            data: JSON.stringify(row),
+                                                            success: function (data, status) {
+                                                                if (status == "success") {
+                                                                }
+                                                            },
+                                                            error: function () {
+                                                                alert("保存失败！");
+                                                            }
+                                                        });
+                                                    }
                                                 });
                                             }
                                         });

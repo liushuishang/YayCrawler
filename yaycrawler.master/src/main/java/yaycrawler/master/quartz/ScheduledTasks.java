@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import yaycrawler.common.model.WorkerHeartbeat;
 import yaycrawler.common.model.WorkerRegistration;
 import yaycrawler.master.dispatcher.CrawlerTaskDispatcher;
 import yaycrawler.master.model.MasterContext;
@@ -35,11 +34,10 @@ public class ScheduledTasks {
     public void refreshWorker() {
         //移除已经超时的Worker
         ConcurrentHashMap<String, WorkerRegistration> workerRegistrationMap = MasterContext.workerRegistrationMap;
-        ConcurrentHashMap<String, WorkerHeartbeat> workerHeartbeatMap = MasterContext.workerHeartbeatMap;
         long currentTime = System.currentTimeMillis();
 
         for (WorkerRegistration registration : workerRegistrationMap.values()) {
-            Long lastTime = workerHeartbeatMap.get(registration.getWorkerId()).getLastTime();
+            Long lastTime = registration.getLastHeartbeatTime();
             if (currentTime - lastTime >= 2 * registration.getHeartbeatInteval()) {
                 logger.info("{}心跳已经超时，Master移除该Worker！",registration.toString());
                 workerRegistrationMap.remove(registration.getWorkerId());

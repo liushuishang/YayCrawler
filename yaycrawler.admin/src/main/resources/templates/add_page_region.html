@@ -34,7 +34,7 @@
             </div>
             <div class="form-actions">
                 <!--<button type="button" class="btn green test">测试</button>-->
-                <button id="btnSubmit" type="button" class="btn primary save">保存</button>
+                <button id="btnSubmit" type="submit" class="btn primary save">保存</button>
             </div>
         </form>
     </div>
@@ -43,8 +43,8 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
-        $("#btnSubmit").click(function () {
-            var form = $(this).closest("form");
+        $(".form").submit(function () {
+            var form = $(this);
             var data = {};
             form.serializeArray().map(function (x) {
                 data[x.name] = x.value;
@@ -65,6 +65,7 @@
                     console.log(msg);
                 }
             });
+            return false;
         });
     });
 
