@@ -25,7 +25,10 @@ public class RequestHelper {
             StringBuilder urlBuilder = new StringBuilder(url);
             for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
                 try {
-                    urlBuilder.append(String.format("%s%s=%s",  urlBuilder.indexOf("?") > 0 ? "&" : "?", entry.getKey(), URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
+                    if(StringUtils.isEmpty(entry.getKey())) {
+                        urlBuilder.append(String.format("%s/%s/%s", "/", entry.getKey(), URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
+                    } else
+                        urlBuilder.append(String.format("%s%s=%s",  urlBuilder.indexOf("?") > 0 ? "&" : "?", entry.getKey(), URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }

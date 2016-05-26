@@ -48,7 +48,7 @@ public class PageInfo {
     @Transient
     private Map<String, Object> paramsMap;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "pageId", insertable = false, updatable = false)
     private List<PageParseRegion> pageParseRegionList;
 

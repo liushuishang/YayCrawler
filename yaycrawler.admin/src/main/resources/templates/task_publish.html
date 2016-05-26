@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.springframework.org/schema/jdbc">
 <head xmlns:th="http://www.thymeleaf.org" th:include="master::head">
     <title>发布任务</title>
 </head>
@@ -27,6 +27,11 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label">请求参数（JSON）</label>
+                            <div id="info">
+                                <div>分页:$pagination_分页参数：值有3个参数（JSON）（START(开始页码),END(结束页码),STEP(步数)）<br/>
+                                    EX:{'START':'1','END':'100','STEP':'1'}</div>
+                                <div>批量查询：$array_批量参数：值（数组）EX:['11','12','13','14','15']</div>
+                            </div>
                             <textarea id="urlParamsJson" name="urlParamsJson" class="form-control " rows="8"
                                       value=""></textarea>
                         </div>
