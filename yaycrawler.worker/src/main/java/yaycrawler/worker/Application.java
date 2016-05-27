@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.orm.jpa.EntityScan;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import yaycrawler.worker.listener.WorkerRegisterListener;
 
 @SpringBootApplication
 @ImportResource(locations = {"classpath*:spring/*.xml"})
@@ -13,7 +14,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+        SpringApplication springApplication =new SpringApplication(Application.class);
+        springApplication.addListeners(new WorkerRegisterListener());
+        springApplication.run(args);
 	}
 
 }

@@ -17,18 +17,19 @@ import java.util.Map;
 public class PageSiteService {
     @Autowired
     private PageSiteRepository siteRepository;
-    public Site getSite(String domain)
-    {
-        return getSite(domain,false);
+
+    public Site getSite(String domain) {
+        return getSite(domain, false);
     }
 
     /**
      * 获取Site
+     *
      * @param domain
      * @param needProxy 是否需要切换代理
      * @return
      */
-    public Site getSite(String domain,boolean needProxy) {
+    public Site getSite(String domain, boolean needProxy) {
         Site site = Site.me();
         PageSite pageSite = siteRepository.findByDomain(domain);
         if (pageSite != null) {
@@ -52,9 +53,13 @@ public class PageSiteService {
                     site.addCookie(domain, entry.getKey(), entry.getValue());
                 }
             }
+            //只设置一个有效Cookie即可
             if (pageSite.getCookieList() != null)
                 for (SiteCookie cookie : pageSite.getCookieList())
-                    site.addHeader("Cookie", cookie.getCookie());
+                    if ("1".equals(cookie.getAvailable())) {
+                        site.addHeader("Cookie", cookie.getCookie());
+                        break;
+                    }
         }
         return site;
     }
