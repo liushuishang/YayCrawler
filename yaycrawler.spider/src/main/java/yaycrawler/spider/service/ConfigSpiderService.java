@@ -43,7 +43,7 @@ public class ConfigSpiderService {
      * @return
      */
     public Map<String, Object> test(CrawlerRequest crawlerRequest, PageParseRegion parseRegion, Page page, Site site) {
-        Request request = RequestHelper.createRequest(crawlerRequest.getUrl(), crawlerRequest.getMethod(), crawlerRequest.getData());
+        final Request request = RequestHelper.createRequest(crawlerRequest.getUrl(), crawlerRequest.getMethod(), crawlerRequest.getData());
         if (pageProcessor == null||request==null) return null;
         if (page == null) {
             final Site finalSite = site;
