@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Request;
-import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.spider.crawler.YaySpider;
+import yaycrawler.spider.downloader.GenericCrawlerDownLoader;
 import yaycrawler.spider.pipeline.GenericPipeline;
 import yaycrawler.spider.processor.GenericPageProcessor;
 import yaycrawler.spider.scheduler.CrawlerQueueScheduler;
@@ -35,6 +35,9 @@ public class TaskScheduleService {
     private GenericPageProcessor pageProcessor;
     @Autowired
     private GenericPipeline pipeline;
+
+    @Autowired
+    private GenericCrawlerDownLoader genericCrawlerDownLoader;
 
     @Autowired
     private TaskFailureListener failureListener;
@@ -85,6 +88,7 @@ public class TaskScheduleService {
         spider.setScheduler(new CrawlerQueueScheduler());
         spider.thread(spiderThreadCount);
         spider.addPipeline(pipeline);
+        spider.setDownloader(genericCrawlerDownLoader);
         spider.getSpiderListeners().add(failureListener);
         spiderMap.put(domain, spider);
         return spider;

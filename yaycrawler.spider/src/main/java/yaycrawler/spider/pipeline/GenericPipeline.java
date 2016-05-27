@@ -1,6 +1,5 @@
 package yaycrawler.spider.pipeline;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -58,6 +57,7 @@ public class GenericPipeline implements Pipeline {
                 try {
                     IResultPersistentService persistentService = persistentServiceFactory.getPersistentServiceByDataType(groupedDataEntry.getKey());
                     if (persistentService != null) {
+                        logger.info("开始持久化{}到{}",groupedDataEntry.getKey(),persistentService.toString());
                         Map dataMap = groupedDataEntry.getValue();
                         persistentService.saveCrawlerResult(pageUrl, dataMap);
                     }

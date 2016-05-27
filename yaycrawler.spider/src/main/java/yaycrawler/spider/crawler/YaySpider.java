@@ -5,7 +5,6 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.SpiderListener;
 import us.codecraft.webmagic.processor.PageProcessor;
-import yaycrawler.spider.downloader.CrawlerHttpClientDownloader;
 import yaycrawler.spider.service.PageSiteService;
 
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ public class YaySpider extends Spider {
         this.site = pageSiteService.getSite(domain);
         if(site==null) site = Site.me();
         this.setSpiderListeners(new ArrayList<SpiderListener>());
-        this.setDownloader(new CrawlerHttpClientDownloader());
         //不需要把子连接加入到本地队列，因为我们的队列由Master统一管理
         spawnUrl=false;
         this.domain = domain;

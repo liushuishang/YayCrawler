@@ -6,11 +6,10 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Task;
-import us.codecraft.webmagic.downloader.Downloader;
 import us.codecraft.webmagic.utils.UrlUtils;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.dao.domain.PageParseRegion;
-import yaycrawler.spider.downloader.CrawlerHttpClientDownloader;
+import yaycrawler.spider.downloader.GenericCrawlerDownLoader;
 import yaycrawler.spider.processor.GenericPageProcessor;
 import yaycrawler.spider.utils.RequestHelper;
 
@@ -22,14 +21,14 @@ import java.util.*;
 @Service
 public class ConfigSpiderService {
 
-    private Downloader downloader;
+    @Autowired
+    private GenericCrawlerDownLoader downloader;
     private GenericPageProcessor pageProcessor;
 
     @Autowired
     private PageSiteService pageSiteService;
 
     public ConfigSpiderService() {
-        downloader = new CrawlerHttpClientDownloader();
         downloader.setThread(1);
         pageProcessor = new GenericPageProcessor();
     }
