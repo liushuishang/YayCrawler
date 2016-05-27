@@ -20,6 +20,7 @@ import yaycrawler.dao.domain.UrlParseRule;
 import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.listener.IPageCompletedListener;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
+import yaycrawler.spider.service.PageSiteService;
 
 import java.util.*;
 
@@ -34,6 +35,10 @@ public class GenericPageProcessor implements PageProcessor {
 
     @Autowired
     private PageParserRuleService pageParseRuleService;
+    @Autowired
+    private PageSiteService pageSiteService;
+
+
     private static String DEFAULT_PAGE_SELECTOR = "page";
 
     public GenericPageProcessor() {
@@ -58,6 +63,13 @@ public class GenericPageProcessor implements PageProcessor {
         } catch (Exception ex) {
             if (completedListener != null)
                 completedListener.onError(page.getRequest());
+
+            //下载成功解析失败，那么该cookie无效
+            Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
+            if (cookieIds != null && cookieIds.size() > 0) {
+                //移除失效的cookie
+                pageSiteService.deleteCookieByIds(cookieIds);
+            }
             logger.error(ex.getMessage(), ex);
         }
     }

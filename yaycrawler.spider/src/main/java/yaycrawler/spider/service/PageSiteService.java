@@ -7,8 +7,10 @@ import us.codecraft.webmagic.Site;
 import yaycrawler.dao.domain.PageSite;
 import yaycrawler.dao.domain.SiteCookie;
 import yaycrawler.dao.repositories.PageSiteRepository;
+import yaycrawler.dao.repositories.SiteCookieRepository;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by yuananyun on 2016/5/2.
@@ -17,6 +19,8 @@ import java.util.Map;
 public class PageSiteService {
     @Autowired
     private PageSiteRepository siteRepository;
+    @Autowired
+    private SiteCookieRepository cookieRepository;
 
     public Site getSite(String domain) {
         return getSite(domain, false);
@@ -58,9 +62,17 @@ public class PageSiteService {
                 for (SiteCookie cookie : pageSite.getCookieList())
                     if ("1".equals(cookie.getAvailable())) {
                         site.addHeader("Cookie", cookie.getCookie());
+                        //记录当前使用的cookie信息以便后续进行cookie刷新
+                        site.addCookie(cookie.getId(), cookie.getCookie());
                         break;
                     }
         }
         return site;
+    }
+
+    public void deleteCookieByIds(Set<String> cookieIds) {
+        for (String cookieId : cookieIds) {
+            cookieRepository.delete(cookieId);
+        }
     }
 }

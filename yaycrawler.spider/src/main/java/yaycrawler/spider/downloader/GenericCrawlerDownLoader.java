@@ -30,9 +30,9 @@ public class GenericCrawlerDownLoader extends AbstractDownloader {
 
     @Override
     public Page download(Request request, Task task) {
-        /**
-         * 查数据库知道用什么下载器
-         */
+        //记录当前请求使用的Cookie
+        request.putExtra("cookieIds", task.getSite().getCookies().keySet());
+
         PageInfo pageInfo = pageInfoRepository.findOneByUrlRgx(request.getUrl());
         if ("1".equals(pageInfo.getIsJsRendering()))
             return mockDonwnloader.download(request, task);

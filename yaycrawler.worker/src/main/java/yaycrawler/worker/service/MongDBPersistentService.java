@@ -23,6 +23,7 @@ public class MongDBPersistentService implements IResultPersistentService {
         String _id = DigestUtils.shaHex(pageUrl);
         data.put("pageUrl", pageUrl);
         data.put("_id", _id);
+        data.put("timestamp", System.currentTimeMillis());
         String collectionName = UrlUtils.getDomain(pageUrl).replace(".", "_");
         mongoTemplate.save(data, collectionName);
         return true;
