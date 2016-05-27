@@ -107,6 +107,8 @@ public class SelectorExpressionResolver {
     }
 
     private static Object executeScalar(Request request, Object localObject, String lowerMethodName, String[] params) {
+
+
         if ("prefix".equals(lowerMethodName)) {
             //附加一个前缀
             String prefixValue = params[0];
@@ -133,6 +135,10 @@ public class SelectorExpressionResolver {
             if (params.length == 1)
                 return selectable.$(String.valueOf(params[0]));
             return selectable.$(String.valueOf(params[0]), String.valueOf(params[1]));
+        }
+
+        if ("replace".equals(lowerMethodName)) {
+            return selectable.replace(String.valueOf(params[0]), String.valueOf(params[1]).trim());
         }
 
         if ("xpath".equals(lowerMethodName))

@@ -29,7 +29,6 @@ public class ConfigSpiderService {
     private PageSiteService pageSiteService;
 
     public ConfigSpiderService() {
-        downloader.setThread(1);
         pageProcessor = new GenericPageProcessor();
     }
 
@@ -70,7 +69,7 @@ public class ConfigSpiderService {
     }
 
     private Site getSite(String url) {
-        Site site = pageSiteService.getSite(url);
+        Site site = pageSiteService.getSite(UrlUtils.getDomain(url));
         if (site == null) {
             site = Site.me();
             String domain = UrlUtils.getDomain(url);

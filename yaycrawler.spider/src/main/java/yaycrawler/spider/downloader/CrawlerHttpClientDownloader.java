@@ -14,6 +14,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -54,17 +55,17 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
         if (site == null) {
             return httpClientGenerator.getClient(null);
         }
-        String domain = site.getDomain();
-        CloseableHttpClient httpClient = httpClients.get(domain);
-        if (httpClient == null) {
-            synchronized (this) {
-                httpClient = httpClients.get(domain);
-                if (httpClient == null) {
-                    httpClient = httpClientGenerator.getClient(site);
-                    httpClients.put(domain, httpClient);
-                }
-            }
-        }
+//        String domain = site.getDomain();
+        CloseableHttpClient httpClient = httpClientGenerator.getClient(site);
+//        if (httpClient == null) {
+//            synchronized (this) {
+//                httpClient = httpClients.get(domain);
+//                if (httpClient == null) {
+//                    httpClient = httpClientGenerator.getClient(site);
+////                    httpClients.put(domain, httpClient);
+//                }
+//            }
+//        }
         return httpClient;
     }
 
@@ -161,9 +162,12 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
             return RequestBuilder.get();
         } else if (method.equalsIgnoreCase(HttpConstant.Method.POST)) {
             RequestBuilder requestBuilder = RequestBuilder.post();
-            NameValuePair[] nameValuePair = (NameValuePair[]) request.getExtra("nameValuePair");
-            if (nameValuePair != null && nameValuePair.length > 0) {
-                requestBuilder.addParameters(nameValuePair);
+
+            Map<String,Object> paramsMap= (Map<String, Object>) request.getExtra("nameValuePair");
+            if(paramsMap!=null) {
+                for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
+                    requestBuilder.addParameters(new BasicNameValuePair(entry.getKey(), String.valueOf(entry.getValue())));
+                }
             }
             return requestBuilder;
         } else if (method.equalsIgnoreCase(HttpConstant.Method.HEAD)) {
