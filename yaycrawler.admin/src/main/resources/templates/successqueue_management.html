@@ -13,7 +13,33 @@
             <table id="tb_success"></table>
         </div>
     </div>
-
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="divModal" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 800px;height:auto;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title" id="modalLabel">
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <textarea id="ta_result" style="width: 100%;" rows="20"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default"
+                            data-dismiss="modal">
+                        关闭
+                    </button>
+                    <!--<button id="btnSiteSubmit" type="button" class="btn btn-primary">-->
+                    <!--保存-->
+                    <!--</button>-->
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 
 </div>
 <script th:inline="javascript">
@@ -26,42 +52,79 @@
             //初始化Table
             oTableInit.Init = function () {
                 $('#tb_success').bootstrapTable($.extend(global.bootstrapTableOptions, {
-                    url: global.contextPath + '/queryQueueByName?name=' + queue,         //请求后台的URL（*）
-                    method: 'get',                      //请求方式（*）
-                    sidePagination: "client",
-                    detailView: false,                   //是否显示父子表
-                    columns: [
-                        {
-                            field: 'url',
-                            title: '请求URL'
-                        },
-                        {
-                            field: 'method',
-                            title: '请求方法'
-                        },
-                        {
-                            field: 'param',
-                            title: '请求参数'
-                        }, {
-                            field: 'workerId',
-                            title: '处理的Worker编号'
-                        },
-                        {
-                            field: 'startTime',
-                            title: '任务完成时间',
-                            formatter: function (value, row, index) {
-                                var timestamp = value;
-                                var d = new Date(timestamp);    //根据时间戳生成的时间对象
-                                var date = (d.getFullYear()) + "-" +
-                                        (d.getMonth() + 1) + "-" +
-                                        (d.getDate()) + " " +
-                                        (d.getHours()) + ":" +
-                                        (d.getMinutes()) + ":" +
-                                        (d.getSeconds());
-                                return date;
-                            }
-                        }]
-                }));
+                            url: global.contextPath + '/queryQueueByName?name=' + queue,         //请求后台的URL（*）
+                            method: 'get',                      //请求方式（*）
+                            sidePagination: "client",
+                            detailView: false,                   //是否显示父子表
+                            columns: [
+                                {
+                                    field: 'url',
+                                    title: '请求URL'
+                                },
+                                {
+                                    field: 'method',
+                                    title: '请求方法'
+                                },
+                                {
+                                    field: 'param',
+                                    title: '请求参数'
+                                }, {
+                                    field: 'workerId',
+                                    title: '处理的Worker编号'
+                                },
+                                {
+                                    field: 'startTime',
+                                    title: '任务完成时间',
+                                    formatter: function (value, row, index) {
+                                        var timestamp = value;
+                                        var d = new Date(timestamp);    //根据时间戳生成的时间对象
+                                        var date = (d.getFullYear()) + "-" +
+                                                (d.getMonth() + 1) + "-" +
+                                                (d.getDate()) + " " +
+                                                (d.getHours()) + ":" +
+                                                (d.getMinutes()) + ":" +
+                                                (d.getSeconds());
+                                        return date;
+                                    }
+                                },
+                                {
+                                    field: 'action',
+                                    title: '操作',
+                                    formatter: function (value, row, index) {
+                                        return [
+                                            '<a  href="javascript:void(0)" class="viewResult btn btn-sm green" title="查看结果">',
+                                            '<i class="fa fa-plus">查看结果</i>',
+                                            '</a>'
+                                        ].join('');
+                                    },
+                                    events: {
+                                        'click .viewResult': function (e, value, row, index) {
+                                            $("#modalLabel").html("查看爬取结果");
+                                            var data = {pageUrl: row.url, taskId: row.hashCode};
+                                            $.ajax({
+                                                type: "Post",
+                                                cache: false,
+                                                contentType: "application/json",
+                                                url: global.contextPath + "/queryQueueByName?random="+Math.random(),
+                                                data: JSON.stringify(data),
+                                                dataType: 'json',
+                                                async:false,
+                                                success: function (result) {     //回调函数，result，返回值
+                                                    debugger
+                                                    $("#ta_result").html(JSON.stringify(result, null, "\t"));
+                                                },
+                                                error: function (msg) {
+                                                    alert(JSON.stringify(msg));
+                                                }
+                                            });
+                                            $('#divModal').modal({
+                                                keyboard: false
+                                            });
+                                        }
+                                    }
+                                }]
+                        }
+                ));
             };
             return oTableInit;
         };

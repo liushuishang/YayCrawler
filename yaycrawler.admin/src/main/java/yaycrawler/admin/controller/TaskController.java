@@ -15,9 +15,7 @@ import yaycrawler.admin.communication.MasterActor;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.utils.UrlUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

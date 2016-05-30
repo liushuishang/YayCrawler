@@ -11,10 +11,11 @@ import java.util.List;
 @Component
 public class PersistentServiceFactory {
 
-    @Autowired
+    @Autowired(required = false)
     private List<IResultPersistentService> persistentServiceList;
 
     public IResultPersistentService getPersistentServiceByDataType(String dataType) {
+        if(persistentServiceList==null) return null;
         for (IResultPersistentService resultPersistentService : persistentServiceList) {
             if (resultPersistentService.getSupportedDataType().equals(dataType))
                 return resultPersistentService;
