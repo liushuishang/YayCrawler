@@ -4,7 +4,7 @@ import com.sun.istack.internal.NotNull;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.sql.Date;
 
 /**
  * Created by ucs_yuananyun on 2016/5/10.
@@ -43,10 +43,10 @@ public class SiteCookie {
     private String  available;
 
     @Column(name = "createdDate", columnDefinition = "timestamp default now()")
-    private Timestamp createdDate;
+    private Date createdDate;
 
     @Column(name = "lastUpdatedDate", columnDefinition = "timestamp default now()")
-    private Timestamp lastUpdatedDate;
+    private Date lastUpdatedDate;
 
     public String getId() {
         return id;
@@ -90,19 +90,19 @@ public class SiteCookie {
     }
 
 
-    public Timestamp getCreatedDate() {
+    public Date getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(Timestamp createdDate) {
+    public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
 
-    public Timestamp getLastUpdatedDate() {
+    public Date getLastUpdatedDate() {
         return lastUpdatedDate;
     }
 
-    public void setLastUpdatedDate(Timestamp lastUpdatedDate) {
+    public void setLastUpdatedDate(Date lastUpdatedDate) {
         this.lastUpdatedDate = lastUpdatedDate;
     }
 }

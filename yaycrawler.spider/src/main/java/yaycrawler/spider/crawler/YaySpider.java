@@ -36,6 +36,7 @@ public class YaySpider extends Spider {
             //TODO 异常恢复
             this.site = pageSiteService.getSite(domain, true);
             request.putExtra("tryTimes", ++tryTimes);
+            request.getExtras().remove("cookieIds");
             this.addRequest(request);
         }else
             super.onError(request);

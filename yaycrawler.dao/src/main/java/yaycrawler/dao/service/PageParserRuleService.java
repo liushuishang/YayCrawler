@@ -30,6 +30,8 @@ public class PageParserRuleService {
 
     @Autowired
     private UrlParseRuleRepository urlParseRuleRepository;
+    @Autowired
+    private UrlRuleParamRepository ruleParamRepository;
 
     @Autowired
     private PageSiteRepository siteRepository;
@@ -43,9 +45,8 @@ public class PageParserRuleService {
     }
 
 
-
     public Page<PageSite> querySites(int pageIndex, int pageSize) {
-        return siteRepository.findAll(new PageRequest(pageIndex,pageSize));
+        return siteRepository.findAll(new PageRequest(pageIndex, pageSize));
     }
 
     public boolean deleteSiteByIds(List<String> deleteIds) {
@@ -57,9 +58,8 @@ public class PageParserRuleService {
     }
 
     public boolean addSite(PageSite pageSite) {
-        return siteRepository.save(pageSite)!=null;
+        return siteRepository.save(pageSite) != null;
     }
-
 
 
     public Page<PageInfo> queryPageInfos(int pageIndex, int pageSize) {
@@ -67,14 +67,16 @@ public class PageParserRuleService {
     }
 
     public boolean savePageInfo(PageInfo pageInfo) {
-        if(pageInfo==null) return false;
-        return pageInfoRepository.save(pageInfo)!=null;
+        if (pageInfo == null) return false;
+        return pageInfoRepository.save(pageInfo) != null;
     }
+
     public PageInfo getPageInfoById(String pageId) {
         return pageInfoRepository.findOne(pageId);
     }
+
     public boolean deletePageInfoByIds(List<String> deleteIds) {
-        if (deleteIds == null||deleteIds.size()==0) return true;
+        if (deleteIds == null || deleteIds.size() == 0) return true;
         for (String deleteId : deleteIds) {
             pageInfoRepository.delete(deleteId);
         }
@@ -83,7 +85,7 @@ public class PageParserRuleService {
 
 
     public boolean savePageRegion(PageParseRegion region) {
-        return regionRepository.save(region)!=null;
+        return regionRepository.save(region) != null;
     }
 
     public PageParseRegion getPageRegionById(String regionId) {
@@ -99,9 +101,10 @@ public class PageParserRuleService {
     }
 
     public boolean saveFieldParseRule(FieldParseRule fieldParseRule) {
-        if(StringUtils.isBlank(fieldParseRule.getRegionId())) return false;
+        if (StringUtils.isBlank(fieldParseRule.getRegionId())) return false;
         return fieldParseRuleRepository.save(fieldParseRule) != null;
     }
+
     public Object deleteFieldRuleByIds(List<String> deleteIds) {
         if (deleteIds == null || deleteIds.size() == 0) return true;
         for (String deleteId : deleteIds) {
@@ -111,9 +114,10 @@ public class PageParserRuleService {
     }
 
     public boolean saveUrlParseRule(UrlParseRule urlParseRule) {
-        if(StringUtils.isBlank(urlParseRule.getRegionId())) return false;
+        if (StringUtils.isBlank(urlParseRule.getRegionId())) return false;
         return urlParseRuleRepository.save(urlParseRule) != null;
     }
+
     public Object deleteUrlRuleByIds(List<String> deleteIds) {
         if (deleteIds == null || deleteIds.size() == 0) return true;
         for (String deleteId : deleteIds) {
@@ -123,4 +127,20 @@ public class PageParserRuleService {
     }
 
 
+    public UrlParseRule getUrlParseRuleById(String urlRuleId) {
+        return urlParseRuleRepository.findOne(urlRuleId);
+    }
+
+    public Boolean saveUrlRuleParam(UrlRuleParam urlRuleParam) {
+        if (urlRuleParam == null) return false;
+        return ruleParamRepository.save(urlRuleParam) != null;
+    }
+
+    public Object deleteUrlRuleParamByIds(List<String> deleteIds) {
+        if(deleteIds==null||deleteIds.size()==0) return true;
+        for (String deleteId : deleteIds) {
+            ruleParamRepository.delete(deleteId);
+        }
+        return true;
+    }
 }

@@ -107,6 +107,8 @@
                     oTableInit.Init = function () {
                         $('#tb_page').bootstrapTable($.extend(global.bootstrapTableOptions, {
                                     url: global.contextPath + '/queryPageInfos',
+                                    pageSize: 1,                       //每页的记录行数（*）
+                                    pageList: [2, 4, 8, 10],        //可供选择的每页的行数（*）
                                     columns: [{
                                         checkbox: true
                                     }, {
@@ -195,14 +197,15 @@
                                         var cur_table = $detail.html('<table id="region_' + row.id + '"></table>').find('table');
                                         $(cur_table).bootstrapTable({
                                             clickToSelect: false,
-                                            undefinedText:"",
-                                            escape:true,
+                                            undefinedText: "",
+                                            escape: true,
                                             detailView: true,//父子表
                                             data: regionData,
                                             uniqueId: "id",
                                             pagination: false,
                                             striped: true,
                                             search: false,
+//                                            onPostBody: function () {$("a.detail-icon").click();},
                                             columns: [{
                                                 checkbox: false
                                             }, {
@@ -264,7 +267,6 @@
                                                     },
                                                     events: {
                                                         'click .addFieldRule': function (e, value, row, index) {
-
                                                             $("#modalLabel").html("添加区域解析字段规则");
                                                             $('#divModal iframe').attr("src", "addFieldRule?regionId=" + row.id + "&random=" + Math.random());
                                                             $('#divModal').modal({
@@ -307,7 +309,6 @@
                                                 }
                                             ],
                                             onEditableSave: function (field, row, oldValue, $el) {
-
                                                 $.ajax({
                                                     type: "post",
                                                     contentType: "application/json",
@@ -333,14 +334,100 @@
                                                 var rule_table = $Subdetail.html('<table class="ruleTable"></table>').find('table');
                                                 $(rule_table).bootstrapTable({
                                                     clickToSelect: false,
-                                                    undefinedText:"",
-                                                    escape:true,
-                                                    detailView: false,//父子表
+                                                    undefinedText: "",
+                                                    escape: true,
+                                                    detailView: true,//父子表
                                                     data: ruleData,
                                                     uniqueId: "id",
                                                     pagination: false,
                                                     striped: true,
                                                     search: false,
+                                                    onExpandRow: function (index, row, $detail) {
+                                                        //urlParam表格
+                                                        var urlParamList = row.urlRuleParams;
+                                                        if (!urlParamList || urlParamList.length == 0) return false;
+                                                        var cur_table = $detail.html('<table ></table>').find('table');
+                                                        $(cur_table).bootstrapTable({
+                                                            clickToSelect: false,
+                                                            undefinedText: "",
+                                                            escape: true,
+                                                            detailView: false,//父子表
+                                                            data: urlParamList,
+                                                            uniqueId: "id",
+                                                            pagination: false,
+                                                            striped: true,
+                                                            search: false,
+//                                                            onPostBody: function () {$("a.detail-icon").click();},
+                                                            columns: [{
+                                                                field: 'paramName',
+                                                                title: '参数名',
+                                                            },
+                                                                {
+                                                                    field: 'expression',
+                                                                    title: '参数抽取表达式',
+                                                                },
+                                                                {
+                                                                    field: 'action',
+                                                                    title: '操作',
+                                                                    formatter: function (value, row, index) {
+                                                                        return [
+                                                                            '<a  href="javascript:void(0)" class="testRuleParam btn btn-sm purple" title="测试规则">',
+                                                                            '<i class="fa fa-plus">测试参数</i>',
+                                                                            '</a>',
+                                                                            '<a  href="javascript:void(0)" class="deleteRuleParam btn btn-sm red" title="删除规则">',
+                                                                            '<i class="fa fa-plus">删除参数</i>',
+                                                                            '</a>'
+                                                                        ].join('');
+                                                                    },
+                                                                    events: {
+                                                                        'click .testRuleParam': function (e, value, row, index) {
+                                                                            var data = row;
+                                                                            $.ajax({
+                                                                                type: "post",
+                                                                                cache: false,
+                                                                                contentType: "application/json",
+                                                                                url: global.contextPath + "/testUrlRuleParam",
+                                                                                data: JSON.stringify(data),
+                                                                                dataType: 'json',
+                                                                                success: function (result) {     //回调函数，result，返回值
+                                                                                    alert(JSON.stringify(result, null, "\t"));
+                                                                                },
+                                                                                error: function (msg) {
+                                                                                    alert("测试出现异常！");
+                                                                                    console.log(msg);
+                                                                                }
+                                                                            });
+                                                                        },
+                                                                        'click .deleteRuleParam': function (e, value, row, index) {
+                                                                            delItem(function () {
+                                                                                var selectedIds = [];
+                                                                                selectedIds.push(row.id);
+                                                                                var targetUrl = global.contextPath;
+                                                                                targetUrl += "/deleteUrlRuleParamByIds";
+                                                                                $.ajax({
+                                                                                    type: "Post",
+                                                                                    cache: false,
+                                                                                    contentType: "application/json",
+                                                                                    url: targetUrl,
+                                                                                    data: JSON.stringify(selectedIds),
+                                                                                    dataType: 'json',
+                                                                                    success: function (result) {     //回调函数，result，返回值
+                                                                                        if (result == true)
+                                                                                            alert("删除成功");
+                                                                                        else
+                                                                                            alert("删除失败");
+                                                                                    },
+                                                                                    error: function (msg) {
+                                                                                        alert(JSON.stringify(msg));
+                                                                                    }
+                                                                                });
+                                                                            });
+                                                                        }
+                                                                    }
+                                                                }
+                                                            ]
+                                                        });
+                                                    },
                                                     columns: [{
                                                         checkbox: false
                                                     }, {
@@ -364,6 +451,9 @@
                                                             title: '操作',
                                                             formatter: function (value, row, index) {
                                                                 return [
+                                                                    '<a  href="javascript:void(0)" class="addUrlParam btn btn-sm yellow" title="添加请求参数">',
+                                                                    '<i class="fa fa-plus">添加请求参数</i>',
+                                                                    '</a>',
                                                                     '<a  href="javascript:void(0)" class="testRule btn btn-sm purple" title="测试规则">',
                                                                     '<i class="fa fa-plus">测试规则</i>',
                                                                     '</a>',
@@ -373,6 +463,13 @@
                                                                 ].join('');
                                                             },
                                                             events: {
+                                                                'click .addUrlParam': function (e, value, row, index) {
+                                                                    $("#modalLabel").html("添加请求参数");
+                                                                    $('#divModal iframe').attr("src", "addUrlRuleParam?urlRuleId=" + row.id + "&random=" + Math.random());
+                                                                    $('#divModal').modal({
+                                                                        keyboard: false
+                                                                    });
+                                                                },
                                                                 'click .testRule': function (e, value, row, index) {
                                                                     var data = row;
                                                                     if (row.fieldName != null) data.ruleType = "fieldRule";
@@ -381,7 +478,7 @@
                                                                         type: "post",
                                                                         cache: false,
                                                                         contentType: "application/json",
-                                                                        url: global.contextPath + "/testPageWithRule",
+                                                                        url: global.contextPath + "/testPageWithRule?scope=all",
                                                                         data: JSON.stringify(data),
                                                                         dataType: 'json',
                                                                         success: function (result) {     //回调函数，result，返回值
@@ -441,7 +538,7 @@
                                                                 alert("保存失败！");
                                                             }
                                                         });
-                                                    }
+                                                    },
                                                 });
                                             }
                                         });
@@ -461,6 +558,10 @@
                                                 alert("保存失败！");
                                             }
                                         });
+                                    },
+                                    onPostBody: function () {
+                                        $("a.detail-icon").click();
+                                        $(".detail-view a.detail-icon").click();
                                     }
                                 }
                         ));

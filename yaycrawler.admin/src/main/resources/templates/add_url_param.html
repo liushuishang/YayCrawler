@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head xmlns:th="http://www.thymeleaf.org" th:include="master::head">
+    <title>添加PageInfo</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <form class="form" action="saveUrlRuleParam" method="post">
+            <div class="form-body">
+                <div class="form-group">
+                    <input type="hidden" th:value="${urlParseRule.id}" name="urlRuleId" style="display:none"/>
+                    <h4 class="form-control" th:text="${'url解析表达式:'+urlParseRule.rule}"></h4>
+                    <h4 class="form-control" th:text="${'url请求方式:'+urlParseRule.method}"></h4>
+                </div>
+                <div class="form-group">
+                    <label class="control-label">参数名</label>
+                    <input type="text"   class="form-control"  id="paramName" name="paramName"
+                           value="" required="required"/></div>
+                <div class="form-group">
+                    <label class="control-label">参数值抽取表达式</label>
+                    <input type="text" class="form-control" id="expression" name="expression"
+                           value="" required="required"/></div>
+            </div>
+            <div class="form-actions">
+                <button id="btnTest" type="button" class="btn green test">测试</button>
+                <button id="btnSubmit" type="submit" class="btn primary save">保存</button>
+            </div>
+        </form>
+        <textarea class="testResult form-control " rows="7"></textarea>
+    </div>
+
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(function () {
+        $("#btn_add_param").click(function () {
+            $('#paramAddModal').modal({
+                keyboard: false
+            });
+        });
+        $("#btnTest").click(function () {
+            var form = $(this).closest("form");
+            var data = {};
+            form.serializeArray().map(function (x) {
+                data[x.name] = x.value;
+            });
+            $.ajax({
+                type: "post",
+                cache: false,
+                contentType: "application/json",
+                url: global.contextPath + "/testUrlRuleParam",
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function (result) {     //回调函数，result，返回值
+                    $(".testResult").html(JSON.stringify(result, null, "\t"));
+                },
+                error: function (msg) {
+                    alert("测试出现异常！");
+                    console.log(msg);
+                }
+            });
+        });
+        $(".form").submit(function () {
+            var form = $(this);
+            var data = {};
+            form.serializeArray().map(function (x) {
+                data[x.name] = x.value;
+            });
+            $.ajax({
+                type: "post",
+                cache: false,
+                contentType: "application/json",
+                url: form.attr("action"),
+                data: JSON.stringify(data),
+                dataType: 'json',
+                success: function (data) {     //回调函数，result，返回值
+                    form.resetForm();
+                    alert(data == true ? "提交成功!" : "提交失败！");
+                },
+                error: function (msg) {
+                    alert("提交出现异常！");
+                    console.log(msg);
+                }
+            });
+            return false;
+        });
+    });
+
+    /*]]>*/
+</script>
+
+</body>
+</html>

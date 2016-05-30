@@ -13,10 +13,10 @@ import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Json;
 import us.codecraft.webmagic.selector.Selectable;
 import yaycrawler.common.model.CrawlerRequest;
-import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.FieldParseRule;
 import yaycrawler.dao.domain.PageParseRegion;
 import yaycrawler.dao.domain.UrlParseRule;
+import yaycrawler.dao.domain.UrlRuleParam;
 import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.listener.IPageCompletedListener;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
@@ -88,42 +88,92 @@ public class GenericPageProcessor implements PageProcessor {
 
         List<UrlParseRule> urlParseRuleList = pageParseRegion.getUrlParseRules();
         if (urlParseRuleList != null && urlParseRuleList.size() > 0) {
-            Set<String> childUrlSet = new HashSet<>();
-            for (UrlParseRule urlParseRule : urlParseRuleList) {
-                Object v = SelectorExpressionResolver.resolve(request,context, urlParseRule.getRule());
-                if (v instanceof Collection) {
-                    Collection<String> urlList = (Collection<String>) v;
-                    if (urlList != null && urlList.size() > 0)
-                        childUrlSet.addAll(urlList);
-                } else childUrlSet.add(String.valueOf(v));
-            }
-//            page.addTargetRequests(new ArrayList<>(childSet));
-            for (String childUrl : childUrlSet) {
-                childRequestList.add(new CrawlerRequest(childUrl, UrlUtils.getDomain(childUrl), "GET"));
-            }
+            childRequestList.addAll(parseUrlRule(context, request, urlParseRuleList));
         }
 
         List<FieldParseRule> fieldParseRuleList = pageParseRegion.getFieldParseRules();
         if (fieldParseRuleList != null && fieldParseRuleList.size() > 0) {
-            int i = 0;
-            HashedMap resultMap = new HashedMap();
-            List<Selectable> nodes = new LinkedList<>();
-            if (context instanceof Json)
-                nodes.add(context);
-            else nodes.addAll(context.nodes());
-
-            for (Selectable node : nodes) {
-                HashedMap childMap = new HashedMap();
-                for (FieldParseRule fieldParseRule : fieldParseRuleList) {
-                    childMap.put(fieldParseRule.getFieldName(), SelectorExpressionResolver.resolve(request,node, fieldParseRule.getRule()));
-                }
-                resultMap.put(String.valueOf(i++), childMap);
-            }
-            if (nodes.size() > 1)
-                return resultMap;
-            else return (Map<String, Object>) resultMap.get("0");
+            return parseFieldRule(context, request, fieldParseRuleList);
         }
         return null;
+    }
+
+    /**
+     * 解析一个字段抽取规则
+     *
+     * @param context
+     * @param request
+     * @param fieldParseRuleList
+     * @return
+     */
+    private Map<String, Object> parseFieldRule(Selectable context, Request request, List<FieldParseRule> fieldParseRuleList) {
+        int i = 0;
+        HashedMap resultMap = new HashedMap();
+        List<Selectable> nodes = getNodes(context);
+
+        for (Selectable node : nodes) {
+            HashedMap childMap = new HashedMap();
+            for (FieldParseRule fieldParseRule : fieldParseRuleList) {
+                childMap.put(fieldParseRule.getFieldName(), SelectorExpressionResolver.resolve(request, node, fieldParseRule.getRule()));
+            }
+            resultMap.put(String.valueOf(i++), childMap);
+        }
+        if (nodes.size() > 1)
+            return resultMap;
+        else return (Map<String, Object>) resultMap.get("0");
+    }
+
+
+    /**
+     * 解析一个Url抽取规则
+     *
+     * @param context
+     * @param request
+     * @param urlParseRuleList
+     * @return
+     */
+    private List<CrawlerRequest> parseUrlRule(Selectable context, Request request, List<UrlParseRule> urlParseRuleList) {
+        List<CrawlerRequest> childRequestList = new LinkedList<>();
+        List<Selectable> nodes = getNodes(context);
+
+        for (Selectable node : nodes) {
+            if (node == null) continue;
+
+            for (UrlParseRule urlParseRule : urlParseRuleList) {
+                //解析url
+                Object u = SelectorExpressionResolver.resolve(request, context, urlParseRule.getRule());
+                //解析Url的参数
+                Map<String, Object> urlParamMap = new HashMap<>();
+                if (urlParseRule.getUrlRuleParams() != null)
+                    for (UrlRuleParam ruleParam : urlParseRule.getUrlRuleParams()) {
+                        urlParamMap.put(ruleParam.getParamName(), SelectorExpressionResolver.resolve(request, context, ruleParam.getExpression()));
+                    }
+                //组装成完整的URL
+                if (u instanceof Collection) {
+                    Collection<String> urlList = (Collection<String>) u;
+                    if (urlList != null && urlList.size() > 0)
+                        for (String url : urlList)
+                            childRequestList.add(new CrawlerRequest(url, urlParseRule.getMethod(), urlParamMap));
+                } else
+                    childRequestList.add(new CrawlerRequest((String) u, urlParseRule.getMethod(), urlParamMap));
+            }
+        }
+        return childRequestList;
+    }
+
+
+    private List<Selectable> getNodes(Selectable context) {
+        List<Selectable> nodes = new LinkedList<>();
+
+        if (context instanceof Json) {
+//            List<Selectable> childs = ((Json) context).nodes();
+//            for (Selectable child : childs) {
+//                if(child instanceof PlainText)
+//                nodes.add(new Json(((PlainText)child).getSourceTexts());
+//            }
+            nodes.add(context);
+        } else nodes.addAll(context.nodes());
+        return nodes;
     }
 
 
@@ -135,4 +185,6 @@ public class GenericPageProcessor implements PageProcessor {
     public List<PageParseRegion> getPageRegionList(String pageUrl) {
         return pageParseRuleService.getPageRegionList(pageUrl);
     }
+
+
 }

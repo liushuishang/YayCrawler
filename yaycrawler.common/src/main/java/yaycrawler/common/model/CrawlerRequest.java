@@ -1,5 +1,7 @@
 package yaycrawler.common.model;
 
+import yaycrawler.common.utils.UrlUtils;
+
 import java.util.Map;
 
 /**
@@ -38,6 +40,12 @@ public class CrawlerRequest {
         this.url = url;
         this.method = method;
         this.domain = domain;
+    }
+    public CrawlerRequest(String url, String method,Map data) {
+        this.url = url;
+        this.method = method;
+        this.domain = UrlUtils.getDomain(url);
+        this.data = data;
     }
 
     public Long getStartTime() {

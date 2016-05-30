@@ -1,6 +1,5 @@
 package yaycrawler.admin.controller;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -47,130 +46,192 @@ public class ConfigController {
 
     @RequestMapping(value = "/queryPageInfos", method = RequestMethod.GET)
     @ResponseBody
-    public Object queryPageInfos(int pageIndex,int pageSize)
-    {
-        Map<String,Object> result=new HashMap<>();
+    public Object queryPageInfos(int pageIndex, int pageSize) {
+        Map<String, Object> result = new HashMap<>();
         Page<PageInfo> data = pageParseRuleService.queryPageInfos(pageIndex, pageSize);
         result.put("rows", data.getContent());
         result.put("total", data.getTotalElements());
         return result;
     }
-    @RequestMapping(value = "/addPageInfo",method = RequestMethod.GET)
+
+    @RequestMapping(value = "/addPageInfo", method = RequestMethod.GET)
     public ModelAndView addPageInfo() {
         return new ModelAndView("add_page_info");
     }
-    @RequestMapping(value = "/savePageInfo",method = RequestMethod.POST)
+
+    @RequestMapping(value = "/savePageInfo", method = RequestMethod.POST)
     @ResponseBody
     public Object savePageInfo(@RequestBody PageInfo pageInfo) {
         Assert.notNull(pageInfo.getPageUrl());
         Assert.notNull(pageInfo.getUrlRgx());
         return pageParseRuleService.savePageInfo(pageInfo);
     }
-    @RequestMapping(value = "/deletePageInfoByIds",method = RequestMethod.POST)
+
+    @RequestMapping(value = "/deletePageInfoByIds", method = RequestMethod.POST)
     @ResponseBody
-    public Object deletePageInfoByIds(@RequestBody  List<String> deleteIds) {
+    public Object deletePageInfoByIds(@RequestBody List<String> deleteIds) {
         return pageParseRuleService.deletePageInfoByIds(deleteIds);
     }
 
 
-
-    @RequestMapping(value = "/addPageRegion",method = RequestMethod.GET)
+    @RequestMapping(value = "/addPageRegion", method = RequestMethod.GET)
     public ModelAndView addPageRegion(String pageId) {
         PageInfo pageInfo = pageParseRuleService.getPageInfoById(pageId);
         ModelAndView mv = new ModelAndView("add_page_region");
         mv.addObject("pageInfo", pageInfo);
         return mv;
     }
-    @RequestMapping(value = "/savePageRegion",method = RequestMethod.POST)
+
+    @RequestMapping(value = "/savePageRegion", method = RequestMethod.POST)
     @ResponseBody
-    public Object savePageRegion( @RequestBody PageParseRegion region) {
+    public Object savePageRegion(@RequestBody PageParseRegion region) {
         return pageParseRuleService.savePageRegion(region);
     }
-    @RequestMapping(value = "/deletePageRegionByIds",method = RequestMethod.POST)
+
+    @RequestMapping(value = "/deletePageRegionByIds", method = RequestMethod.POST)
     @ResponseBody
     public Object deletePageRegionByIds(@RequestBody List<String> deleteIds) {
         return pageParseRuleService.deletePageRegionByIds(deleteIds);
     }
 
 
-
-
-    @RequestMapping(value = "/addFieldRule",method = RequestMethod.GET)
+    @RequestMapping(value = "/addFieldRule", method = RequestMethod.GET)
     public ModelAndView addFieldRule(String regionId) {
         PageParseRegion regionInfo = pageParseRuleService.getPageRegionById(regionId);
         ModelAndView mv = new ModelAndView("add_field_rule");
         mv.addObject("regionInfo", regionInfo);
         return mv;
     }
-    @RequestMapping(value = "/saveFieldRule",method = RequestMethod.POST)
+
+    @RequestMapping(value = "/saveFieldRule", method = RequestMethod.POST)
     @ResponseBody
     public Object saveFieldRule(@RequestBody FieldParseRule fieldRule) {
         return pageParseRuleService.saveFieldParseRule(fieldRule);
     }
-    @RequestMapping(value = "/deleteFieldRuleByIds",method = RequestMethod.POST)
+
+    @RequestMapping(value = "/deleteFieldRuleByIds", method = RequestMethod.POST)
     @ResponseBody
     public Object deleteFieldRuleByIds(@RequestBody List<String> deleteIds) {
         return pageParseRuleService.deleteFieldRuleByIds(deleteIds);
     }
 
 
-    @RequestMapping(value = "/addUrlRule",method = RequestMethod.GET)
+    @RequestMapping(value = "/addUrlRule", method = RequestMethod.GET)
     public ModelAndView addUrlRule(String regionId) {
         PageParseRegion regionInfo = pageParseRuleService.getPageRegionById(regionId);
         ModelAndView mv = new ModelAndView("add_url_rule");
         mv.addObject("regionInfo", regionInfo);
         return mv;
     }
-    @RequestMapping(value = "/saveUrlRule",method = RequestMethod.POST)
+
+    @RequestMapping(value = "/saveUrlRule", method = RequestMethod.POST)
     @ResponseBody
     public Object saveUrlRule(@RequestBody UrlParseRule urlRule) {
         return pageParseRuleService.saveUrlParseRule(urlRule);
     }
-    @RequestMapping(value = "/deleteUrlRuleByIds",method = RequestMethod.POST)
+
+    @RequestMapping(value = "/deleteUrlRuleByIds", method = RequestMethod.POST)
     @ResponseBody
     public Object deleteUrlRuleByIds(@RequestBody List<String> deleteIds) {
         return pageParseRuleService.deleteUrlRuleByIds(deleteIds);
     }
 
+    @RequestMapping(value = "/addUrlRuleParam", method = RequestMethod.GET)
+    public ModelAndView addUrlRuleParam(String urlRuleId) {
+        UrlParseRule urlParseRule = pageParseRuleService.getUrlParseRuleById(urlRuleId);
+        ModelAndView mv = new ModelAndView("add_url_param");
+        mv.addObject("urlParseRule", urlParseRule);
+        return mv;
+    }
 
+    @RequestMapping(value = "/saveUrlRuleParam", method = RequestMethod.POST)
+    @ResponseBody
+    public Object saveUrlRuleParam(@RequestBody UrlRuleParam urlRuleParam) {
+        return pageParseRuleService.saveUrlRuleParam(urlRuleParam);
+    }
+
+    @RequestMapping(value = "/deleteUrlRuleParamByIds", method = RequestMethod.POST)
+    @ResponseBody
+    public Object deleteUrlRuleParamByIds(@RequestBody List<String> deleteIds) {
+        return pageParseRuleService.deleteUrlRuleParamByIds(deleteIds);
+    }
 
 
     @RequestMapping(value = "/testPageWithRule")
     @ResponseBody
     public Object testPage(@RequestBody Map ruleMap) {
-        String regionId=MapUtils.getString(ruleMap, "regionId");
+        String regionId = MapUtils.getString(ruleMap, "regionId");
         String rule = MapUtils.getString(ruleMap, "rule");
+        String scope = MapUtils.getString(ruleMap, "scope", "all");
 
         Assert.notNull(regionId);
         Assert.notNull(rule);
 
         PageParseRegion region = pageParseRuleService.getPageRegionById(regionId);
+
         String ruleType = MapUtils.getString(ruleMap, "ruleType");
-        if("fieldRule".equals(ruleType))
-        {
-            FieldParseRule fieldParseRule = new FieldParseRule(MapUtils.getString(ruleMap, "fieldName"), rule);
-            List<FieldParseRule> fieldParseRuleList = new LinkedList<>();
-            fieldParseRuleList.add(fieldParseRule);
-            region.setFieldParseRules(fieldParseRuleList);
+        if ("fieldRule".equals(ruleType)) {
             region.setUrlParseRules(null);
-        }else{
-            UrlParseRule urlParseRule = new UrlParseRule(rule);
-            List<UrlParseRule> urlParseRuleList = new LinkedList<>();
-            urlParseRuleList.add(urlParseRule);
-            region.setUrlParseRules(urlParseRuleList);
+            if (!"all".equals(scope)) {
+                FieldParseRule fieldParseRule = new FieldParseRule(MapUtils.getString(ruleMap, "fieldName"), rule);
+                List<FieldParseRule> fieldParseRuleList = new LinkedList<>();
+                fieldParseRuleList.add(fieldParseRule);
+                region.setFieldParseRules(fieldParseRuleList);
+            }
+        } else {
             region.setFieldParseRules(null);
+            if (!"all".equals(scope)) {
+                UrlParseRule urlParseRule = new UrlParseRule(rule);
+                urlParseRule.setMethod(MapUtils.getString(ruleMap, "method"));
+                List<UrlParseRule> urlParseRuleList = new LinkedList<>();
+                urlParseRuleList.add(urlParseRule);
+                region.setUrlParseRules(urlParseRuleList);
+            }
         }
 
         PageInfo pageInfo = pageParseRuleService.getPageInfoById(region.getPageId());
         String targetUrl = pageInfo.getPageUrl();
         Map<String, Object> paramsMap = pageInfo.getParamsMap();
-        CrawlerRequest request=new CrawlerRequest(targetUrl, UrlUtils.getDomain(targetUrl),pageInfo.getMethod());
+        CrawlerRequest request = new CrawlerRequest(targetUrl, UrlUtils.getDomain(targetUrl), pageInfo.getMethod());
         request.setData(paramsMap);
 
         return configSpiderService.test(request, region, null, null);
     }
 
+    @RequestMapping(value = "/testUrlRuleParam")
+    @ResponseBody
+    public Object testUrlRuleParam(@RequestBody Map ruleParamMap) {
+        String urlRuleId = MapUtils.getString(ruleParamMap, "urlRuleId");
+        String paramName = MapUtils.getString(ruleParamMap, "paramName");
+        String paramExpression = MapUtils.getString(ruleParamMap, "expression");
 
+        Assert.notNull(urlRuleId);
+        Assert.notNull(paramName);
+        Assert.notNull(paramExpression);
+
+        UrlParseRule urlParseRule = pageParseRuleService.getUrlParseRuleById(urlRuleId);
+        String regionId = urlParseRule.getRegionId();
+        PageParseRegion region = pageParseRuleService.getPageRegionById(regionId);
+        PageInfo pageInfo = pageParseRuleService.getPageInfoById(region.getPageId());
+
+
+        urlParseRule.getUrlRuleParams().clear();
+        urlParseRule.getUrlRuleParams().add(new UrlRuleParam(urlRuleId, paramName, paramExpression));
+
+        region.setFieldParseRules(null);
+
+        List<UrlParseRule> urlParseRuleList = new LinkedList<>();
+        urlParseRuleList.add(urlParseRule);
+        region.setUrlParseRules(urlParseRuleList);
+
+
+        String targetUrl = pageInfo.getPageUrl();
+        Map<String, Object> paramsMap = pageInfo.getParamsMap();
+        CrawlerRequest request = new CrawlerRequest(targetUrl, UrlUtils.getDomain(targetUrl), pageInfo.getMethod());
+        request.setData(paramsMap);
+
+        return configSpiderService.test(request, region, null, null);
+    }
 
 
     @RequestMapping("/siteManagement")
@@ -180,9 +241,8 @@ public class ConfigController {
 
     @RequestMapping(value = "/queryPageSites", method = RequestMethod.GET)
     @ResponseBody
-    public Object querySites(int pageIndex,int pageSize)
-    {
-        Map<String,Object> result=new HashMap<>();
+    public Object querySites(int pageIndex, int pageSize) {
+        Map<String, Object> result = new HashMap<>();
         Page<PageSite> data = pageParseRuleService.querySites(pageIndex, pageSize);
         result.put("rows", data.getContent());
         result.put("total", data.getTotalElements());
@@ -192,18 +252,16 @@ public class ConfigController {
 
     @RequestMapping(value = "/addSite", method = RequestMethod.POST)
     @ResponseBody
-    public Object deleteSites(PageSite pageSite)
-    {
+    public Object deleteSites(PageSite pageSite) {
         if (StringUtils.isBlank(pageSite.getDomain())) {
             return false;
         }
-       return  pageParseRuleService.addSite(pageSite);
+        return pageParseRuleService.addSite(pageSite);
     }
 
     @RequestMapping(value = "/deleteSites", method = RequestMethod.POST)
     @ResponseBody
-    public Object deleteSites(@RequestBody  List<String> deleteIds)
-    {
+    public Object deleteSites(@RequestBody List<String> deleteIds) {
         Assert.notNull(deleteIds);
         return pageParseRuleService.deleteSiteByIds(deleteIds);
     }
