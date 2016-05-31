@@ -45,6 +45,7 @@
             form.serializeArray().map(function (x) {
                 data[x.name] = x.value;
             });
+            data.scope = "url";
             $.ajax({
                 type: "post",
                 cache: false,
