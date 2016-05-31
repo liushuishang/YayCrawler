@@ -13,7 +13,7 @@ import yaycrawler.dao.domain.PageSite;
  * Created by ucs_yuananyun on 2016/5/10.
  */
 @Repository
-public interface PageInfoRepository extends CrudRepository<PageInfo, String> {
+public  interface PageInfoRepository extends CrudRepository<PageInfo, String> {
 
     @Query(value="select *  from conf_page_info pi where ? REGEXP  pi.url_rgx",nativeQuery = true)
     PageInfo findOneByUrlRgx(String url);

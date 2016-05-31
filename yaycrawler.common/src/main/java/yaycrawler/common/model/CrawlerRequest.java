@@ -16,6 +16,15 @@ public class CrawlerRequest {
     private Long startTime;
     private String hashCode;
     private String workerId;
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
     public String getWorkerId() {
         return workerId;

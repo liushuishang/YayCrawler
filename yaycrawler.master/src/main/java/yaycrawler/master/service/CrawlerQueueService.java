@@ -279,7 +279,7 @@ public class CrawlerQueueService {
         }
     }
 
-    public void moveFailQueue(String field) {
+    public void moveFailQueue(String field,String message) {
         long startTime = System.currentTimeMillis();
         HashOperations hashOperations = redisTemplate.opsForHash();
         String failQueue = getFailKey();
@@ -289,6 +289,7 @@ public class CrawlerQueueService {
             return;
         CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
         crawlerRequest.setStartTime(startTime);
+        crawlerRequest.setMessage(message);
         String value = JSON.toJSONString(crawlerRequest);
         hashOperations.put(failQueue, field, value);
         hashOperations.delete(key, field);

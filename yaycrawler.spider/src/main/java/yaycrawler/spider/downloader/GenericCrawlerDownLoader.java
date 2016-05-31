@@ -7,16 +7,15 @@ import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.AbstractDownloader;
 import yaycrawler.dao.domain.PageInfo;
-import yaycrawler.dao.repositories.PageInfoRepository;
+import yaycrawler.dao.service.PageParserRuleService;
 
 /**
  * Created by ucs_yuananyun on 2016/5/27.
  */
 @Component
 public class GenericCrawlerDownLoader extends AbstractDownloader {
-
     @Autowired
-    private PageInfoRepository pageInfoRepository;
+    private PageParserRuleService pageParserRuleService;
 
     private CrawlerHttpClientDownloader httpClientDownloader;
     private PhantomJsMockDonwnloader mockDonwnloader;
@@ -33,7 +32,7 @@ public class GenericCrawlerDownLoader extends AbstractDownloader {
         //记录当前请求使用的Cookie
         request.putExtra("cookieIds", task.getSite().getCookies().keySet());
 
-        PageInfo pageInfo = pageInfoRepository.findOneByUrlRgx(request.getUrl());
+        PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(request.getUrl());
         if ("1".equals(pageInfo.getIsJsRendering()))
             return mockDonwnloader.download(request, task);
         else

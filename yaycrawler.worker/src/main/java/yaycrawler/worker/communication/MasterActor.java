@@ -47,7 +47,9 @@ public class MasterActor {
         if (!WorkerContext.isSuccessRegisted) return false;
 
         WorkerHeartbeat heartbeat = new WorkerHeartbeat(WorkerContext.workerId);
-//        heartbeat.setLastTime(System.currentTimeMillis());
+        heartbeat.setWorkerContextPath(WorkerContext.getContextPath());
+        heartbeat.setHeartbeatInteval(WorkerContext.getHeartbeatInteval());
+
 
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(WorkerContext.getMasterServerAddress(), CommunicationAPIs.WORKER_POST_MASTER_HEARTBEAT);
         heartbeat.setWaitTaskCount(taskScheduleService.getRunningTaskCount());

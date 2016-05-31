@@ -1,0 +1,1 @@
+java -jar master.war --spring.config.location=master_local.properties

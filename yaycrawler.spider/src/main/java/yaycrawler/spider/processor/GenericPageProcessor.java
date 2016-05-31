@@ -18,7 +18,7 @@ import yaycrawler.dao.domain.PageParseRegion;
 import yaycrawler.dao.domain.UrlParseRule;
 import yaycrawler.dao.domain.UrlRuleParam;
 import yaycrawler.dao.service.PageParserRuleService;
-import yaycrawler.spider.listener.IPageCompletedListener;
+import yaycrawler.spider.listener.IPageParseListener;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
 import yaycrawler.spider.service.PageSiteService;
 
@@ -31,7 +31,7 @@ import java.util.*;
 public class GenericPageProcessor implements PageProcessor {
     private static Logger logger = LoggerFactory.getLogger(GenericPageProcessor.class);
     @Autowired(required = false)
-    private IPageCompletedListener completedListener;
+    private IPageParseListener pageParseListener;
 
     @Autowired
     private PageParserRuleService pageParseRuleService;
@@ -58,11 +58,12 @@ public class GenericPageProcessor implements PageProcessor {
                     page.putField(pageParseRegion.getName(), result);
                 }
             }
-            if (completedListener != null)
-                completedListener.onSuccess(page.getRequest(), childRequestList);
+            if (pageParseListener != null)
+                pageParseListener.onSuccess(page.getRequest(), childRequestList);
         } catch (Exception ex) {
-            if (completedListener != null)
-                completedListener.onError(page.getRequest());
+            logger.error(ex.getMessage(), ex);
+            if (pageParseListener != null)
+                pageParseListener.onError(page.getRequest(),"页面解析失败");
 
             //下载成功解析失败，那么该cookie无效
             Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
@@ -70,7 +71,6 @@ public class GenericPageProcessor implements PageProcessor {
                 //移除失效的cookie
                 pageSiteService.deleteCookieByIds(cookieIds);
             }
-            logger.error(ex.getMessage(), ex);
         }
     }
 

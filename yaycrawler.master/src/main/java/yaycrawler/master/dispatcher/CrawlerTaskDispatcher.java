@@ -40,7 +40,7 @@ public class CrawlerTaskDispatcher {
             queueService.removeCrawler(crawlerResult.getKey());
         } else {
             //TODO 执行失败的处理
-            queueService.moveFailQueue(crawlerResult.getKey());
+            queueService.moveFailQueue(crawlerResult.getKey(),crawlerResult.getMessage());
         }
     }
 

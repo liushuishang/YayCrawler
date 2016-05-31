@@ -74,6 +74,10 @@ public class PageParserRuleService {
     public PageInfo getPageInfoById(String pageId) {
         return pageInfoRepository.findOne(pageId);
     }
+    public PageInfo findOnePageInfoByRgx(String url) {
+        if(StringUtils.isBlank(url)) return null;
+        return pageInfoRepository.findOneByUrlRgx(url);
+    }
 
     public boolean deletePageInfoByIds(List<String> deleteIds) {
         if (deleteIds == null || deleteIds.size() == 0) return true;
@@ -143,4 +147,6 @@ public class PageParserRuleService {
         }
         return true;
     }
+
+
 }

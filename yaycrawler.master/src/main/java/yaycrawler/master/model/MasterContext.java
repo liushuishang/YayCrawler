@@ -23,11 +23,15 @@ public class MasterContext {
     public static void receiveWorkerHeartbeat(WorkerHeartbeat heartbeat) {
         long currentTime = System.currentTimeMillis();
         WorkerRegistration registration = workerRegistrationMap.get(heartbeat.getWorkerId());
-        if (registration!=null) {
-            registration.setLastHeartbeatTime(currentTime);
-            registration.setWaitTaskCount(heartbeat.getWaitTaskCount());
-            workerHeartbeatMap.put(heartbeat.getWorkerId(), heartbeat);
+        if (registration == null) {
+            //通过心跳注册
+            registration = new WorkerRegistration(heartbeat.getWorkerId(), heartbeat.getWorkerContextPath());
+            registration.setHeartbeatInteval(heartbeat.getHeartbeatInteval());
+            registeWorker(registration);
         }
+        registration.setLastHeartbeatTime(currentTime);
+        registration.setWaitTaskCount(heartbeat.getWaitTaskCount());
+        workerHeartbeatMap.put(heartbeat.getWorkerId(), heartbeat);
     }
 
 

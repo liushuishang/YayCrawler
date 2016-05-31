@@ -5,6 +5,8 @@ package yaycrawler.common.model;
  */
 public class WorkerHeartbeat {
     private String workerId;
+    private String workerContextPath;
+    private Long heartbeatInteval;
     private int waitTaskCount;
 
 
@@ -32,4 +34,19 @@ public class WorkerHeartbeat {
         this.waitTaskCount = waitTaskCount;
     }
 
+    public String getWorkerContextPath() {
+        return workerContextPath;
+    }
+
+    public void setWorkerContextPath(String workerContextPath) {
+        this.workerContextPath = workerContextPath;
+    }
+
+    public Long getHeartbeatInteval() {
+        return heartbeatInteval;
+    }
+
+    public void setHeartbeatInteval(Long heartbeatInteval) {
+        this.heartbeatInteval = heartbeatInteval;
+    }
 }

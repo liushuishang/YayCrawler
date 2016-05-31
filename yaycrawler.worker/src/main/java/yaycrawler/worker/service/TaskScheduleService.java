@@ -1,6 +1,5 @@
 package yaycrawler.worker.service;
 
-import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,14 +8,16 @@ import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Spider;
 import yaycrawler.common.model.CrawlerRequest;
+import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.crawler.YaySpider;
 import yaycrawler.spider.downloader.GenericCrawlerDownLoader;
+import yaycrawler.spider.listener.IPageParseListener;
 import yaycrawler.spider.pipeline.GenericPipeline;
 import yaycrawler.spider.processor.GenericPageProcessor;
 import yaycrawler.spider.scheduler.CrawlerQueueScheduler;
 import yaycrawler.spider.service.PageSiteService;
 import yaycrawler.spider.utils.RequestHelper;
-import yaycrawler.worker.listener.TaskFailureListener;
+import yaycrawler.worker.listener.TaskDownloadFailureListener;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,10 @@ public class TaskScheduleService {
 
     @Autowired
     private PageSiteService pageSiteService;
+
+    @Autowired
+    private PageParserRuleService pageParserRuleService;
+
     @Autowired
     private GenericPageProcessor pageProcessor;
     @Autowired
@@ -40,12 +45,13 @@ public class TaskScheduleService {
     private GenericCrawlerDownLoader genericCrawlerDownLoader;
 
     @Autowired
-    private TaskFailureListener failureListener;
+    private TaskDownloadFailureListener downloadFailureListener;
+
+    @Autowired
+    private IPageParseListener pageParseListener;
 
     @Value("${worker.spider.threadCount}")
     private int spiderThreadCount;
-
-
 
     private Map<String, YaySpider> spiderMap = new HashMap<>();
 
@@ -63,13 +69,19 @@ public class TaskScheduleService {
 
     public void doSchedule(List<CrawlerRequest> taskList) {
         try {
-            logger.info("worker接收到{}个任务", JSON.toJSON(taskList));
-            for (CrawlerRequest CrawlerRequest : taskList) {
-                String domain = CrawlerRequest.getDomain();
+            logger.info("worker接收到{}个任务", taskList.size());
+            for (CrawlerRequest crawlerRequest : taskList) {
+                //如果查找不到与url相关的解析规则，则该任务不能执行
+                if (pageParserRuleService.findOnePageInfoByRgx(crawlerRequest.getUrl())==null) {
+                    logger.info("查找不到与{}匹配的解析规则，该任务失败！",crawlerRequest.getUrl());
+                    pageParseListener.onError(convertCrawlerRequestToSpiderRequest(crawlerRequest),"查找不到匹配的页面解析规则！");
+                    continue;
+                }
+                String domain = crawlerRequest.getDomain();
                 YaySpider spider = spiderMap.get(domain);
                 if (spider == null)
                     spider = createSpider(domain);
-                spider.addRequest(convertCrawlerRequestToSpiderRequest(CrawlerRequest));
+                spider.addRequest(convertCrawlerRequestToSpiderRequest(crawlerRequest));
                 if (spider.getStatus() != Spider.Status.Running)
                     spider.runAsync();
             }
@@ -89,7 +101,7 @@ public class TaskScheduleService {
         spider.thread(spiderThreadCount);
         spider.addPipeline(pipeline);
         spider.setDownloader(genericCrawlerDownLoader);
-        spider.getSpiderListeners().add(failureListener);
+        spider.getSpiderListeners().add(downloadFailureListener);
         spiderMap.put(domain, spider);
         return spider;
     }

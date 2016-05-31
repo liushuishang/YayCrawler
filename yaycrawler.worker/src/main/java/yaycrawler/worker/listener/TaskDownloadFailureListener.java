@@ -12,7 +12,7 @@ import yaycrawler.worker.communication.MasterActor;
  * Created by ucs_yuananyun on 2016/5/16.
  */
 @Component
-public class TaskFailureListener implements SpiderListener {
+public class TaskDownloadFailureListener implements SpiderListener {
 
     @Autowired
     private MasterActor masterActor;
@@ -24,6 +24,6 @@ public class TaskFailureListener implements SpiderListener {
 
     @Override
     public void onError(Request request) {
-        masterActor.notifyTaskFailure(new CrawlerResult(false, DigestUtils.shaHex(request.getUrl()), null));
+        masterActor.notifyTaskFailure(new CrawlerResult(false, DigestUtils.shaHex(request.getUrl()), null,"页面下载失败！"));
     }
 }
