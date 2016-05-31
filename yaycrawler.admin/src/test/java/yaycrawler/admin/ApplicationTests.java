@@ -8,6 +8,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import yaycrawler.admin.communication.MasterActor;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,4 +36,5 @@ public class ApplicationTests {
 //		data = masterActor.retrievedSuccessQueueRegistrations();
 //		System.out.println(data);
 	}
+
 }

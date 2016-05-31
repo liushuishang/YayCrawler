@@ -112,18 +112,50 @@ public class SelectorExpressionResolver {
     }
 
     private static Object executeScalar(Request request, Object localObject, String lowerMethodName, String[] params) {
-        if ("prefix".equals(lowerMethodName)) {
-            //附加一个前缀
-            String prefixValue = params[0];
-            if (localObject instanceof Collection) {
-                Collection itemCollection = (Collection) localObject;
-                if (itemCollection.size() == 0) return localObject;
-                List<String> itemList = new LinkedList<>();
-                for (Object o : itemCollection) {
-                    itemList.add(prefixValue + String.valueOf(o));
+//        if ("prefix".equals(lowerMethodName)) {
+//            //附加一个前缀
+//            String prefixValue = params[0];
+//            if (localObject instanceof Collection) {
+//                Collection itemCollection = (Collection) localObject;
+//                if (itemCollection.size() == 0) return localObject;
+//                List<String> itemList = new LinkedList<>();
+//                for (Object o : itemCollection) {
+//                    itemList.add(prefixValue + String.valueOf(o));
+//                }
+//                return itemList;
+//            } else return prefixValue + String.valueOf(localObject);
+//        }
+//        if("suffix".equals(lowerMethodName)) {
+//            //附加一个后缀缀
+//            String suffixValue = params[0];
+//            if (localObject instanceof Collection) {
+//                Collection itemCollection = (Collection) localObject;
+//                if (itemCollection.size() == 0) return localObject;
+//                List<String> itemList = new LinkedList<>();
+//                for (Object o : itemCollection) {
+//                    itemList.add( String.valueOf(o) + suffixValue);
+//                }
+//                return itemList;
+//            } else return String.valueOf(localObject) + suffixValue ;
+//        }
+        if (localObject instanceof Collection) {
+            Collection itemCollection = (Collection) localObject;
+            if (itemCollection.size() == 0) return localObject;
+            List<String> itemList = new LinkedList<>();
+            for (Object o : itemCollection) {
+                if("prefix".equals(lowerMethodName))
+                    itemList.add(params[0] + String.valueOf(o));
+                else  if("suffix".equals(lowerMethodName)){
+                    itemList.add(String.valueOf(o) + params[0]);
                 }
-                return itemList;
-            } else return prefixValue + String.valueOf(localObject);
+            }
+            return itemList;
+        } else {
+            if("prefix".equals(lowerMethodName))
+                return params[0] + String.valueOf(localObject);
+            else  if("suffix".equals(lowerMethodName)){
+                return String.valueOf(localObject) + params[0];
+            }
         }
         return localObject;
     }

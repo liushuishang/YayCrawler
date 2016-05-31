@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.RestFulResult;
+import yaycrawler.common.model.TasksResult;
 import yaycrawler.master.model.MasterContext;
 import yaycrawler.master.service.CrawlerQueueService;
 
@@ -43,30 +44,30 @@ public class AdminController {
 
     @RequestMapping(value = "/retrievedSuccessQueueRegistrations",method = RequestMethod.POST)
     @ResponseBody
-    public RestFulResult retrievedSuccessQueueRegistrations()
+    public RestFulResult retrievedSuccessQueueRegistrations(@RequestBody TasksResult tasksResult)
     {
-        return RestFulResult.success(crawlerQueueService.queryQueues("success_data"));
+        return RestFulResult.success(crawlerQueueService.queryQueues(tasksResult));
     }
 
     @RequestMapping(value = "/retrievedFailQueueRegistrations",method = RequestMethod.POST)
     @ResponseBody
-    public RestFulResult retrievedFailQueueRegistrations()
+    public RestFulResult retrievedFailQueueRegistrations(@RequestBody TasksResult tasksResult)
     {
-        return RestFulResult.success(crawlerQueueService.queryQueues("fail_data"));
+        return RestFulResult.success(crawlerQueueService.queryQueues(tasksResult));
     }
 
     @RequestMapping(value = "/retrievedRunningQueueRegistrations",method = RequestMethod.POST)
     @ResponseBody
-    public RestFulResult retrievedRunningQueueRegistrations()
+    public RestFulResult retrievedRunningQueueRegistrations(@RequestBody TasksResult tasksResult)
     {
-        return RestFulResult.success(crawlerQueueService.queryQueues("running_data"));
+        return RestFulResult.success(crawlerQueueService.queryQueues(tasksResult));
     }
 
     @RequestMapping(value = "/retrievedItemQueueRegistrations",method = RequestMethod.POST)
     @ResponseBody
-    public RestFulResult retrievedItemQueueRegistrations()
+    public RestFulResult retrievedItemQueueRegistrations(@RequestBody TasksResult tasksResult)
     {
-        return RestFulResult.success(crawlerQueueService.queryQueues("item_data"));
+        return RestFulResult.success(crawlerQueueService.queryQueues(tasksResult));
     }
 
 }

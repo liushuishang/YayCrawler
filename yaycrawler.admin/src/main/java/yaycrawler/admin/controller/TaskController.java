@@ -1,6 +1,7 @@
 package yaycrawler.admin.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Maps;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import yaycrawler.admin.communication.MasterActor;
 import yaycrawler.common.model.CrawlerRequest;
+import yaycrawler.common.model.TasksResult;
 import yaycrawler.common.utils.UrlUtils;
 
 import java.util.HashMap;
@@ -53,28 +55,28 @@ public class TaskController {
 
     @RequestMapping("/successQueueManagement")
     public ModelAndView successQueueManagement() {
-        ModelAndView modelAndView = new ModelAndView("successqueue_management");
+        ModelAndView modelAndView = new ModelAndView("queue_management");
         modelAndView.addObject("queue","success");
         return modelAndView;
     }
 
     @RequestMapping("/failQueueManagement")
     public ModelAndView failQueueManagement() {
-        ModelAndView modelAndView = new ModelAndView("failqueue_management");
+        ModelAndView modelAndView = new ModelAndView("queue_management");
         modelAndView.addObject("queue","fail");
         return modelAndView;
     }
 
     @RequestMapping("/itemQueueManagement")
     public ModelAndView itemQueueManagement() {
-        ModelAndView modelAndView = new ModelAndView("itemqueue_management");
+        ModelAndView modelAndView = new ModelAndView("queue_management");
         modelAndView.addObject("queue","item");
         return modelAndView;
     }
 
     @RequestMapping("/runningQueueManagement")
     public ModelAndView runningQueueManagement() {
-        ModelAndView modelAndView = new ModelAndView("runningqueue_management");
+        ModelAndView modelAndView = new ModelAndView("queue_management");
         modelAndView.addObject("queue","running");
         return modelAndView;
     }
@@ -83,16 +85,18 @@ public class TaskController {
 
     @RequestMapping("/queryQueueByName")
     @ResponseBody
-    public Object queryQueueByName(String name) {
-        Object data = "";
+    public Object queryQueueByName(TasksResult tasksResult) {
+        Object data = null;
+        String name = tasksResult.getName();
+        Map result = Maps.newHashMap();
         if(StringUtils.equalsIgnoreCase(name,"fail")) {
-            data = masterActor.retrievedFailQueueRegistrations();
+            data = masterActor.retrievedFailQueueRegistrations(tasksResult);
         } else if(StringUtils.equalsIgnoreCase(name,"success")) {
-            data = masterActor.retrievedSuccessQueueRegistrations();
+            data = masterActor.retrievedSuccessQueueRegistrations(tasksResult);
         } else if(StringUtils.equalsIgnoreCase(name,"item")) {
-            data = masterActor.retrievedItemQueueRegistrations();
+            data = masterActor.retrievedItemQueueRegistrations(tasksResult);
         } else if(StringUtils.equalsIgnoreCase(name,"running")) {
-            data = masterActor.retrievedRunningQueueRegistrations();
+            data = masterActor.retrievedRunningQueueRegistrations(tasksResult);
         }
         return data;
     }

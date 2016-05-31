@@ -6,7 +6,11 @@ import org.springframework.stereotype.Component;
 import yaycrawler.common.model.CommunicationAPIs;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.RestFulResult;
+import yaycrawler.common.model.TasksResult;
 import yaycrawler.common.utils.HttpUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by ucs_yuananyun on 2016/5/13.
@@ -39,27 +43,27 @@ public class MasterActor {
         return result.getData();
     }
 
-    public Object retrievedItemQueueRegistrations() {
+    public Object retrievedItemQueueRegistrations(TasksResult tasksResult) {
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.ADMIN_POST_MASTER_RETRIVED_ITEM_QUEUES);
-        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, null);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, tasksResult);
         return result.getData();
     }
 
-    public Object retrievedSuccessQueueRegistrations() {
+    public Object retrievedSuccessQueueRegistrations(TasksResult tasksResult) {
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.ADMIN_POST_MASTER_RETRIVED_SUCCESS_QUEUES);
-        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, null);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, tasksResult);
         return result.getData();
     }
 
-    public Object retrievedFailQueueRegistrations() {
+    public Object retrievedFailQueueRegistrations(TasksResult tasksResult) {
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.ADMIN_POST_MASTER_RETRIVED_FAIL_QUEUES);
-        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, null);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, tasksResult);
         return result.getData();
     }
 
-    public Object retrievedRunningQueueRegistrations() {
+    public Object retrievedRunningQueueRegistrations(TasksResult tasksResult) {
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.ADMIN_POST_MASTER_RETRIVED_RUNNING_QUEUES);
-        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, null);
+        RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, tasksResult);
         return result.getData();
     }
 }
