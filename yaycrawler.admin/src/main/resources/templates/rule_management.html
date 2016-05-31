@@ -478,7 +478,7 @@
                                                                         type: "post",
                                                                         cache: false,
                                                                         contentType: "application/json",
-                                                                        url: global.contextPath + "/testPageWithRule?scope=all",
+                                                                        url: global.contextPath + "/testPageWithRule?scope="+data.ruleType,
                                                                         data: JSON.stringify(data),
                                                                         dataType: 'json',
                                                                         success: function (result) {     //回调函数，result，返回值

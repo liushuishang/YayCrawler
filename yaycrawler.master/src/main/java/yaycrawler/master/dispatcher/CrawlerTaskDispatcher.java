@@ -24,8 +24,6 @@ public class CrawlerTaskDispatcher {
     @Value("${worker.task.batchSize}")
     private Integer batchSize;
 
-    @Value("${task.queue.timeOut}")
-    private Long queueTimeOut;
 
     @Autowired
     private CrawlerQueueService queueService;
@@ -68,8 +66,5 @@ public class CrawlerTaskDispatcher {
         }
     }
 
-    public void releaseQueue() {
-        queueService.releseQueue(queueTimeOut);
-    }
 
 }

@@ -72,7 +72,7 @@ public class WorkerController {
     @RequestMapping("/crawlerSuccessNotify")
     @ResponseBody
     public RestFulResult crawlerSuccessNotify(HttpServletRequest request, @RequestBody CrawlerResult crawlerResult) {
-        logger.info("接收到任务执行成功通知:{}", JSON.toJSON(crawlerResult));
+        logger.info("接收到任务执行成功通知:{}", crawlerResult.toString());
         Assert.notNull(crawlerResult);
         taskDispatcher.dealResultNotify(crawlerResult);
         return RestFulResult.success(true);

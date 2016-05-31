@@ -53,4 +53,13 @@ public class CrawlerResult {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    @Override
+    public String toString() {
+        return "CrawlerResult{" +
+                "key='" + key + '\'' +
+                ", isSuccess=" + isSuccess +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

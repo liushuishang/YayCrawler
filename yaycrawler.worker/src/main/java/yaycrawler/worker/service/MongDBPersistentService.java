@@ -20,7 +20,7 @@ public class MongDBPersistentService implements IResultPersistentService {
 
     @Override
     public boolean saveCrawlerResult(String pageUrl, Map<String, Object> data) {
-        String _id = DigestUtils.shaHex(pageUrl);
+        String _id = DigestUtils.sha1Hex(pageUrl);
         data.put("pageUrl", pageUrl);
         data.put("_id", _id);
         data.put("timestamp", System.currentTimeMillis());

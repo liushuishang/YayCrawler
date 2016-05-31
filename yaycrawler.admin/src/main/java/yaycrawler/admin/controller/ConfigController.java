@@ -162,7 +162,7 @@ public class ConfigController {
     public Object testPage(@RequestBody Map ruleMap) {
         String regionId = MapUtils.getString(ruleMap, "regionId");
         String rule = MapUtils.getString(ruleMap, "rule");
-        String scope = MapUtils.getString(ruleMap, "scope", "all");
+        String scope = MapUtils.getString(ruleMap, "scope", "single");
 
         Assert.notNull(regionId);
         Assert.notNull(rule);

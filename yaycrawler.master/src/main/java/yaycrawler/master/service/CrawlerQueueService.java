@@ -326,7 +326,11 @@ public class CrawlerQueueService {
         return false;
     }
 
-    public void releseQueue(Long leftTime) {
+    /**
+     * 刷新超时队列（把超时的运行中队列任务重新加入待执行队列）
+     * @param leftTime
+     */
+    public void refreshBreakedQueue(Long leftTime) {
         HashOperations hashOperations = redisTemplate.opsForHash();
         SetOperations setOperations = redisTemplate.opsForSet();
         String key = getRunningKey();

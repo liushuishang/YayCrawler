@@ -24,6 +24,6 @@ public class TaskDownloadFailureListener implements SpiderListener {
 
     @Override
     public void onError(Request request) {
-        masterActor.notifyTaskFailure(new CrawlerResult(false, DigestUtils.shaHex(request.getUrl()), null,"页面下载失败！"));
+        masterActor.notifyTaskFailure(new CrawlerResult(false, DigestUtils.sha1Hex(request.getUrl()), null,"页面下载失败！"));
     }
 }

@@ -28,29 +28,10 @@
                 $('#tb_departments').bootstrapTable($.extend(global.bootstrapTableOptions, {
                     url: global.contextPath + '/queryQueueByName?name=' + queue,         //请求后台的URL（*）
                     method: 'get',                      //请求方式（*）
+                    toolbar: null,                //工具按钮用哪个容器
+                    detailView: false,                   //是否显示父子表
+                    sidePagination: "client",           //分页方式：client客户端分页，server服务端分页（*）
                     columns: [{
-                        checkbox: true
-                    }, {
-                        field: 'domain',
-                        title: '域名'
-                    }, {
-                        field: 'method',
-                        title: '请求方法'
-                    }, {
-                        field: 'startTime',
-                        title: '任务失败时间',
-                        formatter: function (value, row, index) {
-                            var timestamp = value;
-                            var d = new Date(timestamp);    //根据时间戳生成的时间对象
-                            var date = (d.getFullYear()) + "-" +
-                                    (d.getMonth() + 1) + "-" +
-                                    (d.getDate()) + " " +
-                                    (d.getHours()) + ":" +
-                                    (d.getMinutes()) + ":" +
-                                    (d.getSeconds());
-                            return date;
-                        }
-                    }, {
                         field: 'url',
                         title: '请求URL'
                     },
@@ -59,7 +40,7 @@
                             title: '请求方法'
                         },
                         {
-                            field: 'param',
+                            field: 'data',
                             title: '请求参数'
                         }, {
                             field: 'workerId',
@@ -67,7 +48,7 @@
                         },
                         {
                             field: 'startTime',
-                            title: '结束时间',
+                            title: '开始时间',
                             formatter: function (value, row, index) {
                                 var timestamp = value;
                                 var d = new Date(timestamp);    //根据时间戳生成的时间对象
@@ -80,7 +61,7 @@
                                 return date;
                             }
                         },
-                        {field: 'failureInfo', title: '失败原因'}]
+                        {field: 'message', title: '失败原因'}]
                 }));
             };
             return oTableInit;

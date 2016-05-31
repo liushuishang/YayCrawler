@@ -22,11 +22,11 @@ public class PageParseListener implements IPageParseListener {
 
     @Override
     public void onSuccess(Request request, List<CrawlerRequest> childRequestList) {
-        masterActor.notifyTaskSuccess(new CrawlerResult(true, DigestUtils.shaHex(request.getUrl()), childRequestList, null));
+        masterActor.notifyTaskSuccess(new CrawlerResult(true, DigestUtils.sha1Hex(request.getUrl()), childRequestList, null));
     }
 
     @Override
     public void onError(Request request, String failureInfo) {
-        masterActor.notifyTaskFailure(new CrawlerResult(false, DigestUtils.shaHex(request.getUrl()), null, failureInfo));
+        masterActor.notifyTaskFailure(new CrawlerResult(false, DigestUtils.sha1Hex(request.getUrl()), null, failureInfo));
     }
 }

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="workerRefreshTask" class="yaycrawler.master.quartz.WorkerRefreshTask">
+    </bean>
+    <bean id="breakedQueueRefreshTask" class="yaycrawler.master.quartz.BreakedQueueRefreshTask">
+        <property name="queueService" ref="crawlerQueueService"></property>
+        <property name="queueTimeOut" value="${task.queue.timeout:300000}"></property>
+    </bean>
+
+
+    <!-- For times when you just need to invoke a method on a specific object -->
+    <bean id="refreshWorkerJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="workerRefreshTask"/>
+        <property name="targetMethod" value="refreshWorker"/>
+    </bean>
+
+    <bean id="refreshBreakedQueueJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="breakedQueueRefreshTask"/>
+        <property name="targetMethod" value="refreshBreakedQueue"/>
+    </bean>
+
+
+    <bean id="workerRefreshTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="refreshWorkerJobDetail"/>
+        <property name="startDelay" value="${worker.refreshInteval}"/>
+        <property name="repeatInterval" value="${worker.refreshInteval}"/>
+    </bean>
+
+    <bean id="breakedQueueRefreshTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="refreshWorkerJobDetail"/>
+        <property name="startDelay" value="${task.queue.timeout}"/>
+        <property name="repeatInterval" value="${task.queue.timeout}"/>
+    </bean>
+
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="jobDetails">
+            <list>
+                <ref bean="refreshWorkerJobDetail"/>
+                <ref bean="refreshBreakedQueueJobDetail"/>
+            </list>
+        </property>
+        <property name="triggers">
+            <list>
+                <ref bean="workerRefreshTrigger"/>
+                <ref bean="breakedQueueRefreshTrigger"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>

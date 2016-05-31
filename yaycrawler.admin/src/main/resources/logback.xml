@@ -10,7 +10,7 @@
         </layout>
     </appender>
     <appender name="ERROR-OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/admin-logs/error.log</file>
+         <file>${catalina.base}/admin-logs/error.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} -
                 %msg%n
@@ -32,7 +32,7 @@
         </rollingPolicy>
     </appender>
     <appender name="INFO-OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/admin-logs/info.log</file>
+         <file>${catalina.base}/admin-logs/info.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} -
                 %msg%n
@@ -54,7 +54,7 @@
         </rollingPolicy>
     </appender>
     <appender name="DEBUG-OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/admin-logs/debug.log</file>
+         <file>${catalina.base}/admin-logs/debug.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} -
                 %msg%n
@@ -76,21 +76,21 @@
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
-    <appender name="MYBATIS-OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/admin-logs/mybatis.log</file>
+    <appender name="EXPRESSION-RESOLVER-OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+         <file>${catalina.base}/admin-logs/expressionResolver.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} -
                 %msg%n
             </pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>DEBUG</level>
+            <level>INFO</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- rollover daily -->
-            <fileNamePattern>mybatis-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>expressionResolver-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <!-- or whenever the file size reaches 100MB -->
@@ -106,14 +106,16 @@
         <appender-ref ref="DEBUG-OUT"/>
     </logger>
 
-    <logger name="com.zaxxer.hikari.pool" level="WARN" additivity="false">
-        <appender-ref ref="MYBATIS-OUT"/>
+    <logger name="yaycrawler.spider.resolver" level="INFO" additivity="false">
+        <!--<appender-ref ref="STDOUT"/>-->
+        <appender-ref ref="EXPRESSION-RESOLVER-OUT"/>
     </logger>
+
     <logger name="org.thymeleaf" level="WARN" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

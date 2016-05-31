@@ -1,5 +1,6 @@
 package yaycrawler.spider.resolver;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ public class SelectorExpressionResolver {
     public static <T> T resolve(Request request, Selectable selector, String expression) {
         if (selector == null) return null;
 
+        logger.info("开始解析表达式{},解析上下文为：\r\n{}", expression, selector.toString());
         Object localObject = selector;
         String[] invokeArray = expression.split("\\)\\.");
         for (int i = 0; i < invokeArray.length; i++) {
@@ -45,9 +47,12 @@ public class SelectorExpressionResolver {
                     paramArray = new String[1];
                     paramArray[0] = param;
                 }
+                logger.info("开始执行函数:{},参数为:{}", methodName, JSON.toJSONString(paramArray));
                 localObject = execute(request, localObject, methodName, paramArray);
+                logger.info("函数:{} 执行成功，结果为:{}\r\n", methodName, JSON.toJSONString(localObject));
             }
         }
+        logger.info("表达式{}解析完成", expression);
         return (T) localObject;
     }
 
@@ -107,8 +112,6 @@ public class SelectorExpressionResolver {
     }
 
     private static Object executeScalar(Request request, Object localObject, String lowerMethodName, String[] params) {
-
-
         if ("prefix".equals(lowerMethodName)) {
             //附加一个前缀
             String prefixValue = params[0];
