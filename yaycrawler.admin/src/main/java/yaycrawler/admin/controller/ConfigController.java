@@ -211,18 +211,14 @@ public class ConfigController {
 
         UrlParseRule urlParseRule = pageParseRuleService.getUrlParseRuleById(urlRuleId);
         String regionId = urlParseRule.getRegionId();
-        PageParseRegion region = pageParseRuleService.getPageRegionById(regionId);
-        PageInfo pageInfo = pageParseRuleService.getPageInfoById(region.getPageId());
+        PageInfo pageInfo = pageParseRuleService.getPageInfoById( pageParseRuleService.getPageRegionById(regionId).getPageId());
 
 
-        urlParseRule.getUrlRuleParams().clear();
-        urlParseRule.getUrlRuleParams().add(new UrlRuleParam(urlRuleId, paramName, paramExpression));
-
-        region.setFieldParseRules(null);
-
-        List<UrlParseRule> urlParseRuleList = new LinkedList<>();
-        urlParseRuleList.add(urlParseRule);
-        region.setUrlParseRules(urlParseRuleList);
+        PageParseRegion testRegion=new PageParseRegion();
+        UrlParseRule testUrlParseRule=new UrlParseRule(urlParseRule.getRule());
+        testUrlParseRule.setUrlRuleParams(new LinkedList<>());
+        testUrlParseRule.getUrlRuleParams().add(new UrlRuleParam(null, paramName, paramExpression));
+        testRegion.getUrlParseRules().add(testUrlParseRule);
 
 
         String targetUrl = pageInfo.getPageUrl();
@@ -230,7 +226,7 @@ public class ConfigController {
         CrawlerRequest request = new CrawlerRequest(targetUrl, UrlUtils.getDomain(targetUrl), pageInfo.getMethod());
         request.setData(paramsMap);
 
-        return configSpiderService.test(request, region, null, null);
+        return configSpiderService.test(request, testRegion, null, null);
     }
 
 
