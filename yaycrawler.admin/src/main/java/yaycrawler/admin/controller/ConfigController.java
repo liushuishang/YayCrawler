@@ -44,6 +44,25 @@ public class ConfigController {
     }
 
 
+    @RequestMapping("/pageExpressionTest")
+    public ModelAndView pageExpressionTest(String pageId) {
+        ModelAndView mv = new ModelAndView("page_expression_test");
+        mv.addObject("pageId", pageId);
+        return mv;
+    }
+
+    @RequestMapping(value = "/testExpressionOnPage", method = RequestMethod.POST)
+    @ResponseBody
+    public Object testExpressionOnPage(String pageId,String expression)
+    {
+        Assert.notNull(pageId);
+        Assert.notNull(expression);
+
+        PageInfo pageInfo = pageParseRuleService.getPageInfoById(pageId);
+        return configSpiderService.testExpressionOnPage(pageInfo, expression);
+    }
+
+
     @RequestMapping(value = "/queryPageInfos", method = RequestMethod.GET)
     @ResponseBody
     public Object queryPageInfos(int pageIndex, int pageSize) {
@@ -156,6 +175,17 @@ public class ConfigController {
         return pageParseRuleService.deleteUrlRuleParamByIds(deleteIds);
     }
 
+    @RequestMapping(value = "/testPageRegionRule")
+    @ResponseBody
+    public Object testPageRegion(@RequestBody PageParseRegion parseRegion) {
+        PageInfo pageInfo = pageParseRuleService.getPageInfoById(parseRegion.getPageId());
+        String targetUrl = pageInfo.getPageUrl();
+        Map<String, Object> paramsMap = pageInfo.getParamsMap();
+        CrawlerRequest request = new CrawlerRequest(targetUrl, UrlUtils.getDomain(targetUrl), pageInfo.getMethod());
+        request.setData(paramsMap);
+
+        return configSpiderService.testRegionRule(request, parseRegion, null, null);
+    }
 
     @RequestMapping(value = "/testPageWithRule")
     @ResponseBody
@@ -167,35 +197,31 @@ public class ConfigController {
         Assert.notNull(regionId);
         Assert.notNull(rule);
 
-        PageParseRegion region = pageParseRuleService.getPageRegionById(regionId);
+        PageParseRegion regionInDb = pageParseRuleService.getPageRegionById(regionId);
+        PageParseRegion region=new PageParseRegion();
+        region.setSelectExpression(regionInDb.getSelectExpression());
 
         String ruleType = MapUtils.getString(ruleMap, "ruleType");
         if ("fieldRule".equals(ruleType)) {
-            region.setUrlParseRules(null);
             if (!"all".equals(scope)) {
                 FieldParseRule fieldParseRule = new FieldParseRule(MapUtils.getString(ruleMap, "fieldName"), rule);
-                List<FieldParseRule> fieldParseRuleList = new LinkedList<>();
-                fieldParseRuleList.add(fieldParseRule);
-                region.setFieldParseRules(fieldParseRuleList);
+                region.getFieldParseRules().add(fieldParseRule);
             }
         } else {
-            region.setFieldParseRules(null);
             if (!"all".equals(scope)) {
                 UrlParseRule urlParseRule = new UrlParseRule(rule);
                 urlParseRule.setMethod(MapUtils.getString(ruleMap, "method"));
-                List<UrlParseRule> urlParseRuleList = new LinkedList<>();
-                urlParseRuleList.add(urlParseRule);
-                region.setUrlParseRules(urlParseRuleList);
+                region.getUrlParseRules().add(urlParseRule);
             }
         }
 
-        PageInfo pageInfo = pageParseRuleService.getPageInfoById(region.getPageId());
+        PageInfo pageInfo = pageParseRuleService.getPageInfoById( regionInDb.getPageId());
         String targetUrl = pageInfo.getPageUrl();
         Map<String, Object> paramsMap = pageInfo.getParamsMap();
         CrawlerRequest request = new CrawlerRequest(targetUrl, UrlUtils.getDomain(targetUrl), pageInfo.getMethod());
         request.setData(paramsMap);
 
-        return configSpiderService.test(request, region, null, null);
+        return configSpiderService.testRegionRule(request, region, null, null);
     }
 
     @RequestMapping(value = "/testUrlRuleParam")
@@ -226,7 +252,7 @@ public class ConfigController {
         CrawlerRequest request = new CrawlerRequest(targetUrl, UrlUtils.getDomain(targetUrl), pageInfo.getMethod());
         request.setData(paramsMap);
 
-        return configSpiderService.test(request, testRegion, null, null);
+        return configSpiderService.testRegionRule(request, testRegion, null, null);
     }
 
 

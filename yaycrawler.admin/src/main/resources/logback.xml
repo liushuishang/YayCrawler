@@ -106,10 +106,10 @@
         <appender-ref ref="DEBUG-OUT"/>
     </logger>
 
-    <logger name="yaycrawler.spider.resolver" level="INFO" additivity="false">
-        <!--<appender-ref ref="STDOUT"/>-->
-        <appender-ref ref="EXPRESSION-RESOLVER-OUT"/>
-    </logger>
+    <!--<logger name="yaycrawler.spider.resolver" level="INFO" additivity="false">-->
+        <!--&lt;!&ndash;<appender-ref ref="STDOUT"/>&ndash;&gt;-->
+        <!--<appender-ref ref="EXPRESSION-RESOLVER-OUT"/>-->
+    <!--</logger>-->
 
     <logger name="org.thymeleaf" level="WARN" additivity="false">
         <appender-ref ref="STDOUT"/>

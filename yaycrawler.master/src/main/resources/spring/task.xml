@@ -30,7 +30,7 @@
     </bean>
 
     <bean id="breakedQueueRefreshTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
-        <property name="jobDetail" ref="refreshWorkerJobDetail"/>
+        <property name="jobDetail" ref="refreshBreakedQueueJobDetail"/>
         <property name="startDelay" value="${task.queue.timeout}"/>
         <property name="repeatInterval" value="${task.queue.timeout}"/>
     </bean>

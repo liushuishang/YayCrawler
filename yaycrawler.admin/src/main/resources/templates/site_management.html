@@ -96,11 +96,18 @@
                                 <input type="text" class="form-control" name="timeOut"
                                        value="500" placeholder="输入超时时间(毫秒)"/>
                             </div>
-
+                            <!--<div class="form-group">-->
+                            <!--<label class="control-label">重试次数</label>-->
+                            <!--<input type="text" class="form-control" name="tryTimes"-->
+                            <!--value="2" placeholder="输入重试次数"/>-->
+                            <!--</div>-->
                             <div class="form-group">
-                                <label class="control-label">重试次数</label>
-                                <input type="text" class="form-control" name="tryTimes"
-                                       value="2" placeholder="输入重试次数"/>
+                                <label class="control-label">请求头参数(JSON)</label>
+                                <textarea name="headers" rows="3" class="form-control">
+{
+ "Content-Type":"application/x-www-form-urlencoded"
+ }
+                                </textarea>
                             </div>
                             <div class="form-group">
                                 <label class="control-label">浏览器标识</label>
@@ -154,7 +161,6 @@
         });
         $("#btn_delete").click(function () {
             delItem(function () {
-               
                 var selectedRows = $('#tb_sites').bootstrapTable('getSelections');
                 var selectedIds = [];
                 $.each(selectedRows, function (i, item) {
@@ -206,8 +212,8 @@
                         title: '任务间隔时间'
                     },
                         {
-                            field: 'retryTimes',
-                            title: '重试次数'
+                            field: 'headers',
+                            title: '请求头'
                         },
                         {
                             field: 'userAgent',

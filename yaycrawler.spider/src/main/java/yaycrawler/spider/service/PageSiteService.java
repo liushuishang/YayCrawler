@@ -1,6 +1,7 @@
 package yaycrawler.spider.service;
 
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Site;
@@ -51,7 +52,7 @@ public class PageSiteService {
                     site.addHeader(entry.getKey(), entry.getValue());
                 }
             }
-            if (pageSite.getDefaultCookies() != null) {
+            if (!StringUtils.isBlank(pageSite.getDefaultCookies() )) {
                 Map<String, String> cookiesMap = JSON.parseObject(pageSite.getDefaultCookies(), Map.class);
                 for (Map.Entry<String, String> entry : cookiesMap.entrySet()) {
                     site.addCookie(domain, entry.getKey(), entry.getValue());

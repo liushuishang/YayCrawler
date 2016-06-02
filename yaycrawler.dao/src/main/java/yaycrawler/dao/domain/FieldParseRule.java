@@ -17,8 +17,9 @@ public class FieldParseRule implements Serializable {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid")
     private String id;
+
     @NotNull
-    @Column(columnDefinition = "varchar(38)")
+    @Column(columnDefinition = "varchar(38) not null")
     private String regionId;
     @NotNull
     @Column(name="fieldName")
@@ -37,7 +38,7 @@ public class FieldParseRule implements Serializable {
 
     public FieldParseRule(String fieldName, String rule) {
         this();
-        this.fieldName = fieldName;
+       setFieldName(fieldName);
         this.rule = rule;
 
     }
@@ -47,7 +48,8 @@ public class FieldParseRule implements Serializable {
     }
 
     public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
+        if(fieldName==null) fieldName = "";
+        this.fieldName = fieldName.replace(".", "_");
     }
 
     public String getRule() {

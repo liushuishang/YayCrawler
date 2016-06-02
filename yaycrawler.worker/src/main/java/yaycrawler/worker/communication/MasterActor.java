@@ -45,7 +45,7 @@ public class MasterActor {
 
     public boolean sendHeartbeart() {
         if (!WorkerContext.isSuccessRegisted) return false;
-
+        logger.debug("worker-{}开始向Master发送心跳", WorkerContext.workerId);
         WorkerHeartbeat heartbeat = new WorkerHeartbeat(WorkerContext.workerId);
         heartbeat.setWorkerContextPath(WorkerContext.getContextPath());
         heartbeat.setHeartbeatInteval(WorkerContext.getHeartbeatInteval());

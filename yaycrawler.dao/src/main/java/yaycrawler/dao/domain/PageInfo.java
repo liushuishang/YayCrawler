@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 表示一个待抓取的页面信息
+ * 表示一个待抓取的页面测试信息
  * Created by ucs_yuananyun on 2016/5/10.
  */
 @Entity
@@ -45,8 +45,6 @@ public class PageInfo {
     @Column(name = "createdDate", columnDefinition = "timestamp default now()")
     private Date createdDate;
 
-    @Transient
-    private Map<String, Object> paramsMap;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "pageId", insertable = false, updatable = false)
@@ -75,20 +73,16 @@ public class PageInfo {
 
     public void setParamsJson(String paramsJson) {
         this.paramsJson = paramsJson;
-        try {
-            paramsMap = JSON.parseObject(paramsJson, Map.class);
-        } catch (Exception ex) {
-        }
     }
 
     public Map<String, Object> getParamsMap() {
-        return paramsMap;
+        try {
+            return JSON.parseObject(paramsJson, Map.class);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
-    public void setParamsMap(Map<String, Object> paramsMap) {
-        this.paramsMap = paramsMap;
-        paramsJson = JSON.toJSONString(paramsMap);
-    }
 
     public Date getCreatedDate() {
         return createdDate;

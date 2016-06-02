@@ -21,7 +21,7 @@ public class UrlParseRule implements Serializable {
     private String id;
 
     @NotNull
-    @Column(columnDefinition = "varchar(38)")
+    @Column(columnDefinition = "varchar(38) not null")
     private String regionId;
 
     @NotNull

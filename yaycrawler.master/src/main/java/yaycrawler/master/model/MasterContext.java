@@ -15,8 +15,9 @@ public class MasterContext {
     public static ConcurrentHashMap<String, WorkerHeartbeat> workerHeartbeatMap = new ConcurrentHashMap<>();
 
     public static void registeWorker(WorkerRegistration registration) {
-        if (registration.getWorkerId() != null)
+        if (registration.getWorkerId() != null) {
             workerRegistrationMap.put(registration.getWorkerId(), registration);
+        }
     }
 
 

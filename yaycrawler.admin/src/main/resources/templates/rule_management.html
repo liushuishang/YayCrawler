@@ -20,6 +20,7 @@
                 <button id="btn_delete" type="button" class="btn btn-default">
                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>删除
                 </button>
+                <h4><font color="red">字段名中不要包含"."!!</font> </h4>
             </div>
             <table id="tb_page"></table>
         </div>
@@ -54,7 +55,29 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
-
+    <div class="modal fade" id="resultModal" tabindex="-1" role="dialog"
+         aria-labelledby="resultModalLabel" aria-hidden="true">
+        <div class="modal-dialog" style="width: 800px;height:auto;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-hidden="true">×
+                    </button>
+                    <h4 class="modal-title" id="resultModalLabel">测试结果展示
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <textarea id="ta_result" style="width: 100%;" rows="20"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default"
+                            data-dismiss="modal">
+                        关闭
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 
     <div th:include="master::itemDel"></div>
 </div>
@@ -109,6 +132,7 @@
                                     url: global.contextPath + '/queryPageInfos',
                                     pageSize: 1,                       //每页的记录行数（*）
                                     pageList: [2, 4, 8, 10],        //可供选择的每页的行数（*）
+                                    escape: true,
                                     columns: [{
                                         checkbox: true
                                     }, {
@@ -163,8 +187,12 @@
                                         }, {
                                             field: 'paramsJson',
                                             title: '请求参数',
-                                            editable: {
-                                                type: 'textarea'
+//                                            editable: {
+//                                                type: 'textarea'
+//                                            },
+                                            formatter: function (value, row, index) {
+                                                debugger
+                                                return value;
                                             }
                                         },
                                         {
@@ -172,16 +200,25 @@
                                             title: '操作',
                                             formatter: function (value, row, index) {
                                                 return [
-                                                    '<a  href="javascript:void(0)" class="addRegion btn btn-sm green" title="添加解析区域">',
-                                                    '<i class="fa fa-plus">添加解析区域</i>',
+                                                    '<a  href="javascript:void(0)" class="addRegion btn btn-sm green" title="加解析区域">',
+                                                    '<i class="fa fa-plus">加解析区域</i>',
+                                                    '</a>',
+                                                    '<a  href="javascript:void(0)" class="testExpression btn btn-sm purple" title="测试表达式">',
+                                                    '<i class="fa fa-file-o">测试表达式</i>',
                                                     '</a>'
                                                 ].join('');
                                             },
                                             events: {
                                                 'click .addRegion': function (e, value, row, index) {
-
                                                     $("#modalLabel").html("添加页面解析区域");
                                                     $('#divModal iframe').attr("src", "addPageRegion?pageId=" + row.id + "&random=" + Math.random());
+                                                    $('#divModal').modal({
+                                                        keyboard: false
+                                                    });
+                                                },
+                                                'click .testExpression': function (e, value, row, index) {
+                                                    $("#modalLabel").html("测试此页面有关的表达式语法");
+                                                    $('#divModal iframe').attr("src", "pageExpressionTest?pageId=" + row.id + "&random=" + Math.random());
                                                     $('#divModal').modal({
                                                         keyboard: false
                                                     });
@@ -205,7 +242,6 @@
                                             pagination: false,
                                             striped: true,
                                             search: false,
-//                                            onPostBody: function () {$("a.detail-icon").click();},
                                             columns: [{
                                                 checkbox: false
                                             }, {
@@ -254,15 +290,19 @@
                                                     title: '操作',
                                                     formatter: function (value, row, index) {
                                                         return [
+                                                            '<a  href="javascript:void(0)" class="testRegion btn btn-sm purple" title=" 测试此区域">',
+                                                            '<i class="fa fa-file-o">测试区域</i>',
+                                                            '</a>',
+                                                            '<a  href="javascript:void(0)" class="deleteRegion btn btn-sm red" title=" 删除此区域">',
+                                                            '<i class="fa fa-times">删除区域</i>',
+                                                            '</a>',
                                                             '<a  href="javascript:void(0)" class="addFieldRule btn btn-sm yellow" title="添加字段规则">',
-                                                            '<i class="fa fa-plus">添加字段规则</i>',
+                                                            '<i class="fa fa-plus">字段规则</i>',
                                                             '</a>',
                                                             '<a  href="javascript:void(0)" class="addUrlRule btn btn-sm blue" title="添加Url规则">',
-                                                            '<i class="fa fa-plus">添加Url规则</i>',
-                                                            '</a>',
-                                                            '<a  href="javascript:void(0)" class="deleteRegion btn btn-sm red" title="删除此区域">',
-                                                            '<i class="fa fa-times">删除区域</i>',
+                                                            '<i class="fa fa-plus">子链规则</i>',
                                                             '</a>'
+
                                                         ].join('');
                                                     },
                                                     events: {
@@ -274,11 +314,29 @@
                                                             });
                                                         },
                                                         'click .addUrlRule': function (e, value, row, index) {
-
                                                             $("#modalLabel").html("添加区域解析Url规则");
                                                             $('#divModal iframe').attr("src", "addUrlRule?regionId=" + row.id + "&random=" + Math.random());
                                                             $('#divModal').modal({
                                                                 keyboard: false
+                                                            });
+                                                        },
+                                                        'click .testRegion': function (e, value, row, index) {
+                                                            var data = row;
+                                                            $.ajax({
+                                                                type: "post",
+                                                                cache: false,
+                                                                contentType: "application/json",
+                                                                url: global.contextPath + "/testPageRegionRule",
+                                                                data: JSON.stringify(data),
+                                                                dataType: 'json',
+                                                                success: function (result) {     //回调函数，result，返回值
+                                                                    $("#resultModal #ta_result").html(JSON.stringify(result, null, "\t"));
+                                                                    $('#resultModal').modal({keyboard: false});
+                                                                },
+                                                                error: function (msg) {
+                                                                    alert("测试出现异常！");
+                                                                    console.log(msg);
+                                                                }
                                                             });
                                                         },
                                                         'click .deleteRegion': function (e, value, row, index) {
@@ -372,10 +430,10 @@
                                                                     formatter: function (value, row, index) {
                                                                         return [
                                                                             '<a  href="javascript:void(0)" class="testRuleParam btn btn-sm purple" title="测试规则">',
-                                                                            '<i class="fa fa-plus">测试参数</i>',
+                                                                            '<i class="fa fa-file-o">测试</i>',
                                                                             '</a>',
                                                                             '<a  href="javascript:void(0)" class="deleteRuleParam btn btn-sm red" title="删除规则">',
-                                                                            '<i class="fa fa-plus">删除参数</i>',
+                                                                            '<i class="fa fa-times">删除</i>',
                                                                             '</a>'
                                                                         ].join('');
                                                                     },
@@ -390,7 +448,8 @@
                                                                                 data: JSON.stringify(data),
                                                                                 dataType: 'json',
                                                                                 success: function (result) {     //回调函数，result，返回值
-                                                                                    alert(JSON.stringify(result, null, "\t"));
+                                                                                    $("#resultModal #ta_result").html(JSON.stringify(result, null, "\t"));
+                                                                                    $('#resultModal').modal({keyboard: false});
                                                                                 },
                                                                                 error: function (msg) {
                                                                                     alert("测试出现异常！");
@@ -451,15 +510,15 @@
                                                             title: '操作',
                                                             formatter: function (value, row, index) {
                                                                 return [
-                                                                    '<a  href="javascript:void(0)" class="addUrlParam btn btn-sm yellow" title="添加请求参数">',
-                                                                    '<i class="fa fa-plus">添加请求参数</i>',
-                                                                    '</a>',
                                                                     '<a  href="javascript:void(0)" class="testRule btn btn-sm purple" title="测试规则">',
-                                                                    '<i class="fa fa-plus">测试规则</i>',
+                                                                    '<i class="fa fa-file-o">测试</i>',
                                                                     '</a>',
                                                                     '<a  href="javascript:void(0)" class="deleteRule btn btn-sm red" title="删除规则">',
-                                                                    '<i class="fa fa-plus">删除规则</i>',
-                                                                    '</a>'
+                                                                    '<i class="fa fa-times">删除</i>',
+                                                                    '</a>',
+                                                                    '<a  href="javascript:void(0)" class="addUrlParam btn btn-sm yellow" title="添加请求参数">',
+                                                                    '<i class="fa fa-plus">参数</i>',
+                                                                    '</a>',
                                                                 ].join('');
                                                             },
                                                             events: {
@@ -478,11 +537,12 @@
                                                                         type: "post",
                                                                         cache: false,
                                                                         contentType: "application/json",
-                                                                        url: global.contextPath + "/testPageWithRule?scope="+data.ruleType,
+                                                                        url: global.contextPath + "/testPageWithRule?scope=" + data.ruleType,
                                                                         data: JSON.stringify(data),
                                                                         dataType: 'json',
                                                                         success: function (result) {     //回调函数，result，返回值
-                                                                            alert(JSON.stringify(result, null, "\t"));
+                                                                            $("#resultModal #ta_result").html(JSON.stringify(result, null, "\t"));
+                                                                            $('#resultModal').modal({keyboard: false});
                                                                         },
                                                                         error: function (msg) {
                                                                             alert("测试出现异常！");
