@@ -37,6 +37,7 @@
                 <button id="btnSubmit" type="submit" class="btn primary save">保存</button>
             </div>
         </form>
+        <textarea class="testResult form-control " rows="7"></textarea>
     </div>
 
 </div>
@@ -50,14 +51,14 @@
             form.serializeArray().map(function (x) {
                 data[x.name] = x.value;
             });
-            data.scope = "url";
+            data.expression = data.selectExpression;
             $.ajax({
                 type: "post",
                 cache: false,
-                contentType: "application/json",
-                url: global.contextPath + "/testPageWithRule",
-                data: JSON.stringify(data),
-                dataType: 'json',
+//                contentType: "application/json",
+                url: global.contextPath + "/testExpressionOnPage?random="+Math.random(),
+                data: data,
+                dataType: 'text',
                 success: function (result) {     //回调函数，result，返回值
                     $(".testResult").html(JSON.stringify(result, null, "\t"));
                 },

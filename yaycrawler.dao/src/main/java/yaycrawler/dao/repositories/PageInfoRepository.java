@@ -18,6 +18,7 @@ public  interface PageInfoRepository extends CrudRepository<PageInfo, String> {
     @Query(value="select *  from conf_page_info pi where ? REGEXP  pi.url_rgx",nativeQuery = true)
     PageInfo findOneByUrlRgx(String url);
 
+//    @Query(value="select *  from conf_page_info pi order by created_date desc ",nativeQuery = true)
     Page<PageInfo> findAll(Pageable pageable);
 
 

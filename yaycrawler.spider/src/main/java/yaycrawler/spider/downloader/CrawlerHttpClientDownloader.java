@@ -6,7 +6,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.annotation.ThreadSafe;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -33,6 +32,8 @@ import us.codecraft.webmagic.utils.HttpConstant;
 import us.codecraft.webmagic.utils.UrlUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -166,7 +167,14 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
             Map<String,Object> paramsMap= (Map<String, Object>) request.getExtra("nameValuePair");
             if(paramsMap!=null) {
                 for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
-                    requestBuilder.addParameters(new BasicNameValuePair(entry.getKey(), String.valueOf(entry.getValue())));
+                    //对中文编码
+                    String value = String.valueOf(entry.getValue());
+                    try {
+                        value = URLEncoder.encode(value, "utf-8");
+                    } catch (UnsupportedEncodingException e) {
+                        logger.error(e.getMessage());
+                    }
+                    requestBuilder.addParameters(new BasicNameValuePair(entry.getKey(), value));
                 }
             }
             return requestBuilder;

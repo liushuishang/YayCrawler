@@ -100,6 +100,8 @@ public class SelectorExpressionResolver {
                 }
                 return dl;
             }
+            if("tostring".equals(lowerMethodName))
+                return localObject.toString();
 
             if (localObject instanceof Selectable)
                 return executeSelectable(request, (Selectable) localObject, lowerMethodName, params);
@@ -170,8 +172,11 @@ public class SelectorExpressionResolver {
                 return selectable.regex((String) params[0], Integer.parseInt(String.valueOf(params[1])));
         }
 
-        if ("jsonpath".equals(lowerMethodName))
+        if ("jsonpath".equals(lowerMethodName)) {
+            if(!(selectable instanceof  Json))
+               return  new Json(selectable.get()).jsonPath(params[0]);
             return selectable.jsonPath(params[0]);
+        }
 
         if ("all".equals(lowerMethodName))
             return selectable.all();
