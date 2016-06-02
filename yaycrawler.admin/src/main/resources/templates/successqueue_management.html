@@ -54,7 +54,6 @@
                 $('#tb_success').bootstrapTable($.extend(global.bootstrapTableOptions, {
                             url: global.contextPath + '/queryQueueByName?name=' + queue,         //请求后台的URL（*）
                             method: 'get',                      //请求方式（*）
-                            sidePagination: "client",
                             detailView: false,                   //是否显示父子表
                             columns: [
                                 {

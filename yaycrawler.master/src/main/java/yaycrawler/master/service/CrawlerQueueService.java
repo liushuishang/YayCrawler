@@ -423,7 +423,8 @@ public class CrawlerQueueService {
         tasksResult.setTotal(hashOperations.size(hashKey));
         for (String data : datas) {
             CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
-            crawlerRequests.add(crawlerRequest);
+            if(crawlerRequest !=null)
+                crawlerRequests.add(crawlerRequest);
         }
         tasksResult.setRows(crawlerRequests);
         return tasksResult;
