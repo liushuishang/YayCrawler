@@ -96,43 +96,27 @@ http://www.w3.org/2001/XMLSchema-instance ">
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <archive>
-                        <manifest>
-                            <mainClass>${start-class}</mainClass>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                    </archive>
-                    <warSourceExcludes>${basedir}/target/classes/phantomjs</warSourceExcludes>
-                    <packagingExcludes>${basedir}/target/classes/phantomjs</packagingExcludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>gen-webadmin</id>
-                        <phase>compile</phase>
-                        <configuration>
-                            <tasks>
-                                <echo message="******************** ${basedir}/deploy*************************"/>
-                                <mkdir dir="${basedir}/target/classes/phantomjs"/>
-                                <copy todir="${basedir}/target/classes/phantomjs">
-                                    <fileset dir="${basedir}/deploy/phantomjs"/>
-                                </copy>
-                            </tasks>
-                        </configuration>
+                        <id>package</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
+                        <configuration>
+                            <tasks>
+                                <echo message="******************** ${basedir}/deploy*************************"/>
+                                <mkdir dir="${basedir}/target/${artifactId}-${version}/WEB-INF/classes/phantomjs"/>
+                                <copy todir="${basedir}/target/${artifactId}-${version}/WEB-INF/classes/phantomjs">
+                                    <fileset dir="../bin/phantomjs"/>
+                                </copy>
+                            </tasks>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-
 
 </project>

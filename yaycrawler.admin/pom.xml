@@ -80,11 +80,25 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>package</id>
+						<phase>package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<echo message="******************** ${basedir}/deploy*************************"/>
+								<mkdir dir="${basedir}/target/${artifactId}-${version}/WEB-INF/classes/phantomjs"/>
+								<copy todir="${basedir}/target/${artifactId}-${version}/WEB-INF/classes/phantomjs">
+									<fileset dir="../bin/phantomjs"/>
+								</copy>
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
