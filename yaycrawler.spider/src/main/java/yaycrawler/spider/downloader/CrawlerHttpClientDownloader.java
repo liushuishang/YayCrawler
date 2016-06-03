@@ -26,10 +26,10 @@ import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.AbstractDownloader;
-import us.codecraft.webmagic.downloader.HttpClientGenerator;
 import us.codecraft.webmagic.selector.PlainText;
 import us.codecraft.webmagic.utils.HttpConstant;
 import us.codecraft.webmagic.utils.UrlUtils;
+import yaycrawler.common.utils.HttpClientGenerator;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -54,19 +54,19 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
 
     private CloseableHttpClient getHttpClient(Site site) {
         if (site == null) {
-            return httpClientGenerator.getClient(null);
+            return httpClientGenerator.generateClient();
         }
-//        String domain = site.getDomain();
-        CloseableHttpClient httpClient = httpClientGenerator.getClient(site);
-//        if (httpClient == null) {
-//            synchronized (this) {
-//                httpClient = httpClients.get(domain);
-//                if (httpClient == null) {
-//                    httpClient = httpClientGenerator.getClient(site);
-////                    httpClients.put(domain, httpClient);
-//                }
-//            }
-//        }
+        String domain = site.getDomain();
+        CloseableHttpClient httpClient =  httpClients.get(domain);
+        if (httpClient == null) {
+            synchronized (this) {
+                httpClient = httpClients.get(domain);
+                if (httpClient == null) {
+                    httpClient = httpClientGenerator.generateClient(site.getUserAgent(),site.getDomain(),site.isUseGzip(),site.getRetryTimes(),null);
+                    httpClients.put(domain, httpClient);
+                }
+            }
+        }
         return httpClient;
     }
 
@@ -151,6 +151,10 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
             HttpHost host = site.getHttpProxy();
             requestConfigBuilder.setProxy(host);
             request.putExtra(Request.PROXY, host);
+        } else {
+            HttpHost httpHost = new HttpHost("127.0.0.1",8888);
+            requestConfigBuilder.setProxy(httpHost);
+            request.putExtra(Request.PROXY,httpHost);
         }
         requestBuilder.setConfig(requestConfigBuilder.build());
         return requestBuilder.build();
