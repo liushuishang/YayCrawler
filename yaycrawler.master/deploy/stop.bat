@@ -1,0 +1,1 @@
+for /f "tokens=1-5 delims= " %%a in ('"netstat -ano|findstr "^:8068""') do taskkill /f /pid %%e

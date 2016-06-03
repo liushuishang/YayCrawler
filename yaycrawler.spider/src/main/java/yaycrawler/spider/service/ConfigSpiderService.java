@@ -80,7 +80,7 @@ public class ConfigSpiderService {
 
         Object result = SelectorExpressionResolver.resolve(request, page.getHtml(), expression);
         if (result instanceof Selectable) {
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             ((Selectable) result).all().forEach(new Consumer<String>() {
                 @Override
                 public void accept(String s) {

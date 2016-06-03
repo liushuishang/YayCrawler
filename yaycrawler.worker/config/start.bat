@@ -1,1 +1,0 @@
-java -jar worker.war --spring.config.location=worker_local.properties

@@ -1,0 +1,1 @@
+java -jar admin.war --spring.config.location=admin_local.properties
