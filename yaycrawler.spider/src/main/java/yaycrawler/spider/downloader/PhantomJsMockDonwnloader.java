@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import us.codecraft.webmagic.Page;
@@ -44,15 +45,16 @@ public class PhantomJsMockDonwnloader extends AbstractDownloader {
         }
 
         logger.info("downloading page {}", request.getUrl());
-        Page page = new Page();
+        Page page = null;
         String cookie = String.valueOf(site.getHeaders().get("Cookie"));
         String domain = String.valueOf(site.getDomain());
         int i = 3;
         while (i > 0) {
             Process p = null;//这里我的codes.js是保存在c盘下面的phantomjs目录
             logger.info("路径 {}" + JSON.toJSONString(this.getClass().getResource("/")));
-            String path =this.getClass().getClassLoader().getResource("/").getPath().substring(1);
-            String progam =  path + "bin/window/phantomjs";
+            String path =this.getClass().getResource("/").getPath();
+            path = path.substring(1,path.lastIndexOf("/")+1);
+            String progam =  path + "phantomjs/window/phantomjs";
             /**
              * 程序地址：
              * 执行功能的js
@@ -62,12 +64,12 @@ public class PhantomJsMockDonwnloader extends AbstractDownloader {
             Properties prop = System.getProperties();
             String os = prop.getProperty("os.name");
             if(StringUtils.startsWithIgnoreCase(os,"win")) {
-                progam =  path + "bin/window/phantomjs";
+                progam =  path + "phantomjs/window/phantomjs";
             } else {
-                progam =  path + "bin/linux/phantomjs";
+                progam =  path + "phantomjs/linux/phantomjs";
             }
             ProcessBuilder processBuilder = new ProcessBuilder(progam,"phantomDownload.js",request.getUrl(),domain,cookie);
-            processBuilder.directory(new File(path));
+            processBuilder.directory(new File(path+"phantomjs"));
             try {
                 p = processBuilder.start();
                 InputStream is = p.getInputStream();
@@ -77,12 +79,12 @@ public class PhantomJsMockDonwnloader extends AbstractDownloader {
                 while ((tmp = br.readLine()) != null) {
                     sbf.append(tmp);
                 }
-                if(sbf.indexOf("{\"contentType\":null,\"headers\":[]") > -1)
+                if(sbf.indexOf("{\"contentType\":null,\"headers\":[]") > -1) {
+                    page = null;
                     continue;
-                page.setRawText(sbf.toString());
-                page.setUrl(new PlainText(request.getUrl()));
-                page.setRequest(request);
-                page.setStatusCode(200);
+                }
+                page = handleResponse(request,sbf.toString());
+                onSuccess(request);
                 break;
             } catch (Exception e) {
                 logger.warn("download page " + request.getUrl() + " error", e);
@@ -96,6 +98,15 @@ public class PhantomJsMockDonwnloader extends AbstractDownloader {
             }
 
         }
+        return page;
+    }
+
+    protected Page handleResponse(Request request,String content) throws IOException {
+        Page page = new Page();
+        page.setRawText(content);
+        page.setUrl(new PlainText(request.getUrl()));
+        page.setRequest(request);
+        page.setStatusCode(200);
         return page;
     }
 
