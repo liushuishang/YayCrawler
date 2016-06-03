@@ -11,7 +11,7 @@ import java.sql.Date;
  * Created by yuananyun on 2016/5/1.
  */
 @Entity
-@Table(name="conf_field_rule")
+@Table(name = "conf_field_rule")
 public class FieldParseRule implements Serializable {
     @Id
     @GeneratedValue(generator = "uuid")
@@ -22,14 +22,17 @@ public class FieldParseRule implements Serializable {
     @Column(columnDefinition = "varchar(38) not null")
     private String regionId;
     @NotNull
-    @Column(name="fieldName")
+    @Column(name = "fieldName")
     private String fieldName;
+
+    @Column(name = "remark", columnDefinition = "varchar(100)")
+    private String remark;
     @NotNull
-    @Column(name="rule")
+    @Column(name = "rule")
     private String rule;
-    @Column(name="valueType")
+    @Column(name = "valueType")
     private String valueType;
-    @Column(name = "createdDate",columnDefinition = "timestamp default now()")
+    @Column(name = "createdDate", columnDefinition = "timestamp default now()")
     private Date createdDate;
 
     public FieldParseRule() {
@@ -38,7 +41,7 @@ public class FieldParseRule implements Serializable {
 
     public FieldParseRule(String fieldName, String rule) {
         this();
-       setFieldName(fieldName);
+        setFieldName(fieldName);
         this.rule = rule;
 
     }
@@ -48,7 +51,7 @@ public class FieldParseRule implements Serializable {
     }
 
     public void setFieldName(String fieldName) {
-        if(fieldName==null) fieldName = "";
+        if (fieldName == null) fieldName = "";
         this.fieldName = fieldName.replace(".", "_");
     }
 
@@ -90,5 +93,13 @@ public class FieldParseRule implements Serializable {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

@@ -10,7 +10,7 @@
         <!--<div class="col-md-4">-->
         <!--</div>-->
         <div class="col-md-12">
-            <h4><font color="red">字段名中不要包含"."!!</font> </h4>
+            <h4><font color="red">字段名中请不要包含".",否则将会导致数据保存失败</font></h4>
             <div id="toolbar" class="btn-group">
                 <button id="btn_add" type="button" class="btn btn-default">
                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
@@ -503,7 +503,22 @@
                                                     },
                                                         {
                                                             field: 'fieldName',
-                                                            title: '字段名称'
+                                                            title: '字段名称',
+                                                            editable: {
+                                                                type: 'text',
+                                                                validate: function (value) {
+                                                                    if ($.trim(value) == '') {
+                                                                        return '字段名称不能为空';
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            field: 'remark',
+                                                            title: '备注',
+                                                            editable: {
+                                                                type: 'text'
+                                                            }
                                                         },
                                                         {
                                                             field: 'action',
