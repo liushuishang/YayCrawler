@@ -109,7 +109,7 @@ http://www.w3.org/2001/XMLSchema-instance ">
                                 <echo message="******************** ${basedir}/deploy*************************"/>
                                 <mkdir dir="${basedir}/target/${artifactId}-${version}/WEB-INF/classes/phantomjs"/>
                                 <copy todir="${basedir}/target/${artifactId}-${version}/WEB-INF/classes/phantomjs">
-                                    <fileset dir="../bin/phantomjs"/>
+                                    <fileset dir="../exec/phantomjs"/>
                                 </copy>
                             </tasks>
                         </configuration>
