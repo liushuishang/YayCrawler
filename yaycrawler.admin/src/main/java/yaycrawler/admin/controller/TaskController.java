@@ -1,7 +1,6 @@
 package yaycrawler.admin.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Maps;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import yaycrawler.admin.communication.MasterActor;
+import yaycrawler.admin.service.CrawlerResultRetrivalService;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.TasksResult;
 import yaycrawler.common.utils.UrlUtils;
@@ -28,6 +28,9 @@ public class TaskController {
 
     @Autowired
     private MasterActor masterActor;
+
+    @Autowired
+    private CrawlerResultRetrivalService resultRetrivalService;
 
     @RequestMapping(value = "/publishTask", method = RequestMethod.GET)
     public ModelAndView getPublishTask() {
@@ -56,31 +59,30 @@ public class TaskController {
     @RequestMapping("/successQueueManagement")
     public ModelAndView successQueueManagement() {
         ModelAndView modelAndView = new ModelAndView("successqueue_management");
-        modelAndView.addObject("queue","success");
+        modelAndView.addObject("queue", "success");
         return modelAndView;
     }
 
     @RequestMapping("/failQueueManagement")
     public ModelAndView failQueueManagement() {
         ModelAndView modelAndView = new ModelAndView("failqueue_management");
-        modelAndView.addObject("queue","fail");
+        modelAndView.addObject("queue", "fail");
         return modelAndView;
     }
 
     @RequestMapping("/itemQueueManagement")
     public ModelAndView itemQueueManagement() {
         ModelAndView modelAndView = new ModelAndView("itemqueue_management");
-        modelAndView.addObject("queue","item");
+        modelAndView.addObject("queue", "item");
         return modelAndView;
     }
 
     @RequestMapping("/runningQueueManagement")
     public ModelAndView runningQueueManagement() {
         ModelAndView modelAndView = new ModelAndView("runningqueue_management");
-        modelAndView.addObject("queue","running");
+        modelAndView.addObject("queue", "running");
         return modelAndView;
     }
-
 
 
     @RequestMapping("/queryQueueByName")
@@ -88,15 +90,26 @@ public class TaskController {
     public Object queryQueueByName(TasksResult tasksResult) {
         Object data = null;
         String name = tasksResult.getName();
-        if(StringUtils.equalsIgnoreCase(name,"fail")) {
+        if (StringUtils.equalsIgnoreCase(name, "fail")) {
             data = masterActor.retrievedFailQueueRegistrations(tasksResult);
-        } else if(StringUtils.equalsIgnoreCase(name,"success")) {
+        } else if (StringUtils.equalsIgnoreCase(name, "success")) {
             data = masterActor.retrievedSuccessQueueRegistrations(tasksResult);
-        } else if(StringUtils.equalsIgnoreCase(name,"item")) {
+        } else if (StringUtils.equalsIgnoreCase(name, "item")) {
             data = masterActor.retrievedItemQueueRegistrations(tasksResult);
-        } else if(StringUtils.equalsIgnoreCase(name,"running")) {
+        } else if (StringUtils.equalsIgnoreCase(name, "running")) {
             data = masterActor.retrievedRunningQueueRegistrations(tasksResult);
         }
         return data;
+    }
+
+    @RequestMapping(value = "/viewCrawlerResult", method = RequestMethod.POST)
+    @ResponseBody
+    public Object viewCrawlerResult(@RequestBody Map map) {
+        String pageUrl = MapUtils.getString(map, "pageUrl");
+        String taskId = MapUtils.getString(map, "taskId");
+        Assert.notNull(pageUrl);
+        Assert.notNull(taskId);
+
+        return resultRetrivalService.RetrivalByTaskId(UrlUtils.getDomain(pageUrl).replace(".", "_"), taskId);
     }
 }
