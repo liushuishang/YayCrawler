@@ -20,3 +20,8 @@ bin/
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+catalina.base_IS_UNDEFINED/
+yaycrawler.admin/catalina.base_IS_UNDEFINED/
+yaycrawler.admin/debug-2016-05-18.0.log
+yaycrawler.admin/info-2016-05-18.0.log
+yaycrawler.worker/catalina.base_IS_UNDEFINED/

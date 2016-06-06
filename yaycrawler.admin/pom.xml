@@ -90,7 +90,7 @@
 							<echo message="******************** ${basedir}/deploy*************************"/>
 							<mkdir dir="${basedir}/target/classes/phantomjs"/>
 							<copy todir="${basedir}/target/classes/phantomjs">
-								<fileset dir="${basedir}/deploy/phantomjs"/>
+								<fileset dir="../exec/phantomjs"/>
 							</copy>
 						</tasks>
 					</configuration>
