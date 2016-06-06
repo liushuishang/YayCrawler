@@ -2,12 +2,13 @@ package yaycrawler.common.model;
 
 import yaycrawler.common.utils.UrlUtils;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Created by Administrator on 2016/5/12.
  */
-public class CrawlerRequest {
+public class CrawlerRequest implements Serializable{
 
     private String url;
     private String method;
