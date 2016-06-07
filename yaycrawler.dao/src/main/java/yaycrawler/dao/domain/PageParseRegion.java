@@ -34,11 +34,13 @@ public class PageParseRegion implements Serializable {
      */
     @Column(name = "selectExpression",columnDefinition = "varchar(100)")
     private String selectExpression;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "regionId", insertable = false, updatable = false)
     private List<FieldParseRule> fieldParseRules;
-    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+
+    @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "regionId", insertable = false, updatable = false)
+    @OrderBy(value = "id ASC")
     private List<UrlParseRule> urlParseRules;
     @Column(name = "createdDate",columnDefinition = "timestamp default now()")
     private Date createdDate;

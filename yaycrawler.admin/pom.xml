@@ -1,108 +1,125 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.yaycrawler</groupId>
-	<artifactId>yaycrawler-admin</artifactId>
-	<version>${yaycrawler.version}</version>
-	<packaging>war</packaging>
+    <groupId>com.yaycrawler</groupId>
+    <artifactId>yaycrawler-admin</artifactId>
+    <version>${yaycrawler.version}</version>
+    <packaging>war</packaging>
 
-	<name>yaycrawler-admin</name>
-	<description>yaycrawler.admin</description>
+    <name>yaycrawler-admin</name>
+    <description>yaycrawler.admin</description>
 
-	<parent>
-		<artifactId>yaycrawler-parent</artifactId>
-		<groupId>com.yaycrawler</groupId>
-		<version>${yaycrawler.version}</version>
-	</parent>
+    <parent>
+        <artifactId>yaycrawler-parent</artifactId>
+        <groupId>com.yaycrawler</groupId>
+        <version>${yaycrawler.version}</version>
+    </parent>
 
 
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-remote-shell</artifactId>
-		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>org.springframework.boot</groupId>-->
-			<!--<artifactId>spring-boot-starter-security</artifactId>-->
-		<!--</dependency>-->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-tomcat</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.yaycrawler</groupId>
-			<artifactId>yaycrawler-common</artifactId>
-			<version>${yaycrawler.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.yaycrawler</groupId>
-			<artifactId>yaycrawler-spider</artifactId>
-			<version>${yaycrawler.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-tomcat</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-			<version>2.4.1</version>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-remote-shell</artifactId>
+        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>org.springframework.boot</groupId>-->
+        <!--<artifactId>spring-boot-starter-security</artifactId>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.yaycrawler</groupId>
+            <artifactId>yaycrawler-common</artifactId>
+            <version>${yaycrawler.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yaycrawler</groupId>
+            <artifactId>yaycrawler-spider</artifactId>
+            <version>${yaycrawler.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-					<id>gen-webadmin</id>
-					<phase>package</phase>
-					<configuration>
-						<tasks>
-							<echo message="******************** ${basedir}/deploy*************************"/>
-							<mkdir dir="${basedir}/target/classes/phantomjs"/>
-							<copy todir="${basedir}/target/classes/phantomjs">
-								<fileset dir="../exec/phantomjs"/>
-							</copy>
-						</tasks>
-					</configuration>
-					<goals>
-						<goal>run</goal>
-					</goals>
-				</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.yaycrawler</groupId>
+            <artifactId>yaycrawler-quartz</artifactId>
+            <version>${yaycrawler.version}</version>
+        </dependency>
 
-	
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>gen-webadmin</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <tasks>
+                                <echo message="******************** ${basedir}/deploy*************************"/>
+                                <mkdir dir="${basedir}/target/classes/phantomjs"/>
+                                <copy todir="${basedir}/target/classes/phantomjs">
+                                    <fileset dir="../exec/phantomjs"/>
+                                </copy>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 
 </project>

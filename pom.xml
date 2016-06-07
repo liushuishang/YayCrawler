@@ -14,6 +14,7 @@
         <module>yaycrawler.master</module>
         <module>yaycrawler.worker</module>
         <module>yaycrawler.dao</module>
+        <module>yaycrawler.quartz</module>
     </modules>
     <packaging>pom</packaging>
 

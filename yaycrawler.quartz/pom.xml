@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.yaycrawler</groupId>
-    <artifactId>yaycrawler-tasks</artifactId>
+    <artifactId>yaycrawler-quartz</artifactId>
     <version>${yaycrawler.version}</version>
     <packaging>jar</packaging>
 
@@ -17,9 +17,7 @@
         <version>${yaycrawler.version}</version>
     </parent>
 
-
     <dependencies>
-
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>

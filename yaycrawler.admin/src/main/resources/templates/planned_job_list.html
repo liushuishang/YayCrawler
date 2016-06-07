@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.springframework.org/schema/jdbc">
+<head xmlns:th="http://www.thymeleaf.org" th:include="master::head">
+    <title>计划中的作业</title>
+
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <!--<div class="col-md-4">-->
+        <!--</div>-->
+        <div class="col-md-12">
+            <table id="tb_jobs"></table>
+        </div>
+
+    </div>
+
+    <div th:include="master::itemDel"></div>
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(function () {
+        $("#btn_delete").click(function () {
+            delItem(function () {
+                var selectedRows = $('#tb_jobs').bootstrapTable('getSelections');
+                var selectedIds = [];
+                $.each(selectedRows, function (i, item) {
+                    selectedIds.push(item.id);
+                });
+                if (selectedIds.length == 0) return false;
+
+                $.ajax({
+                    type: "Post",
+                    cache: false,
+                    contentType: "application/json",
+                    url: global.contextPath + "/deleteSites",
+                    data: JSON.stringify(selectedIds),
+                    dataType: 'json',
+                    success: function (result) {     //回调函数，result，返回值
+                        if (result == true)
+                            $('#tb_jobs').bootstrapTable('refresh');
+                        else
+                            alert("删除失败");
+                    },
+                    error: function (msg) {
+                        alert(JSON.stringify(msg));
+                    }
+                });
+            });
+        });
+
+        //1.初始化Table
+        var TableInit = function () {
+            var oTableInit = new Object();
+            //初始化Table
+            oTableInit.Init = function () {
+                $('#tb_jobs').bootstrapTable($.extend(global.bootstrapTableOptions, {
+                    url: global.contextPath + '/getPlannedJobList',         //请求后台的URL（*）
+                    method: 'get',                      //请求方式（*）
+                    uniqueId: "jobId",
+                    sidePagination: "client",           //分页方式：client客户端分页，server服务端分页（*）
+                    detailView: false,          //是否显示父子表
+                    columns: [{
+                        field: 'jobName',
+                        title: '作业名称'
+                    },
+                        {
+                            field: 'jobGroup',
+                            title: '组名'
+                        }, {
+                            field: 'jobStatus',
+                            title: '状态',
+                            formatter: function (value, row, index) {
+                                if ("NONE" == value)
+                                    return "已停止";
+                                if ("NORMAL" == value)
+                                    return "正常";
+                                if ("PAUSED" == value)
+                                    return "暂停";
+                                if ("COMPLETE" == value)
+                                    return "已完成";
+                                if ("BLOCKED" == value)
+                                    return "线程阻塞";
+                                if ("ERROR" == value)
+                                    return "出现错误";
+                            }
+                        },
+                        {
+                            field: 'cronExpression',
+                            title: '定时表达式',
+                            editable: {
+                                type: 'text',
+                                validate: function (value) {
+                                    if ($.trim(value) == '') {
+                                        return '表达式不能为空';
+                                    }
+                                }
+                            }
+                        }, {
+                            field: 'description',
+                            title: '作业描述'
+                        },
+                        {
+                            field: 'action',
+                            title: '操作',
+                            formatter: oTableInit.actionFormatter,
+                            events: oTableInit.actionEvents
+                        }
+                    ],
+                    onEditableSave: function (field, row, oldValue, $el) {
+                        $.ajax({
+                            type: "post",
+                            contentType: "application/json",
+                            dataType: "json",
+                            url: global.contextPath + "/saveScheduleJob",
+                            data: JSON.stringify(row),
+                            success: function (data, status) {
+                                if (status == "success") {
+                                    $('#tb_jobs').bootstrapTable('refresh');
+                                } else
+                                    alert("保存失败！");
+                            },
+                            error: function () {
+                                alert("保存失败！");
+                            }
+                        });
+                    },
+                }));
+            };
+
+            oTableInit.actionFormatter = function (value, row, index) {
+                var btnArray = [
+                    '<a  href="javascript:void(0)" class="delete btn btn-sm red" title="删除作业">',
+                    '<i class="fa  fa-times">删除作业</i>',
+                    '</a>'
+                ];
+                if (row.jobStatus != "PAUSED")
+                    btnArray.push(
+                            '<a  href="javascript:void(0)" class="pause btn btn-sm dark" title="暂停作业">',
+                            '<i class="fa fa-pause">暂停作业</i>',
+                            '</a>');
+                else
+                    btnArray.push(
+                            '<a  href="javascript:void(0)" class="resume btn btn-sm green" title="重新启动">',
+                            '<i class="fa fa-link">重新启动</i>',
+                            '</a>');
+                return btnArray.join('');
+            };
+            oTableInit.actionEvents = {
+                'click .pause': function (e, value, row, index) {
+                    $.ajax({
+                        type: "Post",
+                        cache: false,
+                        contentType: "application/json",
+                        url: global.contextPath + "/pauseJob",
+                        data: JSON.stringify(row),
+                        dataType: 'json',
+                        success: function (result) {     //回调函数，result，返回值
+                            if (result == true)
+                                $('#tb_jobs').bootstrapTable('refresh');
+                            else
+                                alert("操作失败");
+                        },
+                        error: function (msg) {
+                            alert(JSON.stringify(msg));
+                        }
+                    });
+                },
+                'click .resume': function (e, value, row, index) {
+                    $.ajax({
+                        type: "Post",
+                        cache: false,
+                        contentType: "application/json",
+                        url: global.contextPath + "/resumeJob",
+                        data: JSON.stringify(row),
+                        dataType: 'json',
+                        success: function (result) {     //回调函数，result，返回值
+                            if (result == true)
+                                $('#tb_jobs').bootstrapTable('refresh');
+                            else
+                                alert("操作失败");
+                        },
+                        error: function (msg) {
+                            alert(JSON.stringify(msg));
+                        }
+                    });
+                },
+                'click .delete': function (e, value, row, index) {
+                    delItem(function () {
+                        $.ajax({
+                            type: "Post",
+                            cache: false,
+                            contentType: "application/json",
+                            url: global.contextPath + "/deleteJob",
+                            data: JSON.stringify(row),
+                            dataType: 'json',
+                            success: function (result) {     //回调函数，result，返回值
+                                if (result == true)
+                                    $('#tb_jobs').bootstrapTable('refresh');
+                                else
+                                    alert("删除失败");
+                            },
+                            error: function (msg) {
+                                alert(JSON.stringify(msg));
+                            }
+                        });
+                    });
+                },
+                'click .modifyCron': function (e, value, row, index) {
+                    $.ajax({
+                        type: "Post",
+                        cache: false,
+                        contentType: "application/json",
+                        url: global.contextPath + "/modifyJobCron",
+                        data: JSON.stringify(row),
+                        dataType: 'json',
+                        success: function (result) {     //回调函数，result，返回值
+                            if (result == true)
+                                $('#tb_jobs').bootstrapTable('refresh');
+                            else
+                                alert("修改失败");
+                        },
+                        error: function (msg) {
+                            alert(JSON.stringify(msg));
+                        }
+                    });
+                }
+            };
+            return oTableInit;
+        };
+        var oTable = new TableInit();
+        oTable.Init();
+    });
+    /*]]>*/
+</script>
+
+</body>
+</html>

@@ -12,10 +12,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import yaycrawler.admin.communication.MasterActor;
+import yaycrawler.admin.quartz.CrawlerRequestJob;
 import yaycrawler.admin.service.CrawlerResultRetrivalService;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.TasksResult;
 import yaycrawler.common.utils.UrlUtils;
+import yaycrawler.quartz.model.ScheduleJobInfo;
+import yaycrawler.quartz.service.QuartzScheduleService;
+import yaycrawler.quartz.utils.CronExpressionUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +36,9 @@ public class TaskController {
     @Autowired
     private CrawlerResultRetrivalService resultRetrivalService;
 
+    @Autowired
+    private QuartzScheduleService quartzScheduleService;
+
     @RequestMapping(value = "/publishTask", method = RequestMethod.GET)
     public ModelAndView getPublishTask() {
         return new ModelAndView("task_publish");
@@ -45,6 +52,26 @@ public class TaskController {
         Assert.notNull(url);
         Assert.notNull(method);
 
+        ScheduleJobInfo jobInfo = null;
+        String jobType = MapUtils.getString(taskMap, "jobType");
+        if ("regular".equals(jobType)) {
+            String jobName = MapUtils.getString(taskMap, "jobName");
+            String jobGroup = MapUtils.getString(taskMap, "jobGroup");
+            String cronExpression = MapUtils.getString(taskMap, "cronExpression");
+            String description = MapUtils.getString(taskMap, "description");
+
+            Assert.notNull(jobName);
+            Assert.notNull(jobGroup);
+            Assert.notNull(cronExpression);
+
+            cronExpression = CronExpressionUtils.convertToSpringCron(cronExpression);
+            if (!CronExpressionUtils.isValidExpression(cronExpression))
+                throw new RuntimeException("Cron表达式不正确！");
+
+            jobInfo = new ScheduleJobInfo(jobName, jobGroup, cronExpression);
+            jobInfo.setDescription(description);
+        }
+
         String paramJson = MapUtils.getString(taskMap, "urlParamsJson");
         Map<String, Object> data = new HashMap<>();
         if (!StringUtils.isBlank(paramJson)) {
@@ -53,7 +80,12 @@ public class TaskController {
         CrawlerRequest crawlerRequest = new CrawlerRequest(url, UrlUtils.getDomain(url), method.toUpperCase());
         crawlerRequest.setData(data);
 
-        return masterActor.publishTasks(crawlerRequest);
+        if (masterActor.publishTasks(crawlerRequest) && jobInfo != null) {
+            CrawlerRequestJob job = new CrawlerRequestJob(jobInfo);
+            job.addCrawlerRequest(crawlerRequest);
+            return quartzScheduleService.addJob(job);
+        }
+        return false;
     }
 
     @RequestMapping("/successQueueManagement")
