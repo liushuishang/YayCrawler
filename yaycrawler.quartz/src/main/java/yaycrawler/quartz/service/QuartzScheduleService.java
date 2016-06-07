@@ -46,14 +46,14 @@ public class QuartzScheduleService {
                 //表达式调度构建器
                 CronScheduleBuilder cronBuilder = CronScheduleBuilder.cronSchedule(job.getCronExpression());
                 //按新的cronExpression表达式构建一个新的trigger
-                trigger = TriggerBuilder.newTrigger().withIdentity(job.getJobName(), job.getJobGroup()).withSchedule(cronBuilder).build();
+                trigger = TriggerBuilder.newTrigger().withIdentity(job.getJobName(), job.getJobGroup()).withSchedule(cronBuilder).withDescription(job.getJobInfo().getDescription()).build();
                 scheduler.scheduleJob(jobDetail, trigger);
             } else {
                 // Trigger已存在，那么更新相应的定时设置
                 //表达式调度构建器
                 CronScheduleBuilder cronBuilder = CronScheduleBuilder.cronSchedule(job.getCronExpression());
                 //按新的cronExpression表达式重新构建trigger
-                trigger = trigger.getTriggerBuilder().withIdentity(triggerKey).withSchedule(cronBuilder).build();
+                trigger = trigger.getTriggerBuilder().withIdentity(triggerKey).withSchedule(cronBuilder).withDescription(job.getJobInfo().getDescription()).build();
                 //按新的trigger重新设置job执行
                 scheduler.rescheduleJob(triggerKey, trigger);
             }
@@ -68,26 +68,26 @@ public class QuartzScheduleService {
     /**
      * 更新一个job
      *
-     * @param job
+     * @param jobInfo
      * @return
      */
-    public boolean updateJob(AbstractExecutableJob job) {
+    public boolean updateJob(ScheduleJobInfo jobInfo) {
         try {
-            TriggerKey triggerKey = TriggerKey.triggerKey(job.getJobName(), job.getJobGroup());
+            TriggerKey triggerKey = TriggerKey.triggerKey(jobInfo.getJobName(), jobInfo.getJobGroup());
 
-            JobDetail jobDetail = scheduler.getJobDetail(getJobKey(job.getJobName(), job.getJobGroup()));
+            JobDetail jobDetail = scheduler.getJobDetail(getJobKey(jobInfo.getJobName(), jobInfo.getJobGroup()));
             //jobDetail = jobDetail.getJobBuilder().ofType(jobClass).build();
             //更新参数 实际测试中发现无法更新
             JobDataMap jobDataMap = jobDetail.getJobDataMap();
-            jobDataMap.put(Constant.JOB_PARAM_KEY, job.getJobInfo());
+            jobDataMap.put(Constant.JOB_PARAM_KEY, jobInfo);
             jobDetail.getJobBuilder().usingJobData(jobDataMap);
 
             //获取trigger，即在spring配置文件中定义的 bean id="myTrigger"
             CronTrigger trigger = (CronTrigger) scheduler.getTrigger(triggerKey);
             //表达式调度构建器
-            CronScheduleBuilder cronBuilder = CronScheduleBuilder.cronSchedule(job.getCronExpression());
+            CronScheduleBuilder cronBuilder = CronScheduleBuilder.cronSchedule(jobInfo.getCronExpression());
             //按新的cronExpression表达式重新构建trigger
-            trigger = trigger.getTriggerBuilder().withIdentity(triggerKey)
+            trigger = trigger.getTriggerBuilder().withIdentity(triggerKey).withDescription(jobInfo.getDescription())
                     .withSchedule(cronBuilder).build();
             //按新的trigger重新设置job执行
             scheduler.rescheduleJob(triggerKey, trigger);
@@ -115,7 +115,7 @@ public class QuartzScheduleService {
                     ScheduleJobInfo job = new ScheduleJobInfo();
                     job.setJobName(jobKey.getName());
                     job.setJobGroup(jobKey.getGroup());
-                    job.setDescription("触发器:" + trigger.getKey());
+                    job.setDescription(trigger.getDescription());
                     Trigger.TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
                     job.setJobStatus(triggerState.name());
                     if (trigger instanceof CronTrigger) {
@@ -149,7 +149,7 @@ public class QuartzScheduleService {
                 Trigger trigger = executingJob.getTrigger();
                 job.setJobName(jobKey.getName());
                 job.setJobGroup(jobKey.getGroup());
-                job.setDescription("触发器:" + trigger.getKey());
+                job.setDescription(trigger.getDescription());
                 Trigger.TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
                 job.setJobStatus(triggerState.name());
                 if (trigger instanceof CronTrigger) {
@@ -174,6 +174,23 @@ public class QuartzScheduleService {
      * @return
      */
     public boolean pauseJob(String jobName, String jobGroup) {
+        try {
+            JobKey jobKey = getJobKey(jobName, jobGroup);
+            scheduler.pauseJob(jobKey);
+            return true;
+        } catch (SchedulerException e) {
+            logger.error(e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * 恢复一个暂停的作业
+     * @param jobName
+     * @param jobGroup
+     * @return
+     */
+    public boolean resumeJob(String jobName, String jobGroup) {
         try {
             JobKey jobKey = getJobKey(jobName, jobGroup);
             scheduler.resumeJob(jobKey);

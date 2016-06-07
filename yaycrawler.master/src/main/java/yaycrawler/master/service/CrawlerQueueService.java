@@ -149,6 +149,7 @@ public class CrawlerQueueService {
 
     public boolean regeditQueues(List<CrawlerRequest> crawlerRequests) {
         try {
+            logger.info("开始注册{}个任务", crawlerRequests.size());
             for (CrawlerRequest crawlerRequest:crawlerRequests) {
                 Map<String, String> parameter = crawlerRequest.getData();
                 List<Object> arrayTmps = null;
@@ -212,12 +213,12 @@ public class CrawlerQueueService {
                     regeditQueue(request);
                 }
             }
+            logger.info("{}个任务注册成功！", crawlerRequests.size());
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return false;
         }
-
-        return true;
     }
 
     public Object regeditQueue(CrawlerRequest crawlerRequest) {

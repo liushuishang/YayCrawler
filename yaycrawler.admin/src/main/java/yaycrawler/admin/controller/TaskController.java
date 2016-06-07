@@ -15,12 +15,11 @@ import yaycrawler.admin.communication.MasterActor;
 import yaycrawler.admin.quartz.CrawlerRequestJob;
 import yaycrawler.admin.service.CrawlerResultRetrivalService;
 import yaycrawler.common.model.CrawlerRequest;
-import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.model.TasksResult;
-import yaycrawler.quartz.utils.CronExpressionUtils;
 import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.quartz.model.ScheduleJobInfo;
 import yaycrawler.quartz.service.QuartzScheduleService;
+import yaycrawler.quartz.utils.CronExpressionUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,17 +57,18 @@ public class TaskController {
         if ("regular".equals(jobType)) {
             String jobName = MapUtils.getString(taskMap, "jobName");
             String jobGroup = MapUtils.getString(taskMap, "jobGroup");
-            String cronExpressoin = MapUtils.getString(taskMap, "cronExpression");
+            String cronExpression = MapUtils.getString(taskMap, "cronExpression");
             String description = MapUtils.getString(taskMap, "description");
 
             Assert.notNull(jobName);
             Assert.notNull(jobGroup);
-            Assert.notNull(cronExpressoin);
+            Assert.notNull(cronExpression);
 
-            if (!CronExpressionUtils.isValidExpression(cronExpressoin))
-                return RestFulResult.failure("Cron表达式不正确！");
+            cronExpression = CronExpressionUtils.convertToSpringCron(cronExpression);
+            if (!CronExpressionUtils.isValidExpression(cronExpression))
+                throw new RuntimeException("Cron表达式不正确！");
 
-            jobInfo = new ScheduleJobInfo(jobName, jobGroup, cronExpressoin);
+            jobInfo = new ScheduleJobInfo(jobName, jobGroup, cronExpression);
             jobInfo.setDescription(description);
         }
 
@@ -80,10 +80,10 @@ public class TaskController {
         CrawlerRequest crawlerRequest = new CrawlerRequest(url, UrlUtils.getDomain(url), method.toUpperCase());
         crawlerRequest.setData(data);
 
-        if (masterActor.publishTasks(crawlerRequest)&&jobInfo!=null) {
-            CrawlerRequestJob job=new CrawlerRequestJob(jobInfo);
+        if (masterActor.publishTasks(crawlerRequest) && jobInfo != null) {
+            CrawlerRequestJob job = new CrawlerRequestJob(jobInfo);
             job.addCrawlerRequest(crawlerRequest);
-           return  quartzScheduleService.addJob(job);
+            return quartzScheduleService.addJob(job);
         }
         return false;
     }

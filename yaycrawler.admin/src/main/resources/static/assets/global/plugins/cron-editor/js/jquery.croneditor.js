@@ -122,7 +122,7 @@ $.fn.croneditor = function(opts) {
     max: 59,
     slide: function( event, ui ) {
       cronArr[0] = "*/" + ui.value;
-      $('#tabs-second-n .preview').html('Every ' + ui.value + ' seconds');
+      $('#tabs-second-n .preview').html('每隔 ' + ui.value + ' 秒');
       drawCron();
     }
   });
@@ -132,7 +132,7 @@ $.fn.croneditor = function(opts) {
     max: 59,
     slide: function( event, ui ) {
       cronArr[1] = "*/" + ui.value;
-      $('#tabs-minute-n .preview').html('Every ' + ui.value + ' minutes');
+      $('#tabs-minute-n .preview').html('每隔 ' + ui.value + ' 分钟');
       drawCron();
     }
   });
@@ -142,7 +142,7 @@ $.fn.croneditor = function(opts) {
     max: 23,
     slide: function( event, ui ) {
       cronArr[2] = "*/" + ui.value;
-      $('#tabs-hour-n .preview').html('Every ' + ui.value + ' Hours');
+      $('#tabs-hour-n .preview').html('每隔 ' + ui.value + ' 小时');
       drawCron();
     }
   });
@@ -275,7 +275,8 @@ $.fn.croneditor = function(opts) {
 
   function drawEachMonths () {
     // months
-    var months = [null, 'Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+    //var months = [null, 'Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+    var months = [null, '一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
 
     for (var i = 1; i < 13; i++) {
       var padded = i;
@@ -316,7 +317,8 @@ $.fn.croneditor = function(opts) {
 
   function drawEachWeek () {
     // weeks
-    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    //var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var days = ['星期天', '星期一', '星期二', '星期三', '星期四', '星球五', '星期六'];
     for (var i = 0; i < 7; i++) {
       var padded = i;
       if(padded.toString().length === 1) {
@@ -363,34 +365,34 @@ $.fn.croneditor = function(opts) {
 };
 
 // HTML Template for plugin
-var tmpl = '<input type="text" id="cronString" value="* * * * * *" size="80"/>\
+var tmpl = '<input type="text" id="cronString" value="* * * * * * ?" size="80"/>\
 <br/>\
-<input type="button" value="Reset" id="clear"/>\
+<input type="button" value="重置" id="clear"/>\
 <br/>\
 <!-- TODO: add back next estimated time -->\
 <!-- <span>Will run next at:<em><span class="next"></span></em></span> -->\
 <!-- the cron editor will be here -->\
 <div id="tabs" class="tabs">\
   <ul>\
-    <li><a href="#tabs-second">Second</a></li>\
-    <li><a href="#tabs-minute">Minute</a></li>\
-    <li><a href="#tabs-hour">Hour</a></li>\
-    <li><a href="#tabs-day">Day of Month</a></li>\
-    <li><a href="#tabs-month">Month</a></li>\
-    <li><a href="#tabs-week">Day of Week</a></li>\
+    <li><a href="#tabs-second">秒</a></li>\
+    <li><a href="#tabs-minute">分钟</a></li>\
+    <li><a href="#tabs-hour">小时</a></li>\
+    <li><a href="#tabs-day">月份中的天</a></li>\
+    <li><a href="#tabs-month">月份</a></li>\
+    <li><a href="#tabs-week">星期几？</a></li>\
   </ul>\
   <div id="tabs-second">\
     <div class="tabs">\
       <ul>\
-        <li id="button-second-every"><a href="#tabs-second-every">Every second</a></li>\
-        <li id="button-second-n"><a href="#tabs-second-n">Every n seconds</a></li>\
+        <li id="button-second-every"><a href="#tabs-second-every">每秒</a></li>\
+        <li id="button-second-n"><a href="#tabs-second-n">隔几秒</a></li>\
       </ul>\
       <div id="tabs-second-every" class="preview">\
         <div>*</div>\
-        <div>Every second.</div>\
+        <div>每秒</div>\
       </div>\
       <div id="tabs-second-n">\
-        <div class="preview"> Every 1 seconds</div>\
+        <div class="preview"> 每隔1秒</div>\
         <div class="slider"></div>\
       </div>\
     </div>\
@@ -398,20 +400,20 @@ var tmpl = '<input type="text" id="cronString" value="* * * * * *" size="80"/>\
   <div id="tabs-minute">\
     <div class="tabs">\
       <ul>\
-        <li id="button-minute-every"><a href="#tabs-minute-every">Every Minute</a></li>\
-        <li id="button-minute-n"><a href="#tabs-minute-n">Every n minutes</a></li>\
-        <li id="button-minute-each"><a href="#tabs-minute-each">Each Selected Minute</a></li>\
+        <li id="button-minute-every"><a href="#tabs-minute-every">每分钟</a></li>\
+        <li id="button-minute-n"><a href="#tabs-minute-n">隔几分钟</a></li>\
+        <li id="button-minute-each"><a href="#tabs-minute-each">隔选定的分钟</a></li>\
       </ul>\
       <div id="tabs-minute-every" class="preview">\
         <div>*</div>\
-        <div>Every minute.</div>\
+        <div>每分钟</div>\
       </div>\
       <div id="tabs-minute-n">\
-        <div class="preview"> Every 1 minutes</div>\
+        <div class="preview">每隔1分钟</div>\
         <div class="slider"></div>\
       </div>\
       <div id="tabs-minute-each" class="preview">\
-        <div>Each selected minute</div><br/>\
+        <div>隔选定的分钟</div><br/>\
         <div class="tabs-minute-format"></div>\
       </div>\
     </div>\
@@ -419,20 +421,20 @@ var tmpl = '<input type="text" id="cronString" value="* * * * * *" size="80"/>\
   <div id="tabs-hour">\
     <div class="tabs">\
       <ul>\
-        <li id="button-hour-every"><a href="#tabs-hour-every">Every Hour</a></li>\
-        <li id="button-hour-n"><a href="#tabs-hour-n">Every n Hours</a></li>\
-        <li id="button-hour-each"><a href="#tabs-hour-each">Each Selected Hour</a></li>\
+        <li id="button-hour-every"><a href="#tabs-hour-every">每小时</a></li>\
+        <li id="button-hour-n"><a href="#tabs-hour-n">隔几小时</a></li>\
+        <li id="button-hour-each"><a href="#tabs-hour-each">隔选定的小时</a></li>\
       </ul>\
       <div id="tabs-hour-every" class="preview">\
         <div>*</div>\
-        <div>Every hour</div>\
+        <div>每小时</div>\
       </div>\
       <div id="tabs-hour-n">\
-        <div class="preview">Every 1 hours</div>\
+        <div class="preview">每隔1小时</div>\
         <div class="slider"></div>\
       </div>\
       <div id="tabs-hour-each" class="preview">\
-        <div>Each selected hour</div><br/>\
+        <div>隔选定的小时</div><br/>\
         <div class="tabs-hour-format"></div>\
       </div>\
     </div>\
@@ -440,15 +442,15 @@ var tmpl = '<input type="text" id="cronString" value="* * * * * *" size="80"/>\
   <div id="tabs-day">\
     <div class="tabs">\
       <ul>\
-        <li id="button-day-every"><a href="#tabs-day-every">Every Day</a></li>\
-        <li id="button-day-each"><a href="#tabs-day-each">Each Day</a></li>\
+        <li id="button-day-every"><a href="#tabs-day-every">每天/月</a></li>\
+        <li id="button-day-each"><a href="#tabs-day-each">选定的日期</a></li>\
       </ul>\
       <div id="tabs-day-every" class="preview">\
         <div>*</div>\
-        <div>Every Day</div>\
+        <div>每天/月</div>\
       </div>\
       <div id="tabs-day-each" class="preview">\
-        <div>Each selected Day</div><br/>\
+        <div>选定的日期</div><br/>\
         <div class="tabs-day-format"></div>\
       </div>\
     </div>\
@@ -456,15 +458,15 @@ var tmpl = '<input type="text" id="cronString" value="* * * * * *" size="80"/>\
   <div id="tabs-month">\
     <div class="tabs">\
       <ul>\
-        <li id="button-month-every"><a href="#tabs-month-every">Every Month</a></li>\
-        <li id="button-month-each"><a href="#tabs-month-each">Each Month</a></li>\
+        <li id="button-month-every"><a href="#tabs-month-every">每月</a></li>\
+        <li id="button-month-each"><a href="#tabs-month-each">选定的月份</a></li>\
       </ul>\
       <div id="tabs-month-every" class="preview">\
         <div>*</div>\
-        <div>Every month</div>\
+        <div>每月</div>\
       </div>\
       <div id="tabs-month-each" class="preview">\
-        <div>Each selected month</div><br/>\
+        <div>选定的月份</div><br/>\
         <div class="tabs-month-format"></div>\
       </div>\
     </div>\
@@ -472,15 +474,15 @@ var tmpl = '<input type="text" id="cronString" value="* * * * * *" size="80"/>\
   <div id="tabs-week">\
     <div class="tabs">\
       <ul>\
-        <li id="button-week-every"><a href="#tabs-week-every">Every Week</a></li>\
-        <li id="button-week-each"><a href="#tabs-week-each">Each Week</a></li>\
+        <li id="button-week-every"><a href="#tabs-week-every">每天/周</a></li>\
+        <li id="button-week-each"><a href="#tabs-week-each">选定的星期几</a></li>\
       </ul>\
       <div id="tabs-week-every" class="preview">\
         <div>*</div>\
-        <div>Every Day</div>\
+        <div>每天/周</div>\
       </div>\
       <div id="tabs-week-each">\
-        <div class="preview">Each selected Day</div><br/>\
+        <div class="preview">选定的星期几</div><br/>\
         <div class="tabs-week-format"></div>\
       </div>\
     </div>\
