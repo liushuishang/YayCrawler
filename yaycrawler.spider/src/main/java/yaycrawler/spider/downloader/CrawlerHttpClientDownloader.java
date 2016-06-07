@@ -152,9 +152,9 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
             requestConfigBuilder.setProxy(host);
             request.putExtra(Request.PROXY, host);
         } else {
-            HttpHost httpHost = new HttpHost("127.0.0.1",8888);
-            requestConfigBuilder.setProxy(httpHost);
-            request.putExtra(Request.PROXY,httpHost);
+//            HttpHost httpHost = new HttpHost("127.0.0.1",8888);
+//            requestConfigBuilder.setProxy(httpHost);
+//            request.putExtra(Request.PROXY,httpHost);
         }
         requestBuilder.setConfig(requestConfigBuilder.build());
         return requestBuilder.build();
@@ -220,7 +220,7 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
         }
         //unicode编码处理
         if (UNICODE_PATTERN.matcher(content).find())
-            return StringEscapeUtils.unescapeJava(content);
+            return StringEscapeUtils.unescapeJava(content.replace("\"","\\\""));
         return content;
     }
 

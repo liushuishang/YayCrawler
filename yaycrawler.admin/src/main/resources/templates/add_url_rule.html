@@ -54,7 +54,7 @@
                 data: JSON.stringify(data),
                 dataType: 'json',
                 success: function (result) {     //回调函数，result，返回值
-                    $(".testResult").html(JSON.stringify(result, null, "\t"));
+                    $(".testResult").val(JSON.stringify(result, null, "\t"));
                 },
                 error: function (msg) {
                     alert("测试出现异常！");

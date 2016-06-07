@@ -48,7 +48,7 @@ public class ImagePersistentService implements IResultPersistentService {
                     if (src instanceof List)
                         srcList = (List<String>) src;
                     else
-                        id = src !=null ?src.toString():"";
+                        id = String.valueOf(src);
                 }
                 if (srcList == null || srcList.isEmpty())
                     continue;

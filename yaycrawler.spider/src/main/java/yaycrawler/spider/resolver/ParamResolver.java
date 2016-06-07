@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  */
 public class ParamResolver {
     private static Pattern REQUEST_PATTERN = Pattern.compile("REQUEST\\((.*?)\\)");
-
+    private static Pattern REPLACE_PATTERN = Pattern.compile("REPLACE\\((.*?)\\)");
     public static String resolverFromRequest(Request request, String origin) {
         Matcher mather = REQUEST_PATTERN.matcher(origin);
         while (mather.find()) {
@@ -34,6 +34,16 @@ public class ParamResolver {
             return matcher.group(1);
         }
         return "";
+    }
+
+    public static String resolverReplaceRequest(Request request, String origin, Object localObject) {
+        Matcher mather = REPLACE_PATTERN.matcher(origin);
+        String url = request.getUrl();
+        if(mather.find()) {
+            String key = mather.group(1);
+            url = url.replaceAll(key + "=([^&|?.]*)",key + "=" + localObject);
+        }
+        return url;
     }
 
 //    public static void main(String[] args)

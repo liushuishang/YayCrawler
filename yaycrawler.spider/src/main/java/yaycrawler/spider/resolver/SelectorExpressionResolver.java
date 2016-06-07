@@ -85,6 +85,8 @@ public class SelectorExpressionResolver {
                 String url = params[0];
                 if (url.contains("REQUEST("))
                     url = ParamResolver.resolverFromRequest(request, url);
+                else if(url.contains("REPLACE("))
+                    url = ParamResolver.resolverReplaceRequest(request,url,localObject);
                 return url;
             }
             //应该有四个参数（template,varName,start,end)
@@ -147,7 +149,7 @@ public class SelectorExpressionResolver {
         if (selectable == null) return null;
 
         if ("getjson".equals(lowerMethodName))
-            return new Json(selectable.xpath("//body/html()").get());
+            return new Json(selectable.get());
 
         if ("css".equals(lowerMethodName)) {
             if (params.length == 1)

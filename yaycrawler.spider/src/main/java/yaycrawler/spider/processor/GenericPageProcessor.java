@@ -82,8 +82,12 @@ public class GenericPageProcessor implements PageProcessor {
 
         if (StringUtils.isBlank(selectExpression) || DEFAULT_PAGE_SELECTOR.equals(selectExpression))
             context = page.getHtml();
-        else
-            context = SelectorExpressionResolver.resolve(request, page.getHtml(), selectExpression);
+        else {
+            if (selectExpression.toLowerCase().contains("getjson()"))
+                context = SelectorExpressionResolver.resolve(request, page.getJson(), selectExpression);
+            else
+                context = SelectorExpressionResolver.resolve(request, page.getHtml(), selectExpression);
+        }
         if (context == null) return null;
 
         List<UrlParseRule> urlParseRuleList = pageParseRegion.getUrlParseRules();
@@ -141,12 +145,12 @@ public class GenericPageProcessor implements PageProcessor {
 
             for (UrlParseRule urlParseRule : urlParseRuleList) {
                 //解析url
-                Object u = SelectorExpressionResolver.resolve(request, context, urlParseRule.getRule());
+                Object u = SelectorExpressionResolver.resolve(request, node, urlParseRule.getRule());
                 //解析Url的参数
                 Map<String, Object> urlParamMap = new HashMap<>();
                 if (urlParseRule.getUrlRuleParams() != null)
                     for (UrlRuleParam ruleParam : urlParseRule.getUrlRuleParams()) {
-                        urlParamMap.put(ruleParam.getParamName(), SelectorExpressionResolver.resolve(request, context, ruleParam.getExpression()));
+                        urlParamMap.put(ruleParam.getParamName(), SelectorExpressionResolver.resolve(request, node, ruleParam.getExpression()));
                     }
                 //组装成完整的URL
                 if (u instanceof Collection) {
