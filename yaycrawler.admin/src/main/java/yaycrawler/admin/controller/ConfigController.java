@@ -1,5 +1,6 @@
 package yaycrawler.admin.controller;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 import yaycrawler.common.model.CrawlerRequest;
+import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.*;
 import yaycrawler.dao.service.PageParserRuleService;
@@ -53,8 +55,7 @@ public class ConfigController {
 
     @RequestMapping(value = "/testExpressionOnPage", method = RequestMethod.POST)
     @ResponseBody
-    public Object testExpressionOnPage(String pageId,String expression)
-    {
+    public Object testExpressionOnPage(String pageId, String expression) {
         Assert.notNull(pageId);
         Assert.notNull(expression);
 
@@ -83,6 +84,16 @@ public class ConfigController {
     public Object savePageInfo(@RequestBody PageInfo pageInfo) {
         Assert.notNull(pageInfo.getPageUrl());
         Assert.notNull(pageInfo.getUrlRgx());
+        String paramsJson = pageInfo.getParamsJson();
+        if (!StringUtils.isBlank(paramsJson)) {
+            try {
+                paramsJson = paramsJson.replace("\"", "\\\"");
+                JSON.parseObject(paramsJson);
+                pageInfo.setParamsJson(paramsJson);
+            } catch (Exception ex) {
+                return RestFulResult.failure("请求参数不是一个合法的Json字符串！");
+            }
+        }
         return pageParseRuleService.savePageInfo(pageInfo);
     }
 
@@ -192,30 +203,37 @@ public class ConfigController {
     public Object testPage(@RequestBody Map ruleMap) {
         String regionId = MapUtils.getString(ruleMap, "regionId");
         String rule = MapUtils.getString(ruleMap, "rule");
-        String scope = MapUtils.getString(ruleMap, "scope", "single");
+//        String scope = MapUtils.getString(ruleMap, "scope", "single");
 
         Assert.notNull(regionId);
         Assert.notNull(rule);
 
         PageParseRegion regionInDb = pageParseRuleService.getPageRegionById(regionId);
-        PageParseRegion region=new PageParseRegion();
+        PageParseRegion region = new PageParseRegion();
         region.setSelectExpression(regionInDb.getSelectExpression());
 
         String ruleType = MapUtils.getString(ruleMap, "ruleType");
+        String ruleId = MapUtils.getString(ruleMap, "id", null);
         if ("fieldRule".equals(ruleType)) {
-            if (!"all".equals(scope)) {
-                FieldParseRule fieldParseRule = new FieldParseRule(MapUtils.getString(ruleMap, "fieldName"), rule);
-                region.getFieldParseRules().add(fieldParseRule);
-            }
+            FieldParseRule fieldParseRule = new FieldParseRule(MapUtils.getString(ruleMap, "fieldName"), rule);
+            region.getFieldParseRules().add(fieldParseRule);
         } else {
-            if (!"all".equals(scope)) {
-                UrlParseRule urlParseRule = new UrlParseRule(rule);
+            UrlParseRule urlParseRule = null;
+//            ruleId不为空则是从数据库中拿取规则测试
+            if (StringUtils.isBlank(ruleId)) {
+                urlParseRule = new UrlParseRule(rule);
                 urlParseRule.setMethod(MapUtils.getString(ruleMap, "method"));
-                region.getUrlParseRules().add(urlParseRule);
+            } else {
+                for (UrlParseRule uRule : regionInDb.getUrlParseRules()) {
+                    if (uRule.getId().equals(ruleId)) {
+                        urlParseRule = uRule;
+                        break;
+                    }
+                }
             }
+            region.getUrlParseRules().add(urlParseRule);
         }
-
-        PageInfo pageInfo = pageParseRuleService.getPageInfoById( regionInDb.getPageId());
+        PageInfo pageInfo = pageParseRuleService.getPageInfoById(regionInDb.getPageId());
         String targetUrl = pageInfo.getPageUrl();
         Map<String, Object> paramsMap = pageInfo.getParamsMap();
         CrawlerRequest request = new CrawlerRequest(targetUrl, UrlUtils.getDomain(targetUrl), pageInfo.getMethod());
@@ -237,11 +255,11 @@ public class ConfigController {
 
         UrlParseRule urlParseRule = pageParseRuleService.getUrlParseRuleById(urlRuleId);
         String regionId = urlParseRule.getRegionId();
-        PageInfo pageInfo = pageParseRuleService.getPageInfoById( pageParseRuleService.getPageRegionById(regionId).getPageId());
+        PageInfo pageInfo = pageParseRuleService.getPageInfoById(pageParseRuleService.getPageRegionById(regionId).getPageId());
 
 
-        PageParseRegion testRegion=new PageParseRegion();
-        UrlParseRule testUrlParseRule=new UrlParseRule(urlParseRule.getRule());
+        PageParseRegion testRegion = new PageParseRegion();
+        UrlParseRule testUrlParseRule = new UrlParseRule(urlParseRule.getRule());
         testUrlParseRule.setUrlRuleParams(new LinkedList<UrlRuleParam>());
         testUrlParseRule.getUrlRuleParams().add(new UrlRuleParam(null, paramName, paramExpression));
         testRegion.getUrlParseRules().add(testUrlParseRule);

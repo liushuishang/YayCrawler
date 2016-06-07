@@ -1,5 +1,7 @@
 package yaycrawler.admin.communication;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -9,14 +11,15 @@ import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.model.TasksResult;
 import yaycrawler.common.utils.HttpUtils;
 
-import java.util.HashMap;
-import java.util.Map;
+
 
 /**
  * Created by ucs_yuananyun on 2016/5/13.
  */
 @Component
 public class MasterActor {
+
+    private static Logger logger = LoggerFactory.getLogger(MasterActor.class);
     @Value("${master.server.address}")
     private String masterServerAddress;
     @Value("${signature.token}")
@@ -30,6 +33,7 @@ public class MasterActor {
     public boolean publishTasks(CrawlerRequest... crawlerRequests) {
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(masterServerAddress, CommunicationAPIs.ADMIN_POST_MASTER_TASK_REGEDIT);
         RestFulResult result = HttpUtils.doSignedHttpExecute(secret, targetUrl, HttpMethod.POST, crawlerRequests);
+        if(result.hasError()) logger.error(result.getMessage());
         return result != null && !result.hasError();
     }
 

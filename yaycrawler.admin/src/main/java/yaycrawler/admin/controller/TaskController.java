@@ -80,7 +80,7 @@ public class TaskController {
         CrawlerRequest crawlerRequest = new CrawlerRequest(url, UrlUtils.getDomain(url), method.toUpperCase());
         crawlerRequest.setData(data);
 
-        if (!masterActor.publishTasks(crawlerRequest)&&jobInfo!=null) {
+        if (masterActor.publishTasks(crawlerRequest)&&jobInfo!=null) {
             CrawlerRequestJob job=new CrawlerRequestJob(jobInfo);
             job.addCrawlerRequest(crawlerRequest);
            return  quartzScheduleService.addJob(job);
