@@ -8,6 +8,18 @@
     <div class="row">
         <div class="col-md-8">
             <div class="portlet-body form">
+                <form action="uploadFile" id="uploadFileForm" enctype="multipart/form-data" method="post">
+                    <div class="input-group">
+                        <input type="file" value="" id="filekey" autocomplete="off" name="files"
+                               class="form-control input-lg" required="required"/>
+                        <span>上传符合格式的Excel文件,CSV文件,TXT文件:</span>
+                                <span class="input-group-btn">
+                                  <button type="submit" class="button btn btn-danger btn-lg" value="解析文件"
+                                          style="margin-left: 2px;margin-top: -23px;">解析文件
+                                  </button>
+                                  </span>
+                    </div>
+                </form>
                 <form id="taskForm" action="publishTask" method="post">
                     <div class="form-body">
                         <div class="form-group">
@@ -34,6 +46,14 @@
                                 <li>2、批量查询:"$array_批量参数名:['xxx','yyy','zzz']"。例：$array_name:['11','12','13','14','15']
                                 </li>
                             </ul>
+
+                            <div class="row">
+                                <!--<div class="col-md-4">-->
+                                <!--</div>-->
+                                <div class="col-md-12">
+                                    <table id="tb_task"></table>
+                                </div>
+                            </div>
                             <textarea id="urlParamsJson" name="urlParamsJson" class="form-control " rows="3" value=""
                                       placeholder="{&quot;$pagination_p&quot;:{'START':'1','END':'100','STEP':'1'},&quot;$array_name&quot;:['11','12','13','14','15']} "></textarea>
                         </div>
@@ -58,10 +78,42 @@
     </div>
 
 </div>
+
 <script th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
-
+        var paramList;
+        $('#uploadFileForm').submit(function () {
+            var form = $(this);
+            debugger
+            var filename = $("#files").val();
+            $.ajax({
+                type: "POST",
+                url: form.attr("action"),
+                cache: false,
+                data: new FormData($('#uploadFileForm')[0]),
+                processData: false,
+                contentType: false,
+                success: function (result) {     //回调函数，result，返回值
+                    debugger
+                    paramList = result.data;
+                    $('#tb_task').bootstrapTable($.extend(global.bootstrapTableOptions, {
+                                method: 'get',                      //请求方式（*）
+                                detailView: false,                   //是否显示父子表
+                                sidePagination: "client",           //分页方式：client客户端分页，server服务端分页（*）
+                                showRefresh: true,
+                                data: result.data,
+                                columns: result.columns
+                            }
+                    ));
+                },
+                error: function (msg) {
+                    console.log(msg)
+                }
+            });
+            return false; //此处必须返回false，阻止常规的form提交
+        });
+        //1.初始化Table
         $(":radio").click(function () {
             if ("regular" === $(this).val())
                 $("#jobInfoDiv").load(global.contextPath + "/addScheduleJob?random=" + Math.random());
@@ -75,6 +127,7 @@
             form.serializeArray().map(function (x) {
                 data[x.name] = x.value;
             });
+            data.paramList= paramList;
             $.ajax({
                 type: "Post",
                 cache: false,

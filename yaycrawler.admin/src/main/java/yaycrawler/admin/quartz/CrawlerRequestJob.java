@@ -46,9 +46,11 @@ public class CrawlerRequestJob extends AbstractExecutableJob {
         this.crawlerRequestList = crawlerRequestList;
     }
 
-    public void addCrawlerRequest(CrawlerRequest request) {
+    public void addCrawlerRequest(CrawlerRequest... requests) {
         if (crawlerRequestList == null) crawlerRequestList = new LinkedList<>();
-        crawlerRequestList.add(request);
+        for (CrawlerRequest crawlerRequest : requests) {
+            crawlerRequestList.add(crawlerRequest);
+        }
     }
 
     @Override

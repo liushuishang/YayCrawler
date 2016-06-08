@@ -6,14 +6,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import yaycrawler.admin.communication.MasterActor;
 import yaycrawler.admin.quartz.CrawlerRequestJob;
 import yaycrawler.admin.service.CrawlerResultRetrivalService;
+import yaycrawler.admin.service.TaskService;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.TasksResult;
 import yaycrawler.common.utils.UrlUtils;
@@ -21,7 +20,10 @@ import yaycrawler.quartz.model.ScheduleJobInfo;
 import yaycrawler.quartz.service.QuartzScheduleService;
 import yaycrawler.quartz.utils.CronExpressionUtils;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -39,6 +41,9 @@ public class TaskController {
     @Autowired
     private QuartzScheduleService quartzScheduleService;
 
+    @Autowired
+    private TaskService taskService;
+
     @RequestMapping(value = "/publishTask", method = RequestMethod.GET)
     public ModelAndView getPublishTask() {
         return new ModelAndView("task_publish");
@@ -51,6 +56,28 @@ public class TaskController {
         String method = MapUtils.getString(taskMap, "method");
         Assert.notNull(url);
         Assert.notNull(method);
+
+
+        List<Map> paramMapList = (List<Map>) taskMap.get("paramList");
+        CrawlerRequest[] crawlerRequestArray = new CrawlerRequest[paramMapList.size()];
+        if (paramMapList.size() > 0) {
+            for (int i = 0; i < paramMapList.size(); i++) {
+                Map paramMap = paramMapList.get(i);
+                if (paramMap == null) continue;
+                CrawlerRequest crawlerRequest = new CrawlerRequest(url, UrlUtils.getDomain(url), method.toUpperCase());
+                crawlerRequest.setData(paramMap);
+                crawlerRequestArray[i] = crawlerRequest;
+            }
+        }else{
+            String paramJson = MapUtils.getString(taskMap, "urlParamsJson");
+            Map<String, Object> data = new HashMap<>();
+            if (!StringUtils.isBlank(paramJson)) {
+                data = JSON.parseObject(paramJson, Map.class);
+            }
+            CrawlerRequest crawlerRequest = new CrawlerRequest(url, UrlUtils.getDomain(url), method.toUpperCase());
+            crawlerRequest.setData(data);
+            crawlerRequestArray[0] = crawlerRequest;
+        }
 
         ScheduleJobInfo jobInfo = null;
         String jobType = MapUtils.getString(taskMap, "jobType");
@@ -72,17 +99,10 @@ public class TaskController {
             jobInfo.setDescription(description);
         }
 
-        String paramJson = MapUtils.getString(taskMap, "urlParamsJson");
-        Map<String, Object> data = new HashMap<>();
-        if (!StringUtils.isBlank(paramJson)) {
-            data = JSON.parseObject(paramJson, Map.class);
-        }
-        CrawlerRequest crawlerRequest = new CrawlerRequest(url, UrlUtils.getDomain(url), method.toUpperCase());
-        crawlerRequest.setData(data);
-        boolean flag = masterActor.publishTasks(crawlerRequest);
+        boolean flag = masterActor.publishTasks(crawlerRequestArray);
         if (flag && jobInfo != null) {
             CrawlerRequestJob job = new CrawlerRequestJob(jobInfo);
-            job.addCrawlerRequest(crawlerRequest);
+            job.addCrawlerRequest(crawlerRequestArray);
             return quartzScheduleService.addJob(job);
         }
         return flag;
@@ -143,5 +163,23 @@ public class TaskController {
         Assert.notNull(taskId);
 
         return resultRetrivalService.RetrivalByTaskId(UrlUtils.getDomain(pageUrl).replace(".", "_"), taskId);
+    }
+
+    @RequestMapping(value = "/uploadFile",method = RequestMethod.POST)
+    @ResponseBody
+    public Object upload(HttpServletRequest request, HttpServletResponse response, @RequestParam("files") MultipartFile[] files)
+    {
+        MultipartFile file = files[0];
+        String filename = file.getOriginalFilename();
+        if (filename == null || "".equals(filename))
+        {
+            return null;
+        }
+        Map map;
+        if(StringUtils.endsWithAny(file.getOriginalFilename(),".csv",".txt"))
+            map = taskService.insertCSV(file);
+        else
+            map = taskService.insertExcel(file);
+        return map;
     }
 }

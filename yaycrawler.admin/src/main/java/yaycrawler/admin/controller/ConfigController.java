@@ -257,7 +257,7 @@ public class ConfigController {
 
         PageParseRegion testRegion = new PageParseRegion();
         UrlParseRule testUrlParseRule = new UrlParseRule(urlParseRule.getRule());
-        testUrlParseRule.setUrlRuleParams(new HashSet<>());
+        testUrlParseRule.setUrlRuleParams(new HashSet<UrlRuleParam>());
         testUrlParseRule.getUrlRuleParams().add(new UrlRuleParam(null, paramName, paramExpression));
         testRegion.getUrlParseRules().add(testUrlParseRule);
 

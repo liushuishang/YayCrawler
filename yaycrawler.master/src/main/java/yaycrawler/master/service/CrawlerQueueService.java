@@ -155,7 +155,7 @@ public class CrawlerQueueService {
         return urlBuilder.toString();
     }
 
-    public boolean regeditQueues(List<CrawlerRequest> crawlerRequests) {
+    public boolean regeditQueues(List<CrawlerRequest> crawlerRequests,boolean removeDuplicated) {
         try {
             logger.info("开始注册{}个任务", crawlerRequests.size());
             for (CrawlerRequest crawlerRequest : crawlerRequests) {
@@ -164,7 +164,7 @@ public class CrawlerQueueService {
                 Map pagination = null;
                 List datas = Lists.newArrayList();
                 if (parameter == null && parameter.size() == 0) {
-                    regeditQueue(crawlerRequest);
+                    regeditQueue(crawlerRequest,removeDuplicated);
                     continue;
                 }
                 for (String key : parameter.keySet()) {
@@ -218,7 +218,7 @@ public class CrawlerQueueService {
                     } else {
                         request.setData(tmp);
                     }
-                    regeditQueue(request);
+                    regeditQueue(request,removeDuplicated);
                 }
             }
             return true;
@@ -229,7 +229,11 @@ public class CrawlerQueueService {
     }
 
     public boolean regeditQueue(CrawlerRequest crawlerRequest) {
-        boolean isDuplicate = isDuplicate(crawlerRequest);
+       return regeditQueue(crawlerRequest,false);
+    }
+
+    public boolean regeditQueue(CrawlerRequest crawlerRequest,boolean removeDuplicated) {
+        boolean isDuplicate = removeDuplicated ?false: isDuplicate(crawlerRequest);
         if (isDuplicate) return false;
 
         try {

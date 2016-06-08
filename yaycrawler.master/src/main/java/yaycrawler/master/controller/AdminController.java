@@ -28,7 +28,7 @@ public class AdminController {
     @ResponseBody
     public RestFulResult acceptAdminTask(@RequestBody List<CrawlerRequest> crawlerRequests)
     {
-        Boolean flag = crawlerQueueService.regeditQueues(crawlerRequests);
+        Boolean flag = crawlerQueueService.regeditQueues(crawlerRequests,true);
         if(flag)
             return RestFulResult.success(flag);
         else
