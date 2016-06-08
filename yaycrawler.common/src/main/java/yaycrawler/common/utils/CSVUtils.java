@@ -77,7 +77,6 @@ public class CSVUtils {
      */
     public static List<Map> importCsv(InputStream inputStream) {
         List<Map> dataList = new ArrayList<Map>();
-
         BufferedReader br = null;
         try {
             br = new BufferedReader(new InputStreamReader(inputStream,"utf-8"));
@@ -87,7 +86,7 @@ public class CSVUtils {
                Map map = new HashMap();
                 String[] value = line.split(",");
                 for (int i = 0; i <title.length; i++) {
-                    map.put(i, StringUtils.trim(value[i]));
+                    map.put(title[i], StringUtils.trim(value[i]));
                 }
                 dataList.add(map);
             }
