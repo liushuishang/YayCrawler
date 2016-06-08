@@ -33,6 +33,8 @@ public class GenericCrawlerDownLoader extends AbstractDownloader {
         request.putExtra("cookieIds", task.getSite().getCookies().keySet());
 
         PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(request.getUrl());
+        if(pageInfo == null)
+            return null;
         if ("1".equals(pageInfo.getIsJsRendering()))
             return mockDonwnloader.download(request, task);
         else

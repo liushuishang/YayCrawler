@@ -329,7 +329,8 @@
                                                                 data: JSON.stringify(data),
                                                                 dataType: 'json',
                                                                 success: function (result) {     //回调函数，result，返回值
-                                                                    $("#resultModal #ta_result").html(JSON.stringify(result, null, "\t"));
+                                                                    debugger
+                                                                    $("#resultModal #ta_result").val(JSON.stringify(result, null, "\t"));
                                                                     $('#resultModal').modal({keyboard: false});
                                                                 },
                                                                 error: function (msg) {

@@ -220,7 +220,7 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
         }
         //unicode编码处理
         if (UNICODE_PATTERN.matcher(content).find())
-            return StringEscapeUtils.unescapeJava(content);
+            return StringEscapeUtils.unescapeJava(content.replace("\"","\\\""));
         return content;
     }
 

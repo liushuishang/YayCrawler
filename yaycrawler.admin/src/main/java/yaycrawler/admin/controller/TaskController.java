@@ -79,13 +79,13 @@ public class TaskController {
         }
         CrawlerRequest crawlerRequest = new CrawlerRequest(url, UrlUtils.getDomain(url), method.toUpperCase());
         crawlerRequest.setData(data);
-
-        if (masterActor.publishTasks(crawlerRequest) && jobInfo != null) {
+        boolean flag = masterActor.publishTasks(crawlerRequest);
+        if (flag && jobInfo != null) {
             CrawlerRequestJob job = new CrawlerRequestJob(jobInfo);
             job.addCrawlerRequest(crawlerRequest);
             return quartzScheduleService.addJob(job);
         }
-        return false;
+        return flag;
     }
 
     @RequestMapping("/successQueueManagement")
