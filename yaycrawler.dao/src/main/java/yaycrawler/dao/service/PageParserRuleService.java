@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import yaycrawler.dao.domain.*;
@@ -17,6 +18,7 @@ import java.util.List;
  */
 @Service
 @Transactional
+@Component
 public class PageParserRuleService {
 
     @Autowired
@@ -41,7 +43,7 @@ public class PageParserRuleService {
         if (StringUtils.isBlank(pageUrl)) return null;
 
         PageInfo pageInfo = pageInfoRepository.findOneByUrlRgx(pageUrl);
-        return pageInfo.getPageParseRegionList();
+        return  pageInfo.getPageParseRegionList();
     }
 
 

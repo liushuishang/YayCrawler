@@ -1,8 +1,13 @@
 package yaycrawler.spider.resolver;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.URLEncodedUtils;
 import us.codecraft.webmagic.Request;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +21,11 @@ public class ParamResolver {
         Matcher mather = REQUEST_PATTERN.matcher(origin);
         while (mather.find()) {
             origin = origin.replace(mather.group(), parseValue(request, mather.group(1)));
+            try {
+                origin = URLDecoder.decode(String.valueOf(origin), "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
         return origin;
     }
@@ -26,6 +36,8 @@ public class ParamResolver {
 
         Object v=request.getExtra(key);
         if(v!=null) return String.valueOf(v);
+        Map param = (Map) request.getExtra("nameValuePair");
+        if(param != null) return String.valueOf(param.get(key));
         String url = request.getUrl();
         Pattern paramPattern = Pattern.compile(key + "=([^&|?.]*)&?");
         Matcher matcher = paramPattern.matcher(url);

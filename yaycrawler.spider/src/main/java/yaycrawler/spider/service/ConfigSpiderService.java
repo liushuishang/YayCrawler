@@ -77,8 +77,11 @@ public class ConfigSpiderService {
 
         Page page = downloadPage(request, null);
         if (page == null) return RestFulResult.failure("页面下载失败！");
-
-        Object result = SelectorExpressionResolver.resolve(request, page.getHtml(), expression);
+        Object result = null;
+        if (expression.toLowerCase().contains("getjson()"))
+            result = SelectorExpressionResolver.resolve(request, page.getJson(), expression);
+        else
+            result = SelectorExpressionResolver.resolve(request, page.getHtml(), expression);
         if (result instanceof Selectable) {
             final StringBuilder sb = new StringBuilder();
             ((Selectable) result).all().forEach(new Consumer<String>() {
@@ -119,7 +122,7 @@ public class ConfigSpiderService {
             Map<String, Object> m = new HashMap<>();
             m.put("inputTime", System.currentTimeMillis());
             m.put("page", page);
-//            pageMap.put(request.getUrl(), m);
+            pageMap.put(request.getUrl(), m);
         }
         return page;
     }

@@ -113,7 +113,8 @@
                                                     $("#ta_result").html(JSON.stringify(result, null, "\t"));
                                                 },
                                                 error: function (msg) {
-//                                                    alert(JSON.stringify(msg));
+                                                    debugger
+                                                     $("#ta_result").html("");
                                                 }
                                             });
                                             $('#divModal').modal({

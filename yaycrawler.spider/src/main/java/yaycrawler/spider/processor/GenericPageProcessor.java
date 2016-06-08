@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
@@ -28,13 +30,14 @@ import java.util.*;
  * Created by yuananyun on 2016/5/1.
  */
 @Component
+@Service
 public class GenericPageProcessor implements PageProcessor {
     private static Logger logger = LoggerFactory.getLogger(GenericPageProcessor.class);
     @Autowired(required = false)
     private IPageParseListener pageParseListener;
 
     @Autowired
-    private PageParserRuleService pageParseRuleService;
+    private PageParserRuleService pageParserRuleService;
     @Autowired
     private PageSiteService pageSiteService;
 
@@ -187,7 +190,7 @@ public class GenericPageProcessor implements PageProcessor {
     }
 
     public List<PageParseRegion> getPageRegionList(String pageUrl) {
-        return pageParseRuleService.getPageRegionList(pageUrl);
+        return pageParserRuleService.getPageRegionList(pageUrl);
     }
 
 
