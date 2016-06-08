@@ -16,7 +16,6 @@ import java.util.List;
  * Created by yuananyun on 2016/5/1.
  */
 @Service
-@Transactional
 public class PageParserRuleService {
 
     @Autowired
@@ -36,7 +35,7 @@ public class PageParserRuleService {
     @Autowired
     private PageSiteRepository siteRepository;
 
-
+    @Transactional
     public List<PageParseRegion> getPageRegionList(String pageUrl) {
         if (StringUtils.isBlank(pageUrl)) return null;
 

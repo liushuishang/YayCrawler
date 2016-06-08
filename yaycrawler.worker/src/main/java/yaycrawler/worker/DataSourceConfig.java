@@ -65,4 +65,17 @@ public class DataSourceConfig {
 //    public PlatformTransactionManager annotationDrivenTransactionManager() {
 //        return new JpaTransactionManager();
 //    }
+
+//    @Bean
+//    public FilterRegistrationBean openEntityManagerInViewFilterRegistration() {
+//        FilterRegistrationBean registration = new FilterRegistrationBean();
+//        registration.setFilter(new OpenEntityManagerInViewFilter() );
+//        registration.addUrlPatterns("/*");
+////        registration.addInitParameter("entityManagerFactoryBeanName", "entityManagerFactory");
+//        registration.setName("Spring OpenEntityManagerInViewFilter");
+//        registration.setOrder(0);
+//        return registration;
+//    }
+
+
 }

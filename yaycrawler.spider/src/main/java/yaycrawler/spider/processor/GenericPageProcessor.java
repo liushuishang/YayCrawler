@@ -27,7 +27,7 @@ import java.util.*;
 /**
  * Created by yuananyun on 2016/5/1.
  */
-@Component
+@Component(value="genericPageProcessor")
 public class GenericPageProcessor implements PageProcessor {
     private static Logger logger = LoggerFactory.getLogger(GenericPageProcessor.class);
     @Autowired(required = false)

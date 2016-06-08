@@ -97,4 +97,12 @@ public class CrawlerRequest implements Serializable{
     public void setData(Map data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "CrawlerRequest{" +
+                "url='" + url + '\'' +
+                ", method='" + method + '\'' +
+                '}';
+    }
 }

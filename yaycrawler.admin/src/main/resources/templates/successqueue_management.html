@@ -99,6 +99,7 @@
                                     events: {
                                         'click .viewResult': function (e, value, row, index) {
                                             $("#modalLabel").html("查看爬取结果");
+                                            $("#ta_result").val("");
                                             var data = {pageUrl: row.url, taskId: row.hashCode};
                                             $.ajax({
                                                 type: "Post",
@@ -110,7 +111,7 @@
                                                 async:false,
                                                 success: function (result) {     //回调函数，result，返回值
                                                     debugger
-                                                    $("#ta_result").html(JSON.stringify(result, null, "\t"));
+                                                    $("#ta_result").val(JSON.stringify(result, null, "\t"));
                                                 },
                                                 error: function (msg) {
 //                                                    alert(JSON.stringify(msg));

@@ -113,9 +113,11 @@ public class CrawlerQueueService {
     protected String getQueueKey() {
         return QUEUE_PREFIX + "data";
     }
+
     protected String getRunningQueueKey() {
         return RUNNING_QUEUE_PREFIX + "data";
     }
+
     protected String getRunningKey() {
         return RUNNING_PREFIX + "data";
     }
@@ -123,21 +125,27 @@ public class CrawlerQueueService {
     protected String getFailKey() {
         return FAIL_PREFIX + "data";
     }
+
     protected String getFailQueueKey() {
         return FAIL_QUEUE_PREFIX + "data";
     }
+
     protected String getItemKey() {
         return ITEM_PREFIX + "data";
     }
+
     protected String getItemQueueKey() {
         return ITEM_QUEUE_PREFIX + "data";
     }
+
     protected String getSuccessKey() {
         return SUCCESS_PREFIX + "data";
     }
+
     protected String getSuccessQueueKey() {
         return SUCCESS_QUEUE_PREFIX + "data";
     }
+
     protected String getRandomUrl(CrawlerRequest crawlerRequest) {
         if (crawlerRequest.getData() == null || crawlerRequest.getData().size() == 0)
             return crawlerRequest.getUrl();
@@ -150,12 +158,12 @@ public class CrawlerQueueService {
     public boolean regeditQueues(List<CrawlerRequest> crawlerRequests) {
         try {
             logger.info("开始注册{}个任务", crawlerRequests.size());
-            for (CrawlerRequest crawlerRequest:crawlerRequests) {
+            for (CrawlerRequest crawlerRequest : crawlerRequests) {
                 Map<String, String> parameter = crawlerRequest.getData();
                 List<Object> arrayTmps = null;
                 Map pagination = null;
                 List datas = Lists.newArrayList();
-                if(parameter == null && parameter.size() == 0) {
+                if (parameter == null && parameter.size() == 0) {
                     regeditQueue(crawlerRequest);
                     continue;
                 }
@@ -181,26 +189,26 @@ public class CrawlerQueueService {
                         }
                         datas.add(ImmutableSet.copyOf(tmpData));
                     } else {
-                        datas.add(ImmutableSet.of(ImmutableMap.of(key,parameter.get(key))));
+                        datas.add(ImmutableSet.of(ImmutableMap.of(key, parameter.get(key))));
                     }
                 }
                 Set<List<ImmutableMap<String, String>>> sets = Sets.cartesianProduct(datas);
-                for (List<ImmutableMap<String,String>> requests : sets) {
+                for (List<ImmutableMap<String, String>> requests : sets) {
                     CrawlerRequest request = new CrawlerRequest();
-                    BeanUtils.copyProperties(crawlerRequest,request);
-                    Map<Object,Object> tmp = Maps.newHashMap();
-                    for (Map data:requests) {
-                        if(data != null)
-                            tmp.put(data.keySet().iterator().next(),data.values().iterator().next());
+                    BeanUtils.copyProperties(crawlerRequest, request);
+                    Map<Object, Object> tmp = Maps.newHashMap();
+                    for (Map data : requests) {
+                        if (data != null)
+                            tmp.put(data.keySet().iterator().next(), data.values().iterator().next());
                     }
-                    if(StringUtils.equalsIgnoreCase(crawlerRequest.getMethod(),"GET")) {
+                    if (StringUtils.equalsIgnoreCase(crawlerRequest.getMethod(), "GET")) {
                         StringBuilder urlBuilder = new StringBuilder(request.getUrl());
                         for (Map.Entry<Object, Object> entry : tmp.entrySet()) {
                             try {
-                                if(entry.getKey() == null || StringUtils.isEmpty(entry.getKey().toString())) {
-                                    urlBuilder.append(String.format("%s/%s", "/",URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
+                                if (entry.getKey() == null || StringUtils.isEmpty(entry.getKey().toString())) {
+                                    urlBuilder.append(String.format("%s/%s", "/", URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
                                 } else
-                                    urlBuilder.append(String.format("%s%s=%s",  urlBuilder.indexOf("?") > 0 ? "&" : "?", entry.getKey(), URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
+                                    urlBuilder.append(String.format("%s%s=%s", urlBuilder.indexOf("?") > 0 ? "&" : "?", entry.getKey(), URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
                             } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
                             }
@@ -213,7 +221,6 @@ public class CrawlerQueueService {
                     regeditQueue(request);
                 }
             }
-            logger.info("{}个任务注册成功！", crawlerRequests.size());
             return true;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -221,14 +228,17 @@ public class CrawlerQueueService {
         }
     }
 
-    public Object regeditQueue(CrawlerRequest crawlerRequest) {
+    public boolean regeditQueue(CrawlerRequest crawlerRequest) {
         boolean isDuplicate = isDuplicate(crawlerRequest);
-        String queue = getQueueKey();
-        String key = getItemKey();
-        String itemQueue = getItemQueueKey();
-        if (!isDuplicate) {
+        if (isDuplicate) return false;
+
+        try {
+            String queue = getQueueKey();
+            String key = getItemKey();
+            String itemQueue = getItemQueueKey();
+
             CrawlerRequest request = new CrawlerRequest();
-            BeanUtils.copyProperties(crawlerRequest,request);
+            BeanUtils.copyProperties(crawlerRequest, request);
             String url = getRandomUrl(request);
             String field = DigestUtils.sha1Hex(url);
             request.setHashCode(field);
@@ -236,14 +246,16 @@ public class CrawlerQueueService {
             ListOperations listOperations = redisTemplate.opsForList();
             request.setUrl(url);
             String value = JSON.toJSONString(request);
-            if(!hashOperations.hasKey(key,field)) {
-                listOperations.leftPush(itemQueue,field);
+            if (!hashOperations.hasKey(key, field)) {
+                listOperations.leftPush(itemQueue, field);
             }
             hashOperations.put(key, field, value);
             listOperations.leftPush(queue, field);
-
+            return true;
+        } catch (Exception ex) {
+            logger.info("任务{}注册失败！错误：{}", crawlerRequest.toString(), ex.getMessage());
+            return false;
         }
-        return true;
     }
 
     public boolean isDuplicate(CrawlerRequest request) {
@@ -269,7 +281,7 @@ public class CrawlerQueueService {
             return crawlerRequests;
         List<String> queueStr = listOperations.range(queue, 0, count - 1);
         for (String field : queueStr) {
-            if(!hashOperations.hasKey(key,field))
+            if (!hashOperations.hasKey(key, field))
                 continue;
             String data = String.valueOf(hashOperations.get(key, field));
             CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
@@ -292,19 +304,19 @@ public class CrawlerQueueService {
             crawlerRequest.setWorkerId(workerHeartbeat.getWorkerId());
             String field = crawlerRequest.getHashCode();
             String value = JSON.toJSONString(crawlerRequest);
-            if(!hashOperations.hasKey(runningQueue,field)) {
-                listOperations.leftPush(runningKey,field);
+            if (!hashOperations.hasKey(runningQueue, field)) {
+                listOperations.leftPush(runningKey, field);
             }
             hashOperations.put(runningQueue, field, value);
             hashOperations.delete(key, field);
-            if(!hashOperations.hasKey(key,field)) {
-                listOperations.remove(itemQueue,0,field);
+            if (!hashOperations.hasKey(key, field)) {
+                listOperations.remove(itemQueue, 0, field);
                 listOperations.remove(queue, 0, field);
             }
         }
     }
 
-    public void moveFailQueue(String field,String message) {
+    public void moveFailQueue(String field, String message) {
         long startTime = System.currentTimeMillis();
         HashOperations hashOperations = redisTemplate.opsForHash();
         ListOperations listOperations = redisTemplate.opsForList();
@@ -312,19 +324,19 @@ public class CrawlerQueueService {
         String failKey = getFailQueueKey();
         String key = getRunningKey();
         String runningKey = getRunningQueueKey();
-        if( !hashOperations.hasKey(key,field))
+        if (!hashOperations.hasKey(key, field))
             return;
-        String data =  String.valueOf(hashOperations.get(key, field));
+        String data = String.valueOf(hashOperations.get(key, field));
         CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
         crawlerRequest.setStartTime(startTime);
         crawlerRequest.setMessage(message);
         String value = JSON.toJSONString(crawlerRequest);
-        if(!hashOperations.hasKey(failQueue,field)) {
-            listOperations.leftPush(failKey,field);
+        if (!hashOperations.hasKey(failQueue, field)) {
+            listOperations.leftPush(failKey, field);
         }
         hashOperations.put(failQueue, field, value);
         hashOperations.delete(key, field);
-        listOperations.remove(runningKey,0,field);
+        listOperations.remove(runningKey, 0, field);
     }
 
     public Object removeCrawler(String field) {
@@ -332,14 +344,14 @@ public class CrawlerQueueService {
         ListOperations listOperations = redisTemplate.opsForList();
         String runningQueue = getRunningKey();
         String runningKey = getRunningQueueKey();
-        if(!hashOperations.hasKey(runningQueue,field))
+        if (!hashOperations.hasKey(runningQueue, field))
             return false;
         String data = String.valueOf(hashOperations.get(runningQueue, field));
         CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
         crawlerRequest.setStartTime(System.currentTimeMillis());
         moveSuccessQueue(crawlerRequest);
         hashOperations.delete(runningQueue, field);
-        listOperations.remove(runningKey,0,field);
+        listOperations.remove(runningKey, 0, field);
         return false;
     }
 
@@ -348,8 +360,8 @@ public class CrawlerQueueService {
         ListOperations listOperations = redisTemplate.opsForList();
         String successQueue = getSuccessKey();
         String successKey = getSuccessQueueKey();
-        if(!hashOperations.hasKey(successQueue,crawlerRequest.getHashCode())) {
-            listOperations.leftPush(successKey,crawlerRequest.getHashCode());
+        if (!hashOperations.hasKey(successQueue, crawlerRequest.getHashCode())) {
+            listOperations.leftPush(successKey, crawlerRequest.getHashCode());
         }
         hashOperations.put(successQueue, crawlerRequest.getHashCode(), JSON.toJSONString(crawlerRequest));
         return false;
@@ -364,6 +376,7 @@ public class CrawlerQueueService {
 
     /**
      * 刷新超时队列（把超时的运行中队列任务重新加入待执行队列）
+     *
      * @param leftTime
      */
     public void refreshBreakedQueue(Long leftTime) {
@@ -404,27 +417,27 @@ public class CrawlerQueueService {
         String hashKey = "";
         int pageIndex = tasksResult.getPageIndex();
         int pageSize = tasksResult.getPageSize();
-        if(StringUtils.equalsIgnoreCase(name,"item")) {
+        if (StringUtils.equalsIgnoreCase(name, "item")) {
             key = itemKey;
             hashKey = itemQueue;
-        } else if(StringUtils.equalsIgnoreCase(name,"running")) {
+        } else if (StringUtils.equalsIgnoreCase(name, "running")) {
             key = runningKey;
             hashKey = runningQueue;
-        } else if(StringUtils.equalsIgnoreCase(name,"success")) {
+        } else if (StringUtils.equalsIgnoreCase(name, "success")) {
             key = successKey;
             hashKey = successQueue;
-        } else if(StringUtils.equalsIgnoreCase(name,"fail")) {
-            key =failKey;
+        } else if (StringUtils.equalsIgnoreCase(name, "fail")) {
+            key = failKey;
             hashKey = failQueue;
         }
         int page = pageIndex * pageSize;
-        int offset = page + (pageSize -1);
-        keys = listOperations.range(key,page,offset);
-        datas = hashOperations.multiGet(hashKey,keys);
+        int offset = page + (pageSize - 1);
+        keys = listOperations.range(key, page, offset);
+        datas = hashOperations.multiGet(hashKey, keys);
         tasksResult.setTotal(hashOperations.size(hashKey));
         for (String data : datas) {
             CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
-            if(crawlerRequest !=null)
+            if (crawlerRequest != null)
                 crawlerRequests.add(crawlerRequest);
         }
         tasksResult.setRows(crawlerRequests);

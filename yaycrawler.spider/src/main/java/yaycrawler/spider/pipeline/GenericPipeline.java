@@ -57,9 +57,10 @@ public class GenericPipeline implements Pipeline {
                 try {
                     IResultPersistentService persistentService = persistentServiceFactory.getPersistentServiceByDataType(groupedDataEntry.getKey());
                     if (persistentService != null) {
-                        logger.info("开始持久化{}到{}",groupedDataEntry.getKey(),persistentService.toString());
+                        logger.info("开始持久化{}到{}", groupedDataEntry.getKey(), persistentService.toString());
                         Map dataMap = groupedDataEntry.getValue();
-                        persistentService.saveCrawlerResult(pageUrl, dataMap);
+                        if (!persistentService.saveCrawlerResult(pageUrl, dataMap))
+                            logger.error("可能持久化{}到{}失败！", groupedDataEntry.getKey(), persistentService.toString());
                     }
                 } catch (Exception ex) {
                     logger.error(ex.getMessage());
