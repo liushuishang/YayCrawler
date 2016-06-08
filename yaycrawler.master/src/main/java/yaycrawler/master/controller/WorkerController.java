@@ -43,6 +43,7 @@ public class WorkerController {
     public RestFulResult register(HttpServletRequest request, @RequestBody WorkerRegistration registration) {
         logger.info("接收到worker的注册信息：{}", JSON.toJSON(registration));
         Assert.notNull(registration.getWorkerId());
+        Assert.notNull(registration.getWorkerContextPath());
         MasterContext.registeWorker(registration);
         return RestFulResult.success(true);
     }

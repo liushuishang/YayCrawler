@@ -23,7 +23,7 @@ public class WorkerRefreshTask {
             Long lastTime = registration.getLastHeartbeatTime();
             if (currentTime - lastTime >= 2 * registration.getHeartbeatInteval()) {
                 logger.info("{}心跳已经超时，Master移除该Worker！", registration.toString());
-                workerRegistrationMap.remove(registration.getWorkerId());
+                workerRegistrationMap.remove(registration.getWorkerContextPath());
             }
         }
     }

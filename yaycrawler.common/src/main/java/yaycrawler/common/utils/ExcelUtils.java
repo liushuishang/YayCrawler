@@ -1,12 +1,15 @@
 package yaycrawler.common.utils;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.*;
 
 import javax.servlet.ServletOutputStream;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2016/6/8.
@@ -82,7 +85,7 @@ public class ExcelUtils {
                 for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
                     Map data = new HashMap();
                     XSSFRow rows = sheet.getRow(i);
-                    for (int j = 1;j<keys.getPhysicalNumberOfCells();j++) {
+                    for (int j = 0;j<keys.getPhysicalNumberOfCells();j++) {
                         String key = keys.getCell(j).toString().replaceAll("[\\s\\u00A0]+$", "");
                         String value = rows.getCell(j).toString().replaceAll("[\\s\\u00A0]+$", "");
                         data.put(key,value);

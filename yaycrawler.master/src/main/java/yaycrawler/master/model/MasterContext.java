@@ -15,15 +15,15 @@ public class MasterContext {
     public static ConcurrentHashMap<String, WorkerHeartbeat> workerHeartbeatMap = new ConcurrentHashMap<>();
 
     public static void registeWorker(WorkerRegistration registration) {
-        if (registration.getWorkerId() != null) {
-            workerRegistrationMap.put(registration.getWorkerId(), registration);
+        if (registration.getWorkerId() != null&&registration.getWorkerContextPath()!=null) {
+            workerRegistrationMap.put(registration.getWorkerContextPath(), registration);
         }
     }
 
 
     public static void receiveWorkerHeartbeat(WorkerHeartbeat heartbeat) {
         long currentTime = System.currentTimeMillis();
-        WorkerRegistration registration = workerRegistrationMap.get(heartbeat.getWorkerId());
+        WorkerRegistration registration = workerRegistrationMap.get(heartbeat.getWorkerContextPath());
         if (registration == null) {
             //通过心跳注册
             registration = new WorkerRegistration(heartbeat.getWorkerId(), heartbeat.getWorkerContextPath());
@@ -32,7 +32,7 @@ public class MasterContext {
         }
         registration.setLastHeartbeatTime(currentTime);
         registration.setWaitTaskCount(heartbeat.getWaitTaskCount());
-        workerHeartbeatMap.put(heartbeat.getWorkerId(), heartbeat);
+        workerHeartbeatMap.put(heartbeat.getWorkerContextPath(), heartbeat);
     }
 
 

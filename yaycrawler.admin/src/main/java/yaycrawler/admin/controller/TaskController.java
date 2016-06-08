@@ -57,10 +57,9 @@ public class TaskController {
         Assert.notNull(url);
         Assert.notNull(method);
 
-
         List<Map> paramMapList = (List<Map>) taskMap.get("paramList");
-        CrawlerRequest[] crawlerRequestArray = new CrawlerRequest[paramMapList.size()];
-        if (paramMapList.size() > 0) {
+        CrawlerRequest[] crawlerRequestArray = new CrawlerRequest[paramMapList==null?1:paramMapList.size()];
+        if (paramMapList!=null&&paramMapList.size() > 0) {
             for (int i = 0; i < paramMapList.size(); i++) {
                 Map paramMap = paramMapList.get(i);
                 if (paramMap == null) continue;
