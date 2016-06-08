@@ -6,8 +6,8 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.sql.Date;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 表示一个待抓取的页面测试信息
@@ -48,7 +48,7 @@ public class PageInfo {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "pageId", insertable = false, updatable = false)
-    private List<PageParseRegion> pageParseRegionList;
+    private Set<PageParseRegion> pageParseRegions;
 
     public String getId() {
         return id;
@@ -100,12 +100,12 @@ public class PageInfo {
         this.pageUrl = pageUrl;
     }
 
-    public List<PageParseRegion> getPageParseRegionList() {
-        return pageParseRegionList;
+    public Set<PageParseRegion> getPageParseRegions() {
+        return pageParseRegions;
     }
 
-    public void setPageParseRegionList(List<PageParseRegion> pageParseRegionList) {
-        this.pageParseRegionList = pageParseRegionList;
+    public void setPageParseRegions(Set<PageParseRegion> pageParseRegions) {
+        this.pageParseRegions = pageParseRegions;
     }
 
 

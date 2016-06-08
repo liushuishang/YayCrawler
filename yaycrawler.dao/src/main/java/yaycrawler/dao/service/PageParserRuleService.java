@@ -10,6 +10,7 @@ import yaycrawler.dao.domain.*;
 import yaycrawler.dao.repositories.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 用于管理页面字段和Url抽取规则
@@ -37,11 +38,11 @@ public class PageParserRuleService {
     private PageSiteRepository siteRepository;
 
 
-    public List<PageParseRegion> getPageRegionList(String pageUrl) {
+    public Set<PageParseRegion> getPageRegions(String pageUrl) {
         if (StringUtils.isBlank(pageUrl)) return null;
 
         PageInfo pageInfo = pageInfoRepository.findOneByUrlRgx(pageUrl);
-        return  pageInfo.getPageParseRegionList();
+        return  pageInfo.getPageParseRegions();
     }
 
 

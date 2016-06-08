@@ -50,7 +50,7 @@ public class GenericPageProcessor implements PageProcessor {
         try {
             List<CrawlerRequest> childRequestList = new LinkedList<>();
             String pageUrl = page.getRequest().getUrl();
-            List<PageParseRegion> regionList = getPageRegionList(pageUrl);
+            Set<PageParseRegion> regionList = getPageRegions(pageUrl);
             for (PageParseRegion pageParseRegion : regionList) {
                 Map<String, Object> result = parseOneRegion(page, pageParseRegion, childRequestList);
                 if (result != null) {
@@ -90,14 +90,14 @@ public class GenericPageProcessor implements PageProcessor {
         }
         if (context == null) return null;
 
-        List<UrlParseRule> urlParseRuleList = pageParseRegion.getUrlParseRules();
-        if (urlParseRuleList != null && urlParseRuleList.size() > 0) {
-            childRequestList.addAll(parseUrlRule(context, request, urlParseRuleList));
+        Set<UrlParseRule> urlParseRules = pageParseRegion.getUrlParseRules();
+        if (urlParseRules != null && urlParseRules.size() > 0) {
+            childRequestList.addAll(parseUrlRules(context, request, urlParseRules));
         }
 
-        List<FieldParseRule> fieldParseRuleList = pageParseRegion.getFieldParseRules();
-        if (fieldParseRuleList != null && fieldParseRuleList.size() > 0) {
-            return parseFieldRule(context, request, fieldParseRuleList);
+        Set<FieldParseRule> fieldParseRules = pageParseRegion.getFieldParseRules();
+        if (fieldParseRules != null && fieldParseRules.size() > 0) {
+            return parseFieldRules(context, request, fieldParseRules);
         }
         return null;
     }
@@ -110,7 +110,7 @@ public class GenericPageProcessor implements PageProcessor {
      * @param fieldParseRuleList
      * @return
      */
-    private Map<String, Object> parseFieldRule(Selectable context, Request request, List<FieldParseRule> fieldParseRuleList) {
+    private Map<String, Object> parseFieldRules(Selectable context, Request request, Collection<FieldParseRule> fieldParseRuleList) {
         int i = 0;
         HashedMap resultMap = new HashedMap();
         List<Selectable> nodes = getNodes(context);
@@ -136,7 +136,7 @@ public class GenericPageProcessor implements PageProcessor {
      * @param urlParseRuleList
      * @return
      */
-    private List<CrawlerRequest> parseUrlRule(Selectable context, Request request, List<UrlParseRule> urlParseRuleList) {
+    private List<CrawlerRequest> parseUrlRules(Selectable context, Request request, Collection<UrlParseRule> urlParseRuleList) {
         List<CrawlerRequest> childRequestList = new LinkedList<>();
         List<Selectable> nodes = getNodes(context);
 
@@ -186,8 +186,8 @@ public class GenericPageProcessor implements PageProcessor {
         return Site.me();
     }
 
-    public List<PageParseRegion> getPageRegionList(String pageUrl) {
-        return pageParserRuleService.getPageRegionList(pageUrl);
+    public Set<PageParseRegion> getPageRegions(String pageUrl) {
+        return pageParserRuleService.getPageRegions(pageUrl);
     }
 
 

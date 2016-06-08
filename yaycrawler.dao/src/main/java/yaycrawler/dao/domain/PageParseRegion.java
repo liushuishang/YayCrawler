@@ -6,8 +6,8 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by yuananyun on 2016/5/1.
@@ -36,18 +36,18 @@ public class PageParseRegion implements Serializable {
     private String selectExpression;
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "regionId", insertable = false, updatable = false)
-    private List<FieldParseRule> fieldParseRules;
+    private Set<FieldParseRule> fieldParseRules;
 
     @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "regionId", insertable = false, updatable = false)
     @OrderBy(value = "id ASC")
-    private List<UrlParseRule> urlParseRules;
+    private Set<UrlParseRule> urlParseRules;
     @Column(name = "createdDate",columnDefinition = "timestamp default now()")
     private Date createdDate;
 
     public PageParseRegion() {
-        fieldParseRules = new LinkedList<>();
-        urlParseRules = new LinkedList<>();
+        fieldParseRules =new HashSet<>();
+        urlParseRules =new HashSet<>();
     }
 
     public String getId() {
@@ -83,19 +83,19 @@ public class PageParseRegion implements Serializable {
         this.selectExpression = selectExpression;
     }
 
-    public List<FieldParseRule> getFieldParseRules() {
+    public Set<FieldParseRule> getFieldParseRules() {
         return fieldParseRules;
     }
 
-    public void setFieldParseRules(List<FieldParseRule> fieldParseRules) {
+    public void setFieldParseRules(Set<FieldParseRule> fieldParseRules) {
         this.fieldParseRules = fieldParseRules;
     }
 
-    public List<UrlParseRule> getUrlParseRules() {
+    public Set<UrlParseRule> getUrlParseRules() {
         return urlParseRules;
     }
 
-    public void setUrlParseRules(List<UrlParseRule> urlParseRules) {
+    public void setUrlParseRules(Set<UrlParseRule> urlParseRules) {
         this.urlParseRules = urlParseRules;
     }
 

@@ -227,7 +227,7 @@
                                     ],
                                     //注册加载子表的事件。注意下这里的三个参数！
                                     onExpandRow: function (index, row, $detail) {
-                                        var regionData = row.pageParseRegionList;
+                                        var regionData = row.pageParseRegions;
                                         if (!regionData || regionData.length == 0) return false;
 
                                         var cur_table = $detail.html('<table id="region_' + row.id + '"></table>').find('table');

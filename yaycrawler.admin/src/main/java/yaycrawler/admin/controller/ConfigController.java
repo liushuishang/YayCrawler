@@ -21,10 +21,7 @@ import yaycrawler.dao.domain.*;
 import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.service.ConfigSpiderService;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by yuananyun on 2016/5/3.
@@ -260,7 +257,7 @@ public class ConfigController {
 
         PageParseRegion testRegion = new PageParseRegion();
         UrlParseRule testUrlParseRule = new UrlParseRule(urlParseRule.getRule());
-        testUrlParseRule.setUrlRuleParams(new LinkedList<UrlRuleParam>());
+        testUrlParseRule.setUrlRuleParams(new HashSet<>());
         testUrlParseRule.getUrlRuleParams().add(new UrlRuleParam(null, paramName, paramExpression));
         testRegion.getUrlParseRules().add(testUrlParseRule);
 

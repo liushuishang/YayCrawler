@@ -6,7 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Date;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Created by yuananyun on 2016/5/1.
@@ -32,7 +32,7 @@ public class UrlParseRule implements Serializable {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "urlRuleId", insertable = false, updatable = false)
-    private List<UrlRuleParam> urlRuleParams;
+    private Set<UrlRuleParam> urlRuleParams;
 
     @Column(name = "createdDate", columnDefinition = "timestamp default now()")
     private Date createdDate;
@@ -88,11 +88,11 @@ public class UrlParseRule implements Serializable {
         this.createdDate = createdDate;
     }
 
-    public List<UrlRuleParam> getUrlRuleParams() {
+    public Set<UrlRuleParam> getUrlRuleParams() {
         return urlRuleParams;
     }
 
-    public void setUrlRuleParams(List<UrlRuleParam> urlRuleParams) {
+    public void setUrlRuleParams(Set<UrlRuleParam> urlRuleParams) {
         this.urlRuleParams = urlRuleParams;
     }
 }
