@@ -8,24 +8,14 @@
     <div class="row">
         <div class="col-md-8">
             <div class="portlet-body form">
-                <form action="uploadFile" id="uploadFileForm" enctype="multipart/form-data" method="post">
-                    <div class="input-group">
-                        <input type="file" value="" id="filekey" autocomplete="off" name="files"
-                               class="form-control input-lg" required="required"/>
-                        <span>上传符合格式的Excel文件,CSV文件,TXT文件:</span>
-                                <span class="input-group-btn">
-                                  <button type="submit" class="button btn btn-danger btn-lg" value="解析文件"
-                                          style="margin-left: 2px;margin-top: -23px;">解析文件
-                                  </button>
-                                  </span>
-                    </div>
-                </form>
+
                 <form id="taskForm" action="publishTask" method="post">
                     <div class="form-body">
                         <div class="form-group">
                             <input type="text" class="form-control" id="pageUrl" name="pageUrl" required="required"
-                                   value="http://floor.0731fdc.com/jggs.php"
-                                   placeholder="页面URL"/>
+                                   value=""
+                                   placeholder="请输入任务URL"/>
+                            <button type="btn_match" class="btn green">测试匹配</button>
                         </div>
                         <div class="form-group">
                             <label class="control-label">请求方式</label>
@@ -57,6 +47,24 @@
                             <textarea id="urlParamsJson" name="urlParamsJson" class="form-control " rows="3" value=""
                                       placeholder="{&quot;$pagination_p&quot;:{'START':'1','END':'100','STEP':'1'},&quot;$array_name&quot;:['11','12','13','14','15']} "></textarea>
                         </div>
+
+                        <div class="form-group">
+                            <label class="control-label">参数文件上传</label>
+                            <!--<form action="uploadFile" id="uploadFileForm" enctype="multipart/form-data" method="post">-->
+                                <div class="input-group">
+                                    <input type="file" value="" id="filekey" autocomplete="off" name="files"
+                                           class="form-control input-lg" required="required"/>
+                                    <span>上传符合格式的Excel文件,CSV文件,TXT文件:</span>
+                                <span class="input-group-btn">
+                                  <button id="btn_file" type="button" class="button btn btn-danger btn-lg" value="解析文件"
+                                          style="margin-left: 2px;margin-top: -23px;">解析文件
+                                  </button>
+                                  </span>
+                                </div>
+                            <!--</form>-->
+                        </div>
+
+
                         <div class="form-group">
                             <label>任务类型</label>
                             <div class="checkbox-list">
@@ -83,15 +91,15 @@
     /*<![CDATA[*/
     $(function () {
         var paramList;
-        $('#uploadFileForm').submit(function () {
-            var form = $(this);
+        $("#btn_file").click(function(){
             debugger
-            var filename = $("#files").val();
+            var data = new FormData($('#taskForm')[0]);
             $.ajax({
                 type: "POST",
-                url: form.attr("action"),
+                url:global.contextPath+"/uploadFile",
                 cache: false,
-                data: new FormData($('#uploadFileForm')[0]),
+                async:false,
+                data: data,
                 processData: false,
                 contentType: false,
                 success: function (result) {     //回调函数，result，返回值
@@ -127,7 +135,7 @@
             form.serializeArray().map(function (x) {
                 data[x.name] = x.value;
             });
-            data.paramList= paramList;
+            data.paramList = paramList;
             $.ajax({
                 type: "Post",
                 cache: false,

@@ -33,11 +33,9 @@ public class CrawlerTaskDispatcher {
 
     public void dealResultNotify(CrawlerResult crawlerResult) {
         if (crawlerResult.isSuccess()) {
-            //TODO 把结果加入队列中
             queueService.regeditQueues(crawlerResult.getCrawlerRequestList(),false);
             queueService.removeCrawler(crawlerResult.getKey());
         } else {
-            //TODO 执行失败的处理
             queueService.moveFailQueue(crawlerResult.getKey(),crawlerResult.getMessage());
         }
     }
@@ -51,7 +49,7 @@ public class CrawlerTaskDispatcher {
      */
     public void assingTask(WorkerHeartbeat workerHeartbeat) {
         ConcurrentHashMap<String, WorkerRegistration> workerListMap = MasterContext.workerRegistrationMap;
-        WorkerRegistration workerRegistration = workerListMap.get(workerHeartbeat.getWorkerId());
+        WorkerRegistration workerRegistration = workerListMap.get(workerHeartbeat.getWorkerContextPath());
         if(workerRegistration==null) return;
 
         int leftCount = batchSize - workerHeartbeat.getWaitTaskCount();

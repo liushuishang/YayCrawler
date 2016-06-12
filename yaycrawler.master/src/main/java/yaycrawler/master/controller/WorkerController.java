@@ -58,6 +58,8 @@ public class WorkerController {
     @ResponseBody
     public RestFulResult heartBeat(HttpServletRequest request, @RequestBody WorkerHeartbeat heartbeat) {
         Assert.notNull(heartbeat.getWorkerId());
+        Assert.notNull(heartbeat.getWorkerContextPath());
+
         MasterContext.receiveWorkerHeartbeat(heartbeat);
         final WorkerHeartbeat workerHeartbeat = heartbeat;
         new Thread(new Runnable() {
