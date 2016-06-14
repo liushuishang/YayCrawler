@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import yaycrawler.common.model.*;
 import yaycrawler.common.utils.HttpUtils;
 import yaycrawler.worker.exception.WorkerHeartbeatFailureException;
-import yaycrawler.worker.exception.WorkerRegisteFailureException;
 import yaycrawler.worker.exception.WorkerResultNotifyFailureException;
 import yaycrawler.worker.model.WorkerContext;
 import yaycrawler.worker.service.TaskScheduleService;
@@ -29,24 +28,24 @@ public class MasterActor {
      * @return
      */
     public boolean register() {
-        logger.info("worker-{}开始向Master申请注册", WorkerContext.workerId);
-
-        WorkerRegistration workerRegistration = new WorkerRegistration(WorkerContext.workerId, WorkerContext.getContextPath());
+        logger.info("worker-{}开始向Master申请注册", WorkerContext.getWorkerId());
+        WorkerRegistration workerRegistration = new WorkerRegistration( WorkerContext.getWorkerId(), WorkerContext.getContextPath());
         workerRegistration.setHeartbeatInteval(WorkerContext.getHeartbeatInteval());
 
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(WorkerContext.getMasterServerAddress(), CommunicationAPIs.WORKER_POST_MASTER_REGISTER);
         RestFulResult result = HttpUtils.doSignedHttpExecute(WorkerContext.getSignatureSecret(), targetUrl, HttpMethod.POST, workerRegistration);
         if (result.hasError()) {
-            logger.error("worker-{}注册Master失败！", WorkerContext.workerId);
-            throw new WorkerRegisteFailureException(result.getMessage());
+            logger.error("worker-{}注册Master失败！", WorkerContext.getWorkerId());
+//            throw new WorkerRegisteFailureException(result.getMessage());
+            return false;
         }
         return true;
     }
 
     public boolean sendHeartbeart() {
         if (!WorkerContext.isSuccessRegisted) return false;
-        logger.debug("worker-{}开始向Master发送心跳", WorkerContext.workerId);
-        WorkerHeartbeat heartbeat = new WorkerHeartbeat(WorkerContext.workerId);
+        logger.debug("worker-{}开始向Master发送心跳", WorkerContext.getWorkerId());
+        WorkerHeartbeat heartbeat = new WorkerHeartbeat( WorkerContext.getWorkerId());
         heartbeat.setWorkerContextPath(WorkerContext.getContextPath());
         heartbeat.setHeartbeatInteval(WorkerContext.getHeartbeatInteval());
 

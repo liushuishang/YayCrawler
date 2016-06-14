@@ -61,13 +61,14 @@ public class WorkerController {
         Assert.notNull(heartbeat.getWorkerContextPath());
         logger.info("workerId {} 剩余任务数{}",heartbeat.getWorkerId(),heartbeat.getWaitTaskCount());
         MasterContext.receiveWorkerHeartbeat(heartbeat);
-        final WorkerHeartbeat workerHeartbeat = heartbeat;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                hearbeatHandler.handler(workerHeartbeat);
-            }
-        }).start();
+        taskDispatcher.assignTasks(heartbeat);
+//        final WorkerHeartbeat workerHeartbeat = heartbeat;
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                hearbeatHandler.handler(workerHeartbeat);
+//            }
+//        }).start();
         return RestFulResult.success(true);
     }
 
@@ -75,7 +76,7 @@ public class WorkerController {
     @RequestMapping("/crawlerSuccessNotify")
     @ResponseBody
     public RestFulResult crawlerSuccessNotify(HttpServletRequest request, @RequestBody CrawlerResult crawlerResult) {
-        logger.info("接收到任务执行成功通知:{}", crawlerResult.toString());
+        logger.debug("接收到任务执行成功通知:{}", crawlerResult.toString());
         Assert.notNull(crawlerResult);
         taskDispatcher.dealResultNotify(crawlerResult);
         return RestFulResult.success(true);
@@ -84,7 +85,7 @@ public class WorkerController {
     @RequestMapping("/crawlerFailureNotify")
     @ResponseBody
     public RestFulResult crawlerFailureNotify(HttpServletRequest request, @RequestBody CrawlerResult crawlerResult) {
-        logger.info("接收到任务执行失败通知:{}", JSON.toJSON(crawlerResult));
+        logger.debug("接收到任务执行失败通知:{}", JSON.toJSON(crawlerResult));
         Assert.notNull(crawlerResult);
         taskDispatcher.dealResultNotify(crawlerResult);
         return RestFulResult.success(true);

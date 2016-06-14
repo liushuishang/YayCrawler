@@ -64,6 +64,7 @@ public class TaskScheduleService {
             CrawlerQueueScheduler crawlerQueueScheduler = (CrawlerQueueScheduler)entry.getValue().getScheduler();
             count += crawlerQueueScheduler.getLeftRequestsCount(null);
         }
+        logger.info("worker还有{}个运行中任务", count);
         return count;
     }
 

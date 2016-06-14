@@ -155,7 +155,7 @@ public class CrawlerQueueService {
         return urlBuilder.toString();
     }
 
-    public boolean regeditQueues(List<CrawlerRequest> crawlerRequests,boolean removeDuplicated) {
+    public boolean regeditTaskToItemQueue(List<CrawlerRequest> crawlerRequests, boolean removeDuplicated) {
         try {
             logger.info("开始注册{}个任务", crawlerRequests.size());
             for (CrawlerRequest crawlerRequest : crawlerRequests) {
@@ -274,7 +274,12 @@ public class CrawlerQueueService {
         return isDuplicate;
     }
 
-    public List<CrawlerRequest> listQueues(long count) {
+    /**
+     * 从待执行队列中拿取指定数目的任务
+     * @param taskCount 任务数目
+     * @return
+     */
+    public List<CrawlerRequest> fetchTasksFromItemQueue(long taskCount) {
         HashOperations hashOperations = redisTemplate.opsForHash();
         ListOperations listOperations = redisTemplate.opsForList();
         List<CrawlerRequest> crawlerRequests = new ArrayList<>();
@@ -283,7 +288,7 @@ public class CrawlerQueueService {
         long size = listOperations.size(queue);
         if (size == 0)
             return crawlerRequests;
-        List<String> queueStr = listOperations.range(queue, 0, count - 1);
+        List<String> queueStr = listOperations.range(queue, 0, taskCount - 1);
         for (String field : queueStr) {
             if (!hashOperations.hasKey(key, field))
                 continue;
@@ -294,7 +299,7 @@ public class CrawlerQueueService {
         return crawlerRequests;
     }
 
-    public void moveRunningQueue(WorkerHeartbeat workerHeartbeat, List<CrawlerRequest> crawlerRequests) {
+    public void moveTaskToRunningQueue(WorkerHeartbeat workerHeartbeat, List<CrawlerRequest> crawlerRequests) {
         long startTime = System.currentTimeMillis();
         HashOperations hashOperations = redisTemplate.opsForHash();
         String runningQueue = getRunningKey();
@@ -320,7 +325,7 @@ public class CrawlerQueueService {
         }
     }
 
-    public void moveFailQueue(String field, String message) {
+    public void moveToFailQueue(String field, String message) {
         long startTime = System.currentTimeMillis();
         HashOperations hashOperations = redisTemplate.opsForHash();
         ListOperations listOperations = redisTemplate.opsForList();
@@ -343,7 +348,7 @@ public class CrawlerQueueService {
         listOperations.remove(runningKey, 0, field);
     }
 
-    public Object removeCrawler(String field) {
+    public Object removeSuccessedTaskFromRunningQueue(String field) {
         HashOperations hashOperations = redisTemplate.opsForHash();
         ListOperations listOperations = redisTemplate.opsForList();
         String runningQueue = getRunningKey();
@@ -373,7 +378,7 @@ public class CrawlerQueueService {
 
     public Object removeCrawlers(List<String> fields) {
         for (String field : fields) {
-            removeCrawler(field);
+            removeSuccessedTaskFromRunningQueue(field);
         }
         return false;
     }
@@ -381,9 +386,9 @@ public class CrawlerQueueService {
     /**
      * 刷新超时队列（把超时的运行中队列任务重新加入待执行队列）
      *
-     * @param leftTime
+     * @param timeout
      */
-    public void refreshBreakedQueue(Long leftTime) {
+    public void refreshBreakedQueue(Long timeout) {
         HashOperations hashOperations = redisTemplate.opsForHash();
         SetOperations setOperations = redisTemplate.opsForSet();
         String key = getRunningKey();
@@ -392,10 +397,10 @@ public class CrawlerQueueService {
         for (String data : datas) {
             CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
             long oldTime = System.currentTimeMillis() - crawlerRequest.getStartTime();
-            if (oldTime > leftTime) {
+            if (oldTime > timeout) {
                 crawlerRequest.setStartTime(null);
                 crawlerRequest.setWorkerId(null);
-                removeCrawler(crawlerRequest.getHashCode());
+                removeSuccessedTaskFromRunningQueue(crawlerRequest.getHashCode());
                 setOperations.remove(uniqQueue, crawlerRequest.getHashCode());
                 regeditQueue(crawlerRequest);
             }

@@ -1,5 +1,7 @@
 package yaycrawler.master.dispatcher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -21,6 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class CrawlerTaskDispatcher {
 
+    private static Logger logger = LoggerFactory.getLogger(CrawlerTaskDispatcher.class);
+
     @Value("${worker.task.batchSize}")
     private Integer batchSize;
 
@@ -33,13 +37,11 @@ public class CrawlerTaskDispatcher {
 
     public void dealResultNotify(CrawlerResult crawlerResult) {
         if (crawlerResult.isSuccess()) {
-            //TODO 把结果加入队列中
-            if(crawlerResult.getCrawlerRequestList().size() > 0)
-                queueService.regeditQueues(crawlerResult.getCrawlerRequestList(),false);
-            queueService.removeCrawler(crawlerResult.getKey());
+            if (crawlerResult.getCrawlerRequestList().size() > 0)
+                queueService.regeditTaskToItemQueue(crawlerResult.getCrawlerRequestList(), false);
+            queueService.removeSuccessedTaskFromRunningQueue(crawlerResult.getKey());
         } else {
-            //TODO 执行失败的处理
-            queueService.moveFailQueue(crawlerResult.getKey(),crawlerResult.getMessage());
+            queueService.moveToFailQueue(crawlerResult.getKey(), crawlerResult.getMessage());
         }
     }
 
@@ -50,20 +52,20 @@ public class CrawlerTaskDispatcher {
     /**
      * 分派任务
      */
-    public void assingTask(WorkerHeartbeat workerHeartbeat) {
+    public void assignTasks(WorkerHeartbeat workerHeartbeat) {
         ConcurrentHashMap<String, WorkerRegistration> workerListMap = MasterContext.workerRegistrationMap;
         WorkerRegistration workerRegistration = workerListMap.get(workerHeartbeat.getWorkerContextPath());
-        if(workerRegistration==null) return;
+        if (workerRegistration == null) return;
 
-        int leftCount = batchSize - workerHeartbeat.getWaitTaskCount();
-        if(leftCount <= 0)
-            return;
-        List<CrawlerRequest> crawlerRequests = queueService.listQueues(leftCount);
-        if(crawlerRequests.size() == 0)
-            return;
+        logger.info("worker:{}剩余任务数:{}", workerHeartbeat.getWorkerId(), workerHeartbeat.getWaitTaskCount());
+        int canAssignCount = batchSize - workerHeartbeat.getWaitTaskCount();
+        if (canAssignCount <= 0) return;
+        List<CrawlerRequest> crawlerRequests = queueService.fetchTasksFromItemQueue(canAssignCount);
+        if (crawlerRequests.size() == 0) return;
         boolean flag = workerActor.assignTasks(workerRegistration, crawlerRequests);
         if (flag) {
-            queueService.moveRunningQueue(workerHeartbeat,crawlerRequests);
+            logger.info("给worker:{}分派了{}个任务", workerHeartbeat.getWorkerId(), crawlerRequests.size());
+            queueService.moveTaskToRunningQueue(workerHeartbeat, crawlerRequests);
         }
     }
 

@@ -7,7 +7,7 @@
     </bean>
     <bean id="breakedQueueRefreshTask" class="yaycrawler.master.quartz.BreakedQueueRefreshTask">
         <property name="queueService" ref="crawlerQueueService"></property>
-        <property name="queueTimeOut" value="${task.queue.timeout:300000}"></property>
+        <property name="queueTimeOut" value="${task.queue.timeout:3600000}"></property>
     </bean>
 
 
