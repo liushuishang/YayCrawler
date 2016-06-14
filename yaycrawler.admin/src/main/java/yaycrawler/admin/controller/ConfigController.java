@@ -21,7 +21,10 @@ import yaycrawler.dao.domain.*;
 import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.service.ConfigSpiderService;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yuananyun on 2016/5/3.
@@ -301,6 +304,14 @@ public class ConfigController {
     public Object deleteSites(@RequestBody List<String> deleteIds) {
         Assert.notNull(deleteIds);
         return pageParseRuleService.deleteSiteByIds(deleteIds);
+    }
+
+    @RequestMapping(value = "/testPageUrlMatchRegex", method = RequestMethod.POST)
+    @ResponseBody
+    public Object testPageUrlMatchRegex(@RequestBody String pageUrl) {
+        Assert.notNull(pageUrl);
+        PageInfo result = pageParseRuleService.findOnePageInfoByRgx(pageUrl);
+        return result;
     }
 
 

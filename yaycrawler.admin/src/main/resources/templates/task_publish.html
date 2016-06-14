@@ -8,14 +8,12 @@
     <div class="row">
         <div class="col-md-8">
             <div class="portlet-body form">
-
                 <form id="taskForm" action="publishTask" method="post">
                     <div class="form-body">
                         <div class="form-group">
                             <input type="text" class="form-control" id="pageUrl" name="pageUrl" required="required"
-                                   value=""
-                                   placeholder="请输入任务URL"/>
-                            <button type="btn_match" class="btn green">测试匹配</button>
+                                   value="" placeholder="请输入任务URL"/>
+                            <button type="button" id="btn_testMatch" class="btn green">测试匹配</button>
                         </div>
                         <div class="form-group">
                             <label class="control-label">请求方式</label>
@@ -51,16 +49,16 @@
                         <div class="form-group">
                             <label class="control-label">参数文件上传</label>
                             <!--<form action="uploadFile" id="uploadFileForm" enctype="multipart/form-data" method="post">-->
-                                <div class="input-group">
-                                    <input type="file" value="" id="filekey" autocomplete="off" name="files"
-                                           class="form-control input-lg" required="required"/>
-                                    <span>上传符合格式的Excel文件,CSV文件,TXT文件:</span>
+                            <div class="input-group">
+                                <input type="file" value="" id="filekey" autocomplete="off" name="files"
+                                       class="form-control input-lg" required="required"/>
+                                <span>上传符合格式的Excel文件,CSV文件,TXT文件:</span>
                                 <span class="input-group-btn">
                                   <button id="btn_file" type="button" class="button btn btn-danger btn-lg" value="解析文件"
                                           style="margin-left: 2px;margin-top: -23px;">解析文件
                                   </button>
                                   </span>
-                                </div>
+                            </div>
                             <!--</form>-->
                         </div>
 
@@ -91,14 +89,14 @@
     /*<![CDATA[*/
     $(function () {
         var paramList;
-        $("#btn_file").click(function(){
+        $("#btn_file").click(function () {
             debugger
             var data = new FormData($('#taskForm')[0]);
             $.ajax({
                 type: "POST",
-                url:global.contextPath+"/uploadFile",
+                url: global.contextPath + "/uploadFile",
                 cache: false,
-                async:false,
+                async: false,
                 data: data,
                 processData: false,
                 contentType: false,
@@ -151,6 +149,31 @@
                 }
             });
             return false; //此处必须返回false，阻止常规的form提交
+        });
+
+
+        $("#btn_testMatch").click(function () {
+            var pageUrl = $("#pageUrl").val();
+            if (!pageUrl) alert("pageUrl不能为空！");
+
+            $.ajax({
+                type: "post",
+                cache: false,
+                contentType: "application/json",
+                url: global.contextPath + "/testPageUrlMatchRegex?random=" + Math.random(),
+                data: pageUrl,
+                dataType: 'json',
+                success: function (result) {     //回调函数，result，返回值
+                    debugger
+                    alert(JSON.stringify(result, null, "\t"));
+                },
+                error: function (msg) {
+                    if (msg.status == 200) alert("没有查询到数据！");
+                    else
+                        alert("测试出现异常！");
+                }
+            });
+            return false;
         });
     });
 

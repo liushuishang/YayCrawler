@@ -169,6 +169,7 @@ public class TaskController {
     public Object upload(HttpServletRequest request, HttpServletResponse response, @RequestParam("files") MultipartFile[] files)
     {
         MultipartFile file = files[0];
+        if(file==null) return false;
         String filename = file.getOriginalFilename();
         if (filename == null || "".equals(filename))
         {
@@ -181,4 +182,7 @@ public class TaskController {
             map = taskService.insertExcel(file);
         return map;
     }
+
+
+
 }
