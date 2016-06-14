@@ -87,7 +87,6 @@
             <artifactId>yaycrawler-quartz</artifactId>
             <version>${yaycrawler.version}</version>
         </dependency>
-
     </dependencies>
 
     <build>

@@ -33,9 +33,12 @@ public class CrawlerTaskDispatcher {
 
     public void dealResultNotify(CrawlerResult crawlerResult) {
         if (crawlerResult.isSuccess()) {
-            queueService.regeditQueues(crawlerResult.getCrawlerRequestList(),false);
+            //TODO 把结果加入队列中
+            if(crawlerResult.getCrawlerRequestList().size() > 0)
+                queueService.regeditQueues(crawlerResult.getCrawlerRequestList(),false);
             queueService.removeCrawler(crawlerResult.getKey());
         } else {
+            //TODO 执行失败的处理
             queueService.moveFailQueue(crawlerResult.getKey(),crawlerResult.getMessage());
         }
     }
