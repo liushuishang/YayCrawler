@@ -1,6 +1,9 @@
 package yaycrawler.worker.model;
 
 import org.springframework.web.context.WebApplicationContext;
+import yaycrawler.common.model.CrawlerResult;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by ucs_yuananyun on 2016/5/13.
@@ -13,6 +16,9 @@ public class WorkerContext {
     private static String token;
     public static boolean isSuccessRegisted = false;
     public static WebApplicationContext webApplicationContext;
+    public  static ConcurrentHashMap<String,CrawlerResult> completedResultMap=new ConcurrentHashMap<>();
+
+
 
 
     public static String getWorkerId() {
@@ -43,6 +49,7 @@ public class WorkerContext {
             token = webApplicationContext.getEnvironment().getProperty("signature.token");
         return token;
     }
+
 
 
 }

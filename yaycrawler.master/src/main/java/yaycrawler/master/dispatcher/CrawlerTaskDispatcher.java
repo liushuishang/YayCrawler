@@ -36,6 +36,7 @@ public class CrawlerTaskDispatcher {
     private WorkerActor workerActor;
 
     public void dealResultNotify(CrawlerResult crawlerResult) {
+        if(crawlerResult==null) return;
         if (crawlerResult.isSuccess()) {
             if (crawlerResult.getCrawlerRequestList().size() > 0)
                 queueService.regeditTaskToItemQueue(crawlerResult.getCrawlerRequestList(), false);

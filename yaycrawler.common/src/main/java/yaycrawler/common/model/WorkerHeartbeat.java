@@ -1,5 +1,7 @@
 package yaycrawler.common.model;
 
+import java.util.List;
+
 /**
  * Created by ucs_yuananyun on 2016/5/12.
  */
@@ -8,6 +10,10 @@ public class WorkerHeartbeat {
     private String workerContextPath;
     private Long heartbeatInteval;
     private int waitTaskCount;
+    /**
+     * 已经完成的任务的列表
+     */
+    private List<CrawlerResult> completedCrawlerResultList;
 
 
     public WorkerHeartbeat(String workerId) {
@@ -48,5 +54,14 @@ public class WorkerHeartbeat {
 
     public void setHeartbeatInteval(Long heartbeatInteval) {
         this.heartbeatInteval = heartbeatInteval;
+    }
+
+
+    public List<CrawlerResult> getCompletedCrawlerResultList() {
+        return completedCrawlerResultList;
+    }
+
+    public void setCompletedCrawlerResultList(List<CrawlerResult> completedCrawlerResultList) {
+        this.completedCrawlerResultList = completedCrawlerResultList;
     }
 }

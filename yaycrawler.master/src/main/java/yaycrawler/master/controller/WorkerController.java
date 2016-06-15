@@ -59,16 +59,15 @@ public class WorkerController {
     public RestFulResult heartBeat(HttpServletRequest request, @RequestBody WorkerHeartbeat heartbeat) {
         Assert.notNull(heartbeat.getWorkerId());
         Assert.notNull(heartbeat.getWorkerContextPath());
-        logger.info("workerId {} 剩余任务数{}",heartbeat.getWorkerId(),heartbeat.getWaitTaskCount());
+        logger.info("workerId {} 剩余任务数{}", heartbeat.getWorkerId(), heartbeat.getWaitTaskCount());
+        //刷新心跳信息
         MasterContext.receiveWorkerHeartbeat(heartbeat);
+        //更新任务状态
+        if (heartbeat.getCompletedCrawlerResultList() != null)
+            for (CrawlerResult result : heartbeat.getCompletedCrawlerResultList())
+                taskDispatcher.dealResultNotify(result);
+        //重新分派任务
         taskDispatcher.assignTasks(heartbeat);
-//        final WorkerHeartbeat workerHeartbeat = heartbeat;
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                hearbeatHandler.handler(workerHeartbeat);
-//            }
-//        }).start();
         return RestFulResult.success(true);
     }
 

@@ -8,6 +8,7 @@ import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.CrawlerResult;
 import yaycrawler.spider.listener.IPageParseListener;
 import yaycrawler.worker.communication.MasterActor;
+import yaycrawler.worker.model.WorkerContext;
 
 import java.util.List;
 
@@ -17,16 +18,22 @@ import java.util.List;
 @Component
 public class PageParseListener implements IPageParseListener {
 
+
     @Autowired
     private MasterActor masterActor;
 
     @Override
     public void onSuccess(Request request, List<CrawlerRequest> childRequestList) {
-        masterActor.notifyTaskSuccess(new CrawlerResult(true, DigestUtils.sha1Hex(request.getUrl()), childRequestList, null));
+        CrawlerResult crawlerResult = new CrawlerResult(true, DigestUtils.sha1Hex(request.getUrl()), childRequestList, null);
+        if (childRequestList != null && childRequestList.size() > 0) {
+            masterActor.notifyTaskSuccess(crawlerResult);
+        } else WorkerContext.addCompletedCrawlerResult(crawlerResult);
     }
 
     @Override
     public void onError(Request request, String failureInfo) {
-        masterActor.notifyTaskFailure(new CrawlerResult(false, DigestUtils.sha1Hex(request.getUrl()), null, failureInfo));
+        CrawlerResult crawlerResult = new CrawlerResult(false, DigestUtils.sha1Hex(request.getUrl()), null, failureInfo);
+        WorkerContext.addCompletedCrawlerResult(crawlerResult);
     }
+
 }
