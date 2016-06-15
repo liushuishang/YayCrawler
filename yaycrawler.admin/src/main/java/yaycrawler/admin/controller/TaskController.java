@@ -60,10 +60,18 @@ public class TaskController {
         List<Map> paramMapList = (List<Map>) taskMap.get("paramList");
         CrawlerRequest[] crawlerRequestArray = new CrawlerRequest[paramMapList==null?1:paramMapList.size()];
         if (paramMapList!=null&&paramMapList.size() > 0) {
+            String paramJson = MapUtils.getString(taskMap, "urlParamsJson");
+            Map<String, Object> data = new HashMap<>();
+            if (!StringUtils.isBlank(paramJson)) {
+                data = JSON.parseObject(paramJson, Map.class);
+            }
             for (int i = 0; i < paramMapList.size(); i++) {
                 Map paramMap = paramMapList.get(i);
                 if (paramMap == null) continue;
                 CrawlerRequest crawlerRequest = new CrawlerRequest(url, UrlUtils.getDomain(url), method.toUpperCase());
+                for (Map.Entry<String, Object> entry : data.entrySet()) {
+                    paramMap.put(entry.getKey(),entry.getValue());
+                }
                 crawlerRequest.setData(paramMap);
                 crawlerRequestArray[i] = crawlerRequest;
             }

@@ -8,10 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
+import org.springframework.expression.Expression;
 import org.springframework.stereotype.Service;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.TasksResult;
@@ -42,6 +44,8 @@ public class CrawlerQueueService {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Value("${task.queue.count}")
+    private int taskCount;
     private static final String QUEUE_PREFIX = "queue_";
 
     private static final String SET_PREFIX = "set_";
@@ -54,57 +58,6 @@ public class CrawlerQueueService {
     private static final String FAIL_QUEUE_PREFIX = "fail_queue_";
     private static final String SUCCESS_PREFIX = "success_";
     private static final String SUCCESS_QUEUE_PREFIX = "success_queue_";
-
-    public String getIpAddress(HttpServletRequest request) {
-        //
-        String ip = request.getHeader("X-Forwarded-For");
-        if (logger.isInfoEnabled()) {
-            logger.info("getIpAddress(HttpServletRequest) - X-Forwarded-For - String ip=" + ip);
-        }
-
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-                ip = request.getHeader("Proxy-Client-IP");
-                if (logger.isInfoEnabled()) {
-                    logger.info("getIpAddress(HttpServletRequest) - Proxy-Client-IP - String ip=" + ip);
-                }
-            }
-            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-                ip = request.getHeader("WL-Proxy-Client-IP");
-                if (logger.isInfoEnabled()) {
-                    logger.info("getIpAddress(HttpServletRequest) - WL-Proxy-Client-IP - String ip=" + ip);
-                }
-            }
-            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-                ip = request.getHeader("HTTP_CLIENT_IP");
-                if (logger.isInfoEnabled()) {
-                    logger.info("getIpAddress(HttpServletRequest) - HTTP_CLIENT_IP - String ip=" + ip);
-                }
-            }
-            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-                ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-                if (logger.isInfoEnabled()) {
-                    logger.info("getIpAddress(HttpServletRequest) - HTTP_X_FORWARDED_FOR - String ip=" + ip);
-                }
-            }
-            if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-                ip = request.getRemoteAddr();
-                if (logger.isInfoEnabled()) {
-                    logger.info("getIpAddress(HttpServletRequest) - getRemoteAddr - String ip=" + ip);
-                }
-            }
-        } else if (ip.length() > 15) {
-            String[] ips = ip.split(",");
-            for (int index = 0; index < ips.length; index++) {
-                String strIp = (String) ips[index];
-                if (!("unknown".equalsIgnoreCase(strIp))) {
-                    ip = strIp;
-                    break;
-                }
-            }
-        }
-        return ip;
-    }
 
     protected String getSetKey() {
         return SET_PREFIX + "data";
@@ -146,6 +99,11 @@ public class CrawlerQueueService {
         return SUCCESS_QUEUE_PREFIX + "data";
     }
 
+    /**
+     * 通过参数，生成了唯一的一个URL
+     * @param crawlerRequest 请求
+     * @return
+     */
     protected String getRandomUrl(CrawlerRequest crawlerRequest) {
         if (crawlerRequest.getData() == null || crawlerRequest.getData().size() == 0)
             return crawlerRequest.getUrl();
@@ -155,8 +113,16 @@ public class CrawlerQueueService {
         return urlBuilder.toString();
     }
 
+    /**
+     * 注册任务
+     * @param crawlerRequests 任务
+     * @param removeDuplicated 是否移除相同任务
+     * @return
+     */
     public boolean regeditTaskToItemQueue(List<CrawlerRequest> crawlerRequests, boolean removeDuplicated) {
         try {
+            List<String > queue = Lists.newArrayList();
+            Map<String,String> crawlerRequestMap = Maps.newHashMap();
             logger.info("开始注册{}个任务", crawlerRequests.size());
             for (CrawlerRequest crawlerRequest : crawlerRequests) {
                 Map<String, String> parameter = crawlerRequest.getData();
@@ -164,62 +130,92 @@ public class CrawlerQueueService {
                 Map pagination = null;
                 List datas = Lists.newArrayList();
                 if (parameter == null && parameter.size() == 0) {
-                    regeditQueue(crawlerRequest,removeDuplicated);
-                    continue;
-                }
-                for (String key : parameter.keySet()) {
-                    if (StringUtils.startsWith(key, "$array_")) {
-                        arrayTmps = JSON.parseObject(parameter.get(key).toString(), List.class);
-                        List<Map> tmpData = Lists.newArrayList();
-                        String tmpParam = StringUtils.substringAfter(key, "$array_");
-                        for (Object tmp : arrayTmps) {
-                            tmpData.add(ImmutableMap.of(tmpParam, tmp));
-                        }
-
-                        datas.add(ImmutableSet.copyOf(tmpData));
-                    } else if (StringUtils.startsWith(key, "$pagination_")) {
-                        pagination = JSON.parseObject(parameter.get(key).toString(), Map.class);
-                        List<Map> tmpData = Lists.newArrayList();
-                        int start = Integer.parseInt(pagination.get("START").toString());
-                        int end = Integer.parseInt(pagination.get("END").toString());
-                        int step = Integer.parseInt(pagination.get("STEP").toString());
-                        String tmpParam = StringUtils.substringAfter(key, "$pagination_");
-                        for (int i = start; i <= end; i = i + step) {
-                            tmpData.add(ImmutableMap.of(tmpParam, i));
-                        }
-                        datas.add(ImmutableSet.copyOf(tmpData));
-                    } else {
-                        datas.add(ImmutableSet.of(ImmutableMap.of(key, parameter.get(key))));
-                    }
-                }
-                Set<List<ImmutableMap<String, String>>> sets = Sets.cartesianProduct(datas);
-                for (List<ImmutableMap<String, String>> requests : sets) {
+                    boolean isDuplicate = removeDuplicated ?false: isDuplicate(crawlerRequest);
+                    if (isDuplicate) continue;
                     CrawlerRequest request = new CrawlerRequest();
                     BeanUtils.copyProperties(crawlerRequest, request);
-                    Map<Object, Object> tmp = Maps.newHashMap();
-                    for (Map data : requests) {
-                        if (data != null)
-                            tmp.put(data.keySet().iterator().next(), data.values().iterator().next());
-                    }
-                    if (StringUtils.equalsIgnoreCase(crawlerRequest.getMethod(), "GET")) {
-                        StringBuilder urlBuilder = new StringBuilder(request.getUrl());
-                        for (Map.Entry<Object, Object> entry : tmp.entrySet()) {
-                            try {
-                                if (entry.getKey() == null || StringUtils.isEmpty(entry.getKey().toString())) {
-                                    urlBuilder.append(String.format("%s/%s", "/", URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
-                                } else
-                                    urlBuilder.append(String.format("%s%s=%s", urlBuilder.indexOf("?") > 0 ? "&" : "?", entry.getKey(), URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
+                    String url = getRandomUrl(request);
+                    String field = DigestUtils.sha1Hex(url);
+                    request.setHashCode(field);
+                    request.setUrl(url);
+                    crawlerRequestMap.put(field,JSON.toJSONString(request));
+                    queue.add(field);
+                } else {
+                    for (String key : parameter.keySet()) {
+                        if (StringUtils.startsWith(key, "$array_")) {
+                            arrayTmps = JSON.parseObject(parameter.get(key).toString(), List.class);
+                            List<Map> tmpData = Lists.newArrayList();
+                            String tmpParam = StringUtils.substringAfter(key, "$array_");
+                            for (Object tmp : arrayTmps) {
+                                tmpData.add(ImmutableMap.of(tmpParam, tmp));
                             }
+
+                            datas.add(ImmutableSet.copyOf(tmpData));
+                        } else if (StringUtils.startsWith(key, "$pagination_")) {
+                            pagination = JSON.parseObject(parameter.get(key).toString(), Map.class);
+                            List<Map> tmpData = Lists.newArrayList();
+                            int start = Integer.parseInt(pagination.get("START").toString());
+                            int end = Integer.parseInt(pagination.get("END").toString());
+                            int step = Integer.parseInt(pagination.get("STEP").toString());
+                            String tmpParam = StringUtils.substringAfter(key, "$pagination_");
+                            for (int i = start; i <= end; i = i + step) {
+                                tmpData.add(ImmutableMap.of(tmpParam, i));
+                            }
+                            datas.add(ImmutableSet.copyOf(tmpData));
+                        } else {
+                            datas.add(ImmutableSet.of(ImmutableMap.of(key, parameter.get(key))));
                         }
-                        request.setUrl(urlBuilder.toString());
-                        request.setData(null);
-                    } else {
-                        request.setData(tmp);
                     }
-                    regeditQueue(request,removeDuplicated);
+                    Set<List<ImmutableMap<String, String>>> sets = Sets.cartesianProduct(datas);
+                    for (List<ImmutableMap<String, String>> requests : sets) {
+                        CrawlerRequest request = new CrawlerRequest();
+                        BeanUtils.copyProperties(crawlerRequest, request);
+                        Map<Object, Object> tmp = Maps.newHashMap();
+                        for (Map data : requests) {
+                            if (data != null)
+                                tmp.put(data.keySet().iterator().next(), data.values().iterator().next());
+                        }
+                        if (StringUtils.equalsIgnoreCase(crawlerRequest.getMethod(), "GET")) {
+                            StringBuilder urlBuilder = new StringBuilder(request.getUrl());
+                            for (Map.Entry<Object, Object> entry : tmp.entrySet()) {
+                                try {
+                                    if (entry.getKey() == null || StringUtils.isEmpty(entry.getKey().toString())) {
+                                        urlBuilder.append(String.format("%s/%s", "/", URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
+                                    } else
+                                        urlBuilder.append(String.format("%s%s=%s", urlBuilder.indexOf("?") > 0 ? "&" : "?", entry.getKey(), URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
+                                } catch (UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            request.setUrl(urlBuilder.toString());
+                            request.setData(null);
+                        } else {
+                            request.setData(tmp);
+                        }
+                        boolean isDuplicate = removeDuplicated ?false: isDuplicate(crawlerRequest);
+                        if (isDuplicate) continue;
+                        else {
+                            String url = getRandomUrl(request);
+                            String field = DigestUtils.sha1Hex(url);
+                            request.setHashCode(field);
+                            request.setUrl(url);
+                            crawlerRequestMap.put(field,JSON.toJSONString(request));
+                            queue.add(field);
+                        }
+                        if(queue.size() !=0 && queue.size() % taskCount == 0) {
+                            regeditQueueMore(queue,crawlerRequestMap);
+                            queue.clear();
+                            crawlerRequestMap.clear();
+                        }
+                    }
                 }
+
+                if(queue.size() != 0 && queue.size() % taskCount == 0) {
+                    regeditQueueMore(queue,crawlerRequestMap);
+                }
+            }
+            if(queue.size() != 0 ) {
+                regeditQueueMore(queue,crawlerRequestMap);
             }
             return true;
         } catch (Exception e) {
@@ -227,6 +223,30 @@ public class CrawlerQueueService {
             return false;
         }
     }
+
+    /**
+     * 批量注册任务
+     * @param queueVal
+     * @param crawlerRequestMap
+     * @return
+     */
+    private boolean regeditQueueMore(List<String> queueVal, Map<String,String> crawlerRequestMap) {
+        try {
+            HashOperations hashOperations = redisTemplate.opsForHash();
+            ListOperations listOperations = redisTemplate.opsForList();
+            String queue = getQueueKey();
+            String key = getItemKey();
+            String itemQueue = getItemQueueKey();
+            listOperations.leftPushAll(queue,queueVal);
+            listOperations.leftPushAll(itemQueue,queueVal);
+            hashOperations.putAll(key,crawlerRequestMap);
+            return true;
+        } catch (Exception e) {
+            logger.info("任务{}注册失败！错误：{}", JSON.toJSONString(queueVal),e.getMessage());
+            return false;
+        }
+    }
+
 
     public boolean regeditQueue(CrawlerRequest crawlerRequest) {
        return regeditQueue(crawlerRequest,false);
@@ -394,6 +414,8 @@ public class CrawlerQueueService {
         String key = getRunningKey();
         String uniqQueue = getSetKey();
         List<String> datas = hashOperations.values(key);
+        List<String > queue = Lists.newArrayList();
+        Map<String,String> crawlerRequestMap = Maps.newHashMap();
         for (String data : datas) {
             CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
             long oldTime = System.currentTimeMillis() - crawlerRequest.getStartTime();
@@ -402,8 +424,22 @@ public class CrawlerQueueService {
                 crawlerRequest.setWorkerId(null);
                 removeSuccessedTaskFromRunningQueue(crawlerRequest.getHashCode());
                 setOperations.remove(uniqQueue, crawlerRequest.getHashCode());
-                regeditQueue(crawlerRequest);
+//                regeditQueue(crawlerRequest);
+                CrawlerRequest request = new CrawlerRequest();
+                BeanUtils.copyProperties(crawlerRequest, request);
+                String url = getRandomUrl(request);
+                String field = DigestUtils.sha1Hex(url);
+                request.setHashCode(field);
+                request.setUrl(url);
+                crawlerRequestMap.put(field,JSON.toJSONString(request));
+                queue.add(field);
             }
+            if(queue.size() != 0 && queue.size() % taskCount == 0) {
+                regeditQueueMore(queue,crawlerRequestMap);
+            }
+        }
+        if(queue.size() != 0) {
+            regeditQueueMore(queue,crawlerRequestMap);
         }
     }
 
