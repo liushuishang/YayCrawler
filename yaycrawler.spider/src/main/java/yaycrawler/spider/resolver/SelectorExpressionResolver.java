@@ -116,7 +116,7 @@ public class SelectorExpressionResolver {
 
     private static Object executeScalar(Request request, Object localObject, String lowerMethodName, String[] params) {
 
-        if("stringreplace".equals(lowerMethodName)&&params.length==3)
+        if("stringreplace".equals(lowerMethodName)&&params.length==2)
         {
             String oldValue = params[0];
             String newValue = params[1];
