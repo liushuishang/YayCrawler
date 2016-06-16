@@ -15,6 +15,7 @@ import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.RestFulResult;
 import yaycrawler.dao.domain.PageInfo;
 import yaycrawler.dao.domain.PageParseRegion;
+import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.downloader.GenericCrawlerDownLoader;
 import yaycrawler.spider.processor.GenericPageProcessor;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
@@ -35,6 +36,11 @@ public class ConfigSpiderService {
 
     @Autowired
     private PageSiteService pageSiteService;
+
+    @Autowired
+    private PageParserRuleService pageParserRuleService;
+
+    private static String DEFAULT_PAGE_SELECTOR = "page";
 
     public ConfigSpiderService() {
         pageProcessor = new GenericPageProcessor();
@@ -118,7 +124,22 @@ public class ConfigSpiderService {
                 return finalSite == null ? ConfigSpiderService.this.getSite(request.getUrl()) : finalSite;
             }
         });
-        if(page!=null) {
+        String pageUrl = page.getRequest().getUrl();
+        PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
+        Object context = null;
+        String selectExpression = pageInfo.getPageValidationRule();
+        if (StringUtils.isBlank(pageInfo.getPageValidationRule()) || DEFAULT_PAGE_SELECTOR.equals(pageInfo.getPageValidationRule()))
+            context = page.getHtml();
+        else {
+            if (selectExpression.toLowerCase().contains("getjson()"))
+                context = SelectorExpressionResolver.resolve(null, page.getJson(), selectExpression);
+            else
+                context = SelectorExpressionResolver.resolve(null, page.getHtml(), selectExpression);
+        }
+        if(context instanceof Selectable) {
+            context = ((Selectable) context).get();
+        }
+        if(StringUtils.isNotEmpty(String.valueOf(context))) {
             Map<String, Object> m = new HashMap<>();
             m.put("inputTime", System.currentTimeMillis());
             m.put("page", page);

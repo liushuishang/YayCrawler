@@ -13,13 +13,10 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
-import org.springframework.expression.Expression;
 import org.springframework.stereotype.Service;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.TasksResult;
 import yaycrawler.common.model.WorkerHeartbeat;
-
-import javax.servlet.http.HttpServletRequest;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -46,26 +43,26 @@ public class CrawlerQueueService {
 
     @Value("${task.queue.count}")
     private int taskCount;
-    private static final String QUEUE_PREFIX = "queue_";
+//    private static final String QUEUE_PREFIX = "queue_";
 
-    private static final String SET_PREFIX = "set_";
+    private static final String DUPLICATE_REMOVAL_PREFIX = "duplicateRemoval:set_";
 
-    private static final String ITEM_PREFIX = "item_";
-    private static final String ITEM_QUEUE_PREFIX = "item_queue_";
-    private static final String RUNNING_PREFIX = "running_";
-    private static final String RUNNING_QUEUE_PREFIX = "running_queue_";
-    private static final String FAIL_PREFIX = "fail_";
-    private static final String FAIL_QUEUE_PREFIX = "fail_queue_";
-    private static final String SUCCESS_PREFIX = "success_";
-    private static final String SUCCESS_QUEUE_PREFIX = "success_queue_";
+    private static final String INITIALIZATION_PREFIX = "initialization:detailed_";
+    private static final String INITIALIZATION_QUEUE_PREFIX = "initialization:queue_";
+    private static final String RUNNING_PREFIX = "running:detailed_";
+    private static final String RUNNING_QUEUE_PREFIX = "running:queue_";
+    private static final String FAIL_PREFIX = "fail:detailed";
+    private static final String FAIL_QUEUE_PREFIX = "fail:queue_";
+    private static final String SUCCESS_PREFIX = "success:detailed_";
+    private static final String SUCCESS_QUEUE_PREFIX = "success:queue_";
 
     protected String getSetKey() {
-        return SET_PREFIX + "data";
+        return DUPLICATE_REMOVAL_PREFIX + "data";
     }
 
-    protected String getQueueKey() {
-        return QUEUE_PREFIX + "data";
-    }
+//    protected String getQueueKey() {
+//        return QUEUE_PREFIX + "data";
+//    }
 
     protected String getRunningQueueKey() {
         return RUNNING_QUEUE_PREFIX + "data";
@@ -84,11 +81,11 @@ public class CrawlerQueueService {
     }
 
     protected String getItemKey() {
-        return ITEM_PREFIX + "data";
+        return INITIALIZATION_PREFIX + "data";
     }
 
     protected String getItemQueueKey() {
-        return ITEM_QUEUE_PREFIX + "data";
+        return INITIALIZATION_QUEUE_PREFIX + "data";
     }
 
     protected String getSuccessKey() {
@@ -129,7 +126,7 @@ public class CrawlerQueueService {
                 List<Object> arrayTmps = null;
                 Map pagination = null;
                 List datas = Lists.newArrayList();
-                if (parameter == null && parameter.size() == 0) {
+                if (parameter == null || parameter.size() == 0) {
                     boolean isDuplicate = removeDuplicated ?false: isDuplicate(crawlerRequest);
                     if (isDuplicate) continue;
                     CrawlerRequest request = new CrawlerRequest();
@@ -166,48 +163,51 @@ public class CrawlerQueueService {
                             datas.add(ImmutableSet.of(ImmutableMap.of(key, parameter.get(key))));
                         }
                     }
-                    Set<List<ImmutableMap<String, String>>> sets = Sets.cartesianProduct(datas);
-                    for (List<ImmutableMap<String, String>> requests : sets) {
-                        CrawlerRequest request = new CrawlerRequest();
-                        BeanUtils.copyProperties(crawlerRequest, request);
-                        Map<Object, Object> tmp = Maps.newHashMap();
-                        for (Map data : requests) {
-                            if (data != null)
-                                tmp.put(data.keySet().iterator().next(), data.values().iterator().next());
-                        }
-                        if (StringUtils.equalsIgnoreCase(crawlerRequest.getMethod(), "GET")) {
-                            StringBuilder urlBuilder = new StringBuilder(request.getUrl());
-                            for (Map.Entry<Object, Object> entry : tmp.entrySet()) {
-                                try {
-                                    if (entry.getKey() == null || StringUtils.isEmpty(entry.getKey().toString())) {
-                                        urlBuilder.append(String.format("%s/%s", "/", URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
-                                    } else
-                                        urlBuilder.append(String.format("%s%s=%s", urlBuilder.indexOf("?") > 0 ? "&" : "?", entry.getKey(), URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
-                                } catch (UnsupportedEncodingException e) {
-                                    e.printStackTrace();
-                                }
+                    if(datas!= null && datas.size() > 0) {
+                        Set<List<ImmutableMap<String, String>>> sets = Sets.cartesianProduct(datas);
+                        for (List<ImmutableMap<String, String>> requests : sets) {
+                            CrawlerRequest request = new CrawlerRequest();
+                            BeanUtils.copyProperties(crawlerRequest, request);
+                            Map<Object, Object> tmp = Maps.newHashMap();
+                            for (Map data : requests) {
+                                if (data != null)
+                                    tmp.put(data.keySet().iterator().next(), data.values().iterator().next());
                             }
-                            request.setUrl(urlBuilder.toString());
-                            request.setData(null);
-                        } else {
-                            request.setData(tmp);
-                        }
-                        boolean isDuplicate = removeDuplicated ?false: isDuplicate(crawlerRequest);
-                        if (isDuplicate) continue;
-                        else {
-                            String url = getRandomUrl(request);
-                            String field = DigestUtils.sha1Hex(url);
-                            request.setHashCode(field);
-                            request.setUrl(url);
-                            crawlerRequestMap.put(field,JSON.toJSONString(request));
-                            queue.add(field);
-                        }
-                        if(queue.size() !=0 && queue.size() % taskCount == 0) {
-                            regeditQueueMore(queue,crawlerRequestMap);
-                            queue.clear();
-                            crawlerRequestMap.clear();
+                            if (StringUtils.equalsIgnoreCase(crawlerRequest.getMethod(), "GET")) {
+                                StringBuilder urlBuilder = new StringBuilder(request.getUrl());
+                                for (Map.Entry<Object, Object> entry : tmp.entrySet()) {
+                                    try {
+                                        if (entry.getKey() == null || StringUtils.isEmpty(entry.getKey().toString())) {
+                                            urlBuilder.append(String.format("%s/%s", "/", URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
+                                        } else
+                                            urlBuilder.append(String.format("%s%s=%s", urlBuilder.indexOf("?") > 0 ? "&" : "?", entry.getKey(), URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8")));
+                                    } catch (UnsupportedEncodingException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                request.setUrl(urlBuilder.toString());
+                                request.setData(null);
+                            } else {
+                                request.setData(tmp);
+                            }
+                            boolean isDuplicate = removeDuplicated ?false: isDuplicate(crawlerRequest);
+                            if (isDuplicate) continue;
+                            else {
+                                String url = getRandomUrl(request);
+                                String field = DigestUtils.sha1Hex(url);
+                                request.setHashCode(field);
+                                request.setUrl(url);
+                                crawlerRequestMap.put(field,JSON.toJSONString(request));
+                                queue.add(field);
+                            }
+                            if(queue.size() !=0 && queue.size() % taskCount == 0) {
+                                regeditQueueMore(queue,crawlerRequestMap);
+                                queue.clear();
+                                crawlerRequestMap.clear();
+                            }
                         }
                     }
+
                 }
 
                 if(queue.size() != 0 && queue.size() % taskCount == 0) {
@@ -234,11 +234,11 @@ public class CrawlerQueueService {
         try {
             HashOperations hashOperations = redisTemplate.opsForHash();
             ListOperations listOperations = redisTemplate.opsForList();
-            String queue = getQueueKey();
+//            String queue = getQueueKey();
             String key = getItemKey();
             String itemQueue = getItemQueueKey();
-            listOperations.leftPushAll(queue,queueVal);
-            listOperations.leftPushAll(itemQueue,queueVal);
+//            listOperations.rightPushAll(queue,queueVal);
+            listOperations.rightPushAll(itemQueue,queueVal);
             hashOperations.putAll(key,crawlerRequestMap);
             return true;
         } catch (Exception e) {
@@ -257,7 +257,7 @@ public class CrawlerQueueService {
         if (isDuplicate) return false;
 
         try {
-            String queue = getQueueKey();
+//            String queue = getQueueKey();
             String key = getItemKey();
             String itemQueue = getItemQueueKey();
 
@@ -271,10 +271,10 @@ public class CrawlerQueueService {
             request.setUrl(url);
             String value = JSON.toJSONString(request);
             if (!hashOperations.hasKey(key, field)) {
-                listOperations.leftPush(itemQueue, field);
+                listOperations.rightPush(itemQueue, field);
             }
             hashOperations.put(key, field, value);
-            listOperations.leftPush(queue, field);
+//            listOperations.rightPush(queue, field);
             return true;
         } catch (Exception ex) {
             logger.info("任务{}注册失败！错误：{}", crawlerRequest.toString(), ex.getMessage());
@@ -303,7 +303,7 @@ public class CrawlerQueueService {
         HashOperations hashOperations = redisTemplate.opsForHash();
         ListOperations listOperations = redisTemplate.opsForList();
         List<CrawlerRequest> crawlerRequests = new ArrayList<>();
-        String queue = getQueueKey();
+        String queue = getItemQueueKey();
         String key = getItemKey();
         long size = listOperations.size(queue);
         if (size == 0)
@@ -326,7 +326,7 @@ public class CrawlerQueueService {
         String key = getItemKey();
         String itemQueue = getItemQueueKey();
         String runningKey = getRunningQueueKey();
-        String queue = getQueueKey();
+//        String queue = getQueueKey();
         ListOperations listOperations = redisTemplate.opsForList();
         for (CrawlerRequest crawlerRequest : crawlerRequests) {
             crawlerRequest.setStartTime(startTime);
@@ -334,13 +334,13 @@ public class CrawlerQueueService {
             String field = crawlerRequest.getHashCode();
             String value = JSON.toJSONString(crawlerRequest);
             if (!hashOperations.hasKey(runningQueue, field)) {
-                listOperations.leftPush(runningKey, field);
+                listOperations.rightPush(runningKey, field);
             }
             hashOperations.put(runningQueue, field, value);
             hashOperations.delete(key, field);
             if (!hashOperations.hasKey(key, field)) {
                 listOperations.remove(itemQueue, 0, field);
-                listOperations.remove(queue, 0, field);
+//                listOperations.remove(queue, 0, field);
             }
         }
     }
@@ -361,7 +361,7 @@ public class CrawlerQueueService {
         crawlerRequest.setMessage(message);
         String value = JSON.toJSONString(crawlerRequest);
         if (!hashOperations.hasKey(failQueue, field)) {
-            listOperations.leftPush(failKey, field);
+            listOperations.rightPush(failKey, field);
         }
         hashOperations.put(failQueue, field, value);
         hashOperations.delete(key, field);
@@ -390,7 +390,7 @@ public class CrawlerQueueService {
         String successQueue = getSuccessKey();
         String successKey = getSuccessQueueKey();
         if (!hashOperations.hasKey(successQueue, crawlerRequest.getHashCode())) {
-            listOperations.leftPush(successKey, crawlerRequest.getHashCode());
+            listOperations.rightPush(successKey, crawlerRequest.getHashCode());
         }
         hashOperations.put(successQueue, crawlerRequest.getHashCode(), JSON.toJSONString(crawlerRequest));
         return false;
@@ -475,9 +475,10 @@ public class CrawlerQueueService {
             key = failKey;
             hashKey = failQueue;
         }
-        int page = pageIndex * pageSize;
-        int offset = page + (pageSize - 1);
-        keys = listOperations.range(key, page, offset);
+        long size = listOperations.size(key);
+        long page = size - pageIndex * pageSize;
+        long offset = page - (pageSize - 1);
+        keys = listOperations.range(key,offset,page);
         datas = hashOperations.multiGet(hashKey, keys);
         tasksResult.setTotal(hashOperations.size(hashKey));
         for (String data : datas) {

@@ -50,6 +50,17 @@ public class PageInfo {
     @JoinColumn(name = "pageId", insertable = false, updatable = false)
     private Set<PageParseRegion> pageParseRegions;
 
+    @Column(name = "pageValidationRule",columnDefinition = "varchar(500)")
+    private String pageValidationRule;
+
+    public String getPageValidationRule() {
+        return pageValidationRule;
+    }
+
+    public void setPageValidationRule(String pageValidationRule) {
+        this.pageValidationRule = pageValidationRule;
+    }
+
     public String getId() {
         return id;
     }

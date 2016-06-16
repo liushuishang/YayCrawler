@@ -82,9 +82,11 @@ public class SelectorExpressionResolver {
              */
             if ("customurl".equals(lowerMethodName)) {
                 String url = params[0];
+                if(localObject == null)
+                    return null;
                 if (url.contains("REQUEST("))
                     url = ParamResolver.resolverFromRequest(request, url);
-                else if(url.contains("REPLACE("))
+                else if(url.contains("REPLACE(") && localObject != null)
                     url = ParamResolver.resolverReplaceRequest(request,url,localObject);
                 return url;
             }

@@ -1,6 +1,7 @@
 package yaycrawler.worker.service;
 
 import com.google.common.io.Files;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
@@ -9,6 +10,8 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import us.codecraft.webmagic.utils.UrlUtils;
+import yaycrawler.common.utils.FtpClientUtils;
 import yaycrawler.common.utils.HttpUtil;
 import yaycrawler.common.utils.HttpUtils;
 import yaycrawler.spider.persistent.IResultPersistentService;
@@ -26,8 +29,14 @@ import java.util.Map;
 @Component
 public class ImagePersistentService implements IResultPersistentService {
 
-    @Value("${worker.spider.imagePath}")
-    private String imagePath;
+    @Value("${ftp.server.url}")
+    private String url;
+    @Value("${ftp.server.port}")
+    private int port;
+    @Value("${ftp.server.username}")
+    private String username;
+    @Value("${ftp.server.password}")
+    private String password;
 
     @Override
     /**
@@ -53,14 +62,20 @@ public class ImagePersistentService implements IResultPersistentService {
                 if (srcList == null || srcList.isEmpty())
                     continue;
                 for (String src : srcList) {
-                    byte[] bytes = EntityUtils.toByteArray(httpUtil.doGet(src,null,headers).getEntity());
+//                    byte[] bytes = EntityUtils.toByteArray(httpUtil.doGet(src,null,headers).getEntity());
+//                    String imgName = StringUtils.substringAfterLast(src,"/");
+//                    if (!StringUtils.contains(imgName,".")) {
+//                        imgName = imgName + ".jpg";
+//                    }
+//                    File img = new File(imagePath + "/" + id +  "/" + imgName);
+//                    Files.createParentDirs(img);
+//                    Files.write(bytes,img);
                     String imgName = StringUtils.substringAfterLast(src,"/");
                     if (!StringUtils.contains(imgName,".")) {
                         imgName = imgName + ".jpg";
                     }
-                    File img = new File(imagePath + "/" + id +  "/" + imgName);
-                    Files.createParentDirs(img);
-                    Files.write(bytes,img);
+                    String path = UrlUtils.getDomain(pageUrl) + "/" + DigestUtils.sha1Hex(pageUrl) + "/" + id;
+                    FtpClientUtils.uploadFile(url,port,username,password,path,imgName,httpUtil.doGetForStream(src,null));
                 }
             }
         } catch (Exception e) {

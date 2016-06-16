@@ -41,18 +41,45 @@
 'name':'yuananyn'
                                 }"></textarea>
                 </div>
+                <div class="form-group">
+                    <label class="control-label">页面验证解析表达式</label>
+                    <input type="text" class="form-control" id="pageValidationRule" name="pageValidationRule"
+                           value=""/></div>
             </div>
             <div class="form-actions">
-                <!--<button type="button" class="btn green test">测试</button>-->
+                <button id="btnValidation" type="button" class="btn green test">测试</button>
                 <button id="btnSubmit" type="submit" class="btn blue save">保存</button>
             </div>
         </form>
+        <textarea class="testResult form-control " rows="7"></textarea>
     </div>
 
 </div>
 <script th:inline="javascript">
     /*<![CDATA[*/
     $(function () {
+        $("#btnValidation").click(function() {
+            var form = $(this).closest("form");
+            var data = {};
+            form.serializeArray().map(function (x) {
+                data[x.name] = x.value;
+            });
+            $.ajax({
+                type: "post",
+                cache: false,
+                contentType: "application/json",
+                url: global.contextPath + "/testPageValidation?random="+Math.random(),
+                data: JSON.stringify(data),
+                dataType: 'text',
+                success: function (result) {     //回调函数，result，返回值
+                    $(".testResult").val(JSON.stringify(result, null, "\t"));
+                },
+                error: function (msg) {
+                    alert("测试出现异常！");
+                    console.log(msg);
+                }
+            });
+        });
         $(".form").submit(function () {
             var form = $(this);
             var data = {};

@@ -7,7 +7,7 @@
      "
         id="myServer">
     <listeners>
-        <nio-listener name="default" port="21">
+        <nio-listener name="default" port="2121">
             <ssl>
                 <keystore file="ftpserver.jks" password="password" />
             </ssl>
@@ -22,5 +22,39 @@
         <!--</ftplet>-->
     <!--</ftplets>-->
 
-    <file-user-manager file="users.properties" encrypt-passwords="salted"/>
+<!--    <file-user-manager file="application.properties" encrypt-passwords="salted"/>-->
+
+
+    <db-user-manager encrypt-passwords="salted">
+        <data-source>
+            <beans:ref bean="dataSource" />
+        </data-source>
+        <insert-user>INSERT INTO FTP_USER (userid, userpassword,
+            homedirectory, enableflag, writepermission, idletime, uploadrate,
+            downloadrate) VALUES ('{userid}', '{userpassword}',
+            '{homedirectory}',
+            {enableflag}, {writepermission}, {idletime},
+            {uploadrate},
+            {downloadrate})
+        </insert-user>
+        <update-user>UPDATE FTP_USER SET
+            userpassword='{userpassword}',homedirectory='{homedirectory}',enableflag={enableflag},writepermission={writepermission},idletime={idletime},uploadrate={uploadrate},downloadrate={downloadrate}
+            WHERE userid='{userid}'
+        </update-user>
+        <delete-user>DELETE FROM FTP_USER WHERE userid = '{userid}'
+        </delete-user>
+        <select-user>SELECT userid, userpassword, homedirectory,
+            enableflag, writepermission, idletime, uploadrate, downloadrate,
+            maxloginnumber, maxloginperip FROM
+            FTP_USER WHERE userid = '{userid}'
+        </select-user>
+        <select-all-users>SELECT userid FROM FTP_USER ORDER BY userid
+        </select-all-users>
+        <is-admin>SELECT userid FROM FTP_USER WHERE userid='{userid}'
+            AND
+            userid='admin'
+        </is-admin>
+        <authenticate>SELECT userpassword from FTP_USER WHERE
+            userid='{userid}'</authenticate>
+    </db-user-manager>
 </server>

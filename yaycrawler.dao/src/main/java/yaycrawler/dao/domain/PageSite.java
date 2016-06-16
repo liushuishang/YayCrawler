@@ -38,7 +38,7 @@ public class PageSite implements Serializable {
     @Column(name = "headers", columnDefinition = "varchar(1000)")
     private String headers;
 
-    @OneToMany( fetch = FetchType.LAZY,cascade=CascadeType.REMOVE,orphanRemoval=true)
+    @OneToMany( fetch = FetchType.EAGER,cascade=CascadeType.REMOVE,orphanRemoval=true)
     @JoinColumn(name = "siteId", insertable = false, updatable = false)
     private List<SiteCookie> cookieList;
 

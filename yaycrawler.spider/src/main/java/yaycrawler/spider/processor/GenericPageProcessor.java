@@ -13,10 +13,7 @@ import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Json;
 import us.codecraft.webmagic.selector.Selectable;
 import yaycrawler.common.model.CrawlerRequest;
-import yaycrawler.dao.domain.FieldParseRule;
-import yaycrawler.dao.domain.PageParseRegion;
-import yaycrawler.dao.domain.UrlParseRule;
-import yaycrawler.dao.domain.UrlRuleParam;
+import yaycrawler.dao.domain.*;
 import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.listener.IPageParseListener;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
@@ -35,6 +32,7 @@ public class GenericPageProcessor implements PageProcessor {
 
     @Autowired
     private PageParserRuleService pageParserRuleService;
+
     @Autowired
     private PageSiteService pageSiteService;
 
@@ -50,16 +48,42 @@ public class GenericPageProcessor implements PageProcessor {
         try {
             List<CrawlerRequest> childRequestList = new LinkedList<>();
             String pageUrl = page.getRequest().getUrl();
-            Set<PageParseRegion> regionList = getPageRegions(pageUrl);
-            for (PageParseRegion pageParseRegion : regionList) {
-                Map<String, Object> result = parseOneRegion(page, pageParseRegion, childRequestList);
-                if (result != null) {
-                    result.put("dataType", pageParseRegion.getDataType());
-                    page.putField(pageParseRegion.getName(), result);
-                }
+            PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
+            Object context = null;
+            String selectExpression = pageInfo.getPageValidationRule();
+            if (StringUtils.isBlank(pageInfo.getPageValidationRule()) || DEFAULT_PAGE_SELECTOR.equals(pageInfo.getPageValidationRule()))
+                context = page.getHtml();
+            else {
+                if (selectExpression.toLowerCase().contains("getjson()"))
+                    context = SelectorExpressionResolver.resolve(null, page.getJson(), selectExpression);
+                else
+                    context = SelectorExpressionResolver.resolve(null, page.getHtml(), selectExpression);
             }
-            if (pageParseListener != null)
-                pageParseListener.onSuccess(page.getRequest(), childRequestList);
+            if(context instanceof Selectable) {
+                context = ((Selectable) context).get();
+            }
+            if(StringUtils.isEmpty(String.valueOf(context))) {
+                if (pageParseListener != null)
+                    pageParseListener.onError(page.getRequest(),"页面解析失败");
+                //下载成功解析失败，那么该cookie无效
+                Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
+                if (cookieIds != null && cookieIds.size() > 0) {
+                    //移除失效的cookie
+                    pageSiteService.deleteCookieByIds(cookieIds);
+                }
+            } else {
+                Set<PageParseRegion> regionList = getPageRegions(pageUrl);
+                for (PageParseRegion pageParseRegion : regionList) {
+                    Map<String, Object> result = parseOneRegion(page, pageParseRegion, childRequestList);
+                    if (result != null) {
+                        result.put("dataType", pageParseRegion.getDataType());
+                        page.putField(pageParseRegion.getName(), result);
+                    }
+                }
+                if (pageParseListener != null)
+                    pageParseListener.onSuccess(page.getRequest(), childRequestList);
+            }
+
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             if (pageParseListener != null)
@@ -99,6 +123,7 @@ public class GenericPageProcessor implements PageProcessor {
         if (fieldParseRules != null && fieldParseRules.size() > 0) {
             return parseFieldRules(context, request, fieldParseRules);
         }
+
         return null;
     }
 

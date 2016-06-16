@@ -97,6 +97,12 @@ public class ConfigController {
         return pageParseRuleService.savePageInfo(pageInfo);
     }
 
+    @RequestMapping(value = "/testPageValidation", method = RequestMethod.POST)
+    @ResponseBody
+    public Object ValidationPageInfo(@RequestBody PageInfo pageInfo) {
+        return configSpiderService.testExpressionOnPage(pageInfo,pageInfo.getPageValidationRule());
+    }
+
     @RequestMapping(value = "/deletePageInfoByIds", method = RequestMethod.POST)
     @ResponseBody
     public Object deletePageInfoByIds(@RequestBody List<String> deleteIds) {

@@ -32,7 +32,7 @@
         </rollingPolicy>
     </appender>
     <appender name="INFO-OUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-         <file>${catalina.base}/admin-logs/info.log</file>
+         <file>${catalina.base}/ftpserver-logs/info.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} -
                 %msg%n
@@ -99,7 +99,7 @@
         </rollingPolicy>
     </appender>
 
-    <logger name="yaycrawler.admin" level="DEBUG" additivity="false">
+    <logger name="yaycrawler.ftpserver" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ERROR-OUT"/>
         <appender-ref ref="INFO-OUT"/>
