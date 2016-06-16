@@ -1,12 +1,12 @@
 package yaycrawler.common.utils;
 
 import com.alibaba.fastjson.JSON;
-import org.springframework.http.*;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -15,7 +15,6 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import yaycrawler.common.model.RestFulResult;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +48,7 @@ public class HttpUtils {
         headers.setContentType(type);
         headers.add("Accept", MediaType.APPLICATION_JSON.toString());
 //        JSONObject jsonObj = JSONObject.fromObject(params);
-        HttpEntity<String> formEntity = new HttpEntity<String>(JSON.toJSONString(params), headers);
+        HttpEntity<String> formEntity = new HttpEntity<String>(JSON.toJSONString(params, SerializerFeature.DisableCircularReferenceDetect), headers);
         return (T) restTemplate.postForObject(url, formEntity, responseType);
     }
 

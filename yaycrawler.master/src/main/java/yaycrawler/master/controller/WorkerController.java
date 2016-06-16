@@ -14,7 +14,6 @@ import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.model.WorkerHeartbeat;
 import yaycrawler.common.model.WorkerRegistration;
 import yaycrawler.master.dispatcher.CrawlerTaskDispatcher;
-import yaycrawler.master.handler.WorkerHearbeatHandler;
 import yaycrawler.master.model.MasterContext;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,8 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 public class WorkerController {
     private static Logger logger = LoggerFactory.getLogger(WorkerController.class);
 
-    @Autowired
-    private WorkerHearbeatHandler hearbeatHandler;
+//    @Autowired
+//    private WorkerHearbeatHandler hearbeatHandler;
     @Autowired
     private CrawlerTaskDispatcher taskDispatcher;
 
@@ -59,7 +58,7 @@ public class WorkerController {
     public RestFulResult heartBeat(HttpServletRequest request, @RequestBody WorkerHeartbeat heartbeat) {
         Assert.notNull(heartbeat.getWorkerId());
         Assert.notNull(heartbeat.getWorkerContextPath());
-        logger.info("workerId {} 剩余任务数{}", heartbeat.getWorkerId(), heartbeat.getWaitTaskCount());
+        logger.debug("workerId {} 剩余任务数{}", heartbeat.getWorkerId(), heartbeat.getWaitTaskCount());
         //刷新心跳信息
         MasterContext.receiveWorkerHeartbeat(heartbeat);
         //更新任务状态
