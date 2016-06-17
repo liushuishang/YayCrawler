@@ -3,6 +3,7 @@ package yaycrawler.spider.resolver;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.selector.Json;
 import us.codecraft.webmagic.selector.Selectable;
@@ -203,5 +204,6 @@ public class SelectorExpressionResolver {
 
         return selectable;
     }
+
 
 }

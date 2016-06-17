@@ -45,33 +45,12 @@ public class GenericPageProcessor implements PageProcessor {
 
     @Override
     public void process(Page page) {
-        try {
-            List<CrawlerRequest> childRequestList = new LinkedList<>();
-            String pageUrl = page.getRequest().getUrl();
-            PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
-            Object context = null;
-            String selectExpression = pageInfo.getPageValidationRule();
-            if (StringUtils.isBlank(pageInfo.getPageValidationRule()) || DEFAULT_PAGE_SELECTOR.equals(pageInfo.getPageValidationRule()))
-                context = page.getHtml();
-            else {
-                if (selectExpression.toLowerCase().contains("getjson()"))
-                    context = SelectorExpressionResolver.resolve(null, page.getJson(), selectExpression);
-                else
-                    context = SelectorExpressionResolver.resolve(null, page.getHtml(), selectExpression);
-            }
-            if(context instanceof Selectable) {
-                context = ((Selectable) context).get();
-            }
-            if(StringUtils.isEmpty(String.valueOf(context))) {
-                if (pageParseListener != null)
-                    pageParseListener.onError(page.getRequest(),"页面解析失败");
-                //下载成功解析失败，那么该cookie无效
-                Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
-                if (cookieIds != null && cookieIds.size() > 0) {
-                    //移除失效的cookie
-                    pageSiteService.deleteCookieByIds(cookieIds);
-                }
-            } else {
+        String pageUrl = page.getRequest().getUrl();
+        PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
+        String pageValidationExpression = pageInfo.getPageValidationRule();
+        if (pageValidated(page, pageValidationExpression)) {
+            try {
+                List<CrawlerRequest> childRequestList = new LinkedList<>();
                 Set<PageParseRegion> regionList = getPageRegions(pageUrl);
                 for (PageParseRegion pageParseRegion : regionList) {
                     Map<String, Object> result = parseOneRegion(page, pageParseRegion, childRequestList);
@@ -82,14 +61,15 @@ public class GenericPageProcessor implements PageProcessor {
                 }
                 if (pageParseListener != null)
                     pageParseListener.onSuccess(page.getRequest(), childRequestList);
+            } catch (Exception ex) {
+                logger.error(ex.getMessage());
+                if (pageParseListener != null)
+                    pageParseListener.onError(page.getRequest(), "页面解析失败");
             }
-
-        } catch (Exception ex) {
-            logger.error(ex.getMessage(), ex);
+        } else {
+            //页面下载错误，验证码或cookie失效
             if (pageParseListener != null)
-                pageParseListener.onError(page.getRequest(),"页面解析失败");
-
-            //下载成功解析失败，那么该cookie无效
+                pageParseListener.onError(page.getRequest(), "下载的页面不是我想要的");
             Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
             if (cookieIds != null && cookieIds.size() > 0) {
                 //移除失效的cookie
@@ -98,20 +78,30 @@ public class GenericPageProcessor implements PageProcessor {
         }
     }
 
+    /**
+     * 验证是否正确的页面
+     * @param page
+     * @param pageValidationExpression
+     * @return
+     */
+    public boolean pageValidated(Page page, String pageValidationExpression) {
+        if (StringUtils.isEmpty(pageValidationExpression)) return true;
+        Request request = page.getRequest();
+        Object result = getPageRegionContext(page, request, pageValidationExpression);
+        if (result == null) return false;
+        if (result instanceof Selectable)
+            return ((Selectable) result).match();
+        else
+            return StringUtils.isNotEmpty(String.valueOf(result));
+
+    }
+
     @SuppressWarnings("all")
     public Map<String, Object> parseOneRegion(Page page, PageParseRegion pageParseRegion, List<CrawlerRequest> childRequestList) {
-        Selectable context = null;
         Request request = page.getRequest();
         String selectExpression = pageParseRegion.getSelectExpression();
 
-        if (StringUtils.isBlank(selectExpression) || DEFAULT_PAGE_SELECTOR.equals(selectExpression))
-            context = page.getHtml();
-        else {
-            if (selectExpression.toLowerCase().contains("getjson()"))
-                context = SelectorExpressionResolver.resolve(request, page.getJson(), selectExpression);
-            else
-                context = SelectorExpressionResolver.resolve(request, page.getHtml(), selectExpression);
-        }
+        Selectable context = getPageRegionContext(page, request, selectExpression);
         if (context == null) return null;
 
         Set<UrlParseRule> urlParseRules = pageParseRegion.getUrlParseRules();
@@ -125,6 +115,24 @@ public class GenericPageProcessor implements PageProcessor {
         }
 
         return null;
+    }
+
+    /**
+     * 获取一个region的上下文
+     * @param page
+     * @param request
+     * @param regionSelectExpression
+     * @return
+     */
+    private Selectable getPageRegionContext(Page page, Request request, String regionSelectExpression) {
+        Selectable context;
+        if (StringUtils.isBlank(regionSelectExpression) || DEFAULT_PAGE_SELECTOR.equals(regionSelectExpression))
+            context = page.getHtml();
+       else if (regionSelectExpression.toLowerCase().contains("getjson()"))
+            context = SelectorExpressionResolver.resolve(request, page.getJson(), regionSelectExpression);
+        else
+            context = SelectorExpressionResolver.resolve(request, page.getHtml(), regionSelectExpression);
+        return context;
     }
 
     /**

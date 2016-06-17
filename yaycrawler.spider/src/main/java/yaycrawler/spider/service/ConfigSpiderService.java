@@ -75,14 +75,17 @@ public class ConfigSpiderService {
 
     public Object testExpressionOnPage(PageInfo pageInfo, String expression) {
         if (StringUtils.isBlank(expression)) return null;
-
         String targetUrl = pageInfo.getPageUrl();
         Map<String, Object> paramsMap = pageInfo.getParamsMap();
-
         Request request = RequestHelper.createRequest(targetUrl, pageInfo.getMethod(), paramsMap);
-
         Page page = downloadPage(request, null);
         if (page == null) return RestFulResult.failure("页面下载失败！");
+
+        if (!pageProcessor.pageValidated(page, pageInfo.getPageValidationRule())) {
+            pageMap.remove(request.getUrl());
+            return RestFulResult.failure("页面内容不正确!");
+        }
+
         Object result = null;
         if (expression.toLowerCase().contains("getjson()"))
             result = SelectorExpressionResolver.resolve(request, page.getJson(), expression);
@@ -124,22 +127,7 @@ public class ConfigSpiderService {
                 return finalSite == null ? ConfigSpiderService.this.getSite(request.getUrl()) : finalSite;
             }
         });
-        String pageUrl = page.getRequest().getUrl();
-        PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
-        Object context = null;
-        String selectExpression = pageInfo.getPageValidationRule();
-        if (StringUtils.isBlank(pageInfo.getPageValidationRule()) || DEFAULT_PAGE_SELECTOR.equals(pageInfo.getPageValidationRule()))
-            context = page.getHtml();
-        else {
-            if (selectExpression.toLowerCase().contains("getjson()"))
-                context = SelectorExpressionResolver.resolve(null, page.getJson(), selectExpression);
-            else
-                context = SelectorExpressionResolver.resolve(null, page.getHtml(), selectExpression);
-        }
-        if(context instanceof Selectable) {
-            context = ((Selectable) context).get();
-        }
-        if(StringUtils.isNotEmpty(String.valueOf(context))) {
+        if(page!=null){
             Map<String, Object> m = new HashMap<>();
             m.put("inputTime", System.currentTimeMillis());
             m.put("page", page);

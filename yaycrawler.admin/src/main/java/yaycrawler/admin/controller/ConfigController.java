@@ -87,7 +87,7 @@ public class ConfigController {
         String paramsJson = pageInfo.getParamsJson();
         if (!StringUtils.isBlank(paramsJson)) {
             try {
-                paramsJson = paramsJson.replace("\"", "\\\"");
+//                paramsJson = paramsJson.replace("\"", "\\\"");
                 JSON.parseObject(paramsJson);
                 pageInfo.setParamsJson(paramsJson);
             } catch (Exception ex) {
