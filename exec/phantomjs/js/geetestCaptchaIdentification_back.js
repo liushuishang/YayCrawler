@@ -1,4 +1,101 @@
 "use strict";
+var system = require('system');
+var pageUrl = system.args[1];
+//能够解析图片位移的服务端地址
+var deltaResolveAddress = system.args[2];
+
+var page = require('webpage').create();
+page.settings.javascriptEnabled=true;
+page.settings.loadImages=true;
+page.settings.webSecurityEnabled=false;
+page.settings.resourceTimeout=10000;
+page.settings.userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36";
+
+page.onConsoleMessage=function(msg,lineNum,sourceId){
+    console.log('CONSOLE: '+msg+' (from line #'+lineNum+' in "'+sourceId+'")');
+};
+page.onResourceError=function(resourceError){
+    console.log('Unable to load resource (#'+resourceError.id+'URL:'+resourceError.url+')');
+    console.log('Error code: '+resourceError.errorCode+'. Description: '+resourceError.errorString);
+};
+// page.onResourceReceived = function(response) {
+//     console.log('Response (#' + response.id + ', stage "' + response.stage + '"): ' + JSON.stringify(response));
+// };
+// page.onResourceTimeout = function(request) {
+//     console.log('Response (#' + request.id + '): ' + JSON.stringify(request));
+// };
+//打开验证码页面开始处理
+page.open(pageUrl, function (status) {
+    if (status !== "success") {
+        console.log("页面加载失败！");
+    } else {
+        waitFor(function () {
+            //判断验证码控件是否渲染成功
+            return page.evaluate(function () {
+                return $(".gt_slider_knob") != undefined;
+            });
+        }, function () {
+            console.log(page.content);
+            /**
+             * 开始验证码解锁
+             */
+            // 1、请求java结果获取图块的移动位移(我们这里只需要考虑x坐标即可)
+            // var fullbgSrcArray = [];
+            // var fullbgCoordinateArray = [];
+            // var fullbgSlices = $(".gt_cut_fullbg_slice");
+            // $.each(fullbgSlices, function (i, item) {
+            //     fullbgSrcArray.push(item.css("background-image"));
+            //     fullbgCoordinateArray.pop(item.css("background-position"));
+            // });
+            // var bgSrcArray = [];
+            // var bgCoordinateArray = [];
+            // var bgSlices = $(".gt_cut_bg_slice");
+            // $.each(bgSlices, function (i, item) {
+            //     bgSrcArray.push(item.css("background-image"));
+            //     bgCoordinateArray.pop(item.css("background-position"));
+            // });
+            //
+            // var data = {};
+            // //完整的拼图素材地址，是一张打乱内容的图片
+            // data.fullbgSrcArray = fullbgSrcArray;
+            // data.fullbgPositionArray = fullbgCoordinateArray;
+            // data.bgSrcArray = bgSrcArray;
+            // data.bgCoordinateArray = bgCoordinateArray;
+            // data.itemCount = 52;//完整拼图包含小图片的个数
+            // data.itemHeight = 10;//每个小块的高度（像素）
+            // data.lineItemCount = 26;//拼图中每行包含的小图片个数
+            //
+            // console.log(JSON.stringify(data));
+
+            // var apiPage = require('webpage').create();
+            // apiPage.open(deltaResolveAddress, 'post', data, function (status) {
+            //     if (status !== 'success') {
+            //         console.log('Java接口请求失败!');
+            //     } else {
+            //         console.log(apiPage.content);
+            //         var result = JSON.parse(apiPage.content);
+            //         var deltaX = result.data.deltaX;//求解出来的x的位移量
+            //         // 2、模拟验证码拖动
+            //         captcha.move(".gt_slider_knob", deltaX);
+            //     }
+            // });
+            // apiPage.close();
+            phantom.exit(0);
+        }, 3000);
+    }
+    phantom.exit(1);
+});
+
+page.onError = function(msg, trace) {
+    var msgStack = ['ERROR: ' + msg];
+    if (trace && trace.length) {
+        msgStack.push('TRACE:');
+        trace.forEach(function(t) {
+            msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+        });
+    }
+    console.error(msgStack.join('\n'));
+};
 
 /**
  * 等待一个测试条件为真或者超时，主要用于等待一个服务端响应
@@ -6,7 +103,7 @@
  * @param onReady 定义测试函数满足时要做的事情
  * @param timeOutMillis 超时时间
  */
-function waitFor(testFx, onReady, timeOutMillis) {
+var waitFor= function(testFx, onReady, timeOutMillis) {
     var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 3000,
         start = new Date().getTime(),
         condition = false,
@@ -71,50 +168,6 @@ var captcha = {
         moveToTarget(2);
     }
 };
-
-
-var system = require('system');
-var pageUrl = system.args[1];
-var javaApiAddress = system.args[2];//java 接口的地址
-var page = require('webpage').create();
-
-//打开验证码页面开始处理
-page.open(pageUrl, function (status) {
-    if (status !== "success") {
-        console.log("Unable to access network");
-    } else {
-        waitFor(function () {
-            //判断验证码控件是否渲染成功
-            return page.evaluate(function () {
-                return $(".gt_slider_knob") != undefined;
-            });
-        }, function () {
-            /**
-             * 开始验证码解锁
-             */
-            // 1、请求java结果获取图块的移动位移(我们这里只需要考虑x坐标即可)
-            var data = {};
-            data.fullbg = "";//完整的拼图素材地址，是一张打乱内容的图片
-            data.bg = "";//带凹块的拼图素材地址，是一张打乱了内容的图片
-            data.itemCount = 52;//完整拼图包含小图片的个数
-            data.lineItemCount = 26;//拼图中每行包含的小图片个数
-            var apiPage = require('webpage').create();
-            apiPage.open(javaApiAddress, 'post', data, function (status) {
-                if (status !== 'success') {
-                    console.log('Java接口请求失败!');
-                } else {
-                    console.log(apiPage.content);
-                    var result = JSON.parse(apiPage.content);
-                    var deltaX = result.data;//求解出来的x的位移量
-                    // 2、模拟验证码拖动
-                    captcha.move(".gt_slider_knob", deltaX);
-                }
-            });
-        }, 3000);
-    }
-    phantom.exit(1);
-});
-
 
 
 
