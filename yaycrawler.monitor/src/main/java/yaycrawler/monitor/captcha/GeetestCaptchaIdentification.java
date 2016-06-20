@@ -97,15 +97,17 @@ public class GeetestCaptchaIdentification {
         String progam = "";
         Properties prop = System.getProperties();
         String os = prop.getProperty("os.name");
+        String phantomJsPath = "";
         if (StringUtils.startsWithIgnoreCase(os, "win")) {
-            progam = path + "phantomjs/window/phantomjs";
+            progam = path + "casperjs/bin/casperjs.exe";
+            phantomJsPath = path + "phantomjs/window/phantomjs.exe";
         } else {
-            progam = path + "phantomjs/linux/phantomjs";
+            progam = path + "casperjs/bin/casperjs";
+            phantomJsPath = path + "phantomjs/linux/phantomjs";
         }
-        ProcessBuilder processBuilder = new ProcessBuilder(progam, "geetestCaptchaIdentification.js",
-                pageUrl,deltaResolveAddress,"--debug=true","--ignore-ssl-errors=yes ","--web-security=no" );
-//        ProcessBuilder processBuilder = new ProcessBuilder(progam, "phantomDownload.js", pageUrl,deltaResolveAddress);
-        processBuilder.directory(new File(path + "phantomjs/js"));
+        ProcessBuilder processBuilder = new ProcessBuilder(progam, "test.js", pageUrl,deltaResolveAddress);
+        processBuilder.directory(new File(path + "casperjs/js"));
+        processBuilder.environment().put("PHANTOMJS_EXECUTABLE", phantomJsPath);
         try {
             p = processBuilder.start();
             InputStream is = p.getInputStream();
