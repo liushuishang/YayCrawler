@@ -279,7 +279,7 @@
                 },
                 labels: function(labelText) {
                     var label = this.findOne({type: "xpath", path: '//label[text()="' +
-                        labelText + '"]'}, form);
+                    labelText + '"]'}, form);
                     if (label && label.htmlFor) {
                         return this.findAll('#' + label.htmlFor, form);
                     }
@@ -309,9 +309,9 @@
                     if (err.name === "FileUploadError") {
                         var selector;
                         if (findType === "labels") {
-                          selector = '#' + field[0].id;
+                            selector = '#' + field[0].id;
                         } else {
-                          selector = fieldSelector;
+                            selector = fieldSelector;
                         }
                         out.files.push({
                             type: findType,
@@ -718,7 +718,7 @@
                 return !!a && !isNaN(a) && parseInt(a, 10) ||
                     !!a && !isNaN(parseFloat(a)) && parseFloat(a) >= 0 &&
                     parseFloat(a) <= 100 && parseFloat(a) / 100 ||
-                def;
+                    def;
             };
             try {
                 var evt = document.createEvent("MouseEvents");
@@ -843,17 +843,25 @@
                     for (var k in data) {
                         if (data.hasOwnProperty(k)) {
                             dataList.push(encodeURIComponent(k) + "=" +
-                             encodeURIComponent(data[k].toString()));
+                                encodeURIComponent(data[k].toString()));
                         }
                     }
                     dataString = dataList.join('&');
-                    this.log("sendAJAX(): Using request data: '" + dataString + "'", "debug");
+                    //this.log("sendAJAX(): Using request data: '" + dataString + "'", "debug");
                 } else if (typeof data === "string") {
                     dataString = data;
                 }
                 xhr.setRequestHeader("Content-Type", contentType);
             }
-            xhr.send(method === "POST" ? dataString : null);
+            try {
+                xhr.send(method === "POST" ? dataString : null);
+            }catch(e){
+                this.log("name: " + e.name +
+                    "message: " + e.message +
+                    "lineNumber: " + e.lineNumber +
+                    "fileName: " + e.fileName +
+                    "stack: " + e.stack);
+            }
             return xhr.responseText;
         };
 
@@ -984,7 +992,7 @@
                 field.blur();
             } catch (err) {
                 this.log("Unable to blur() input field " + field.getAttribute('name') +
-                 ": " + err, "warning");
+                    ": " + err, "warning");
             }
             return out;
         };

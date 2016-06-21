@@ -105,7 +105,7 @@ public class GeetestCaptchaIdentification {
             progam = path + "casperjs/bin/casperjs";
             phantomJsPath = path + "phantomjs/linux/phantomjs";
         }
-        ProcessBuilder processBuilder = new ProcessBuilder(progam, "test.js", pageUrl,deltaResolveAddress);
+        ProcessBuilder processBuilder = new ProcessBuilder(progam, "geetest.js", pageUrl,deltaResolveAddress," --web-security=no","--ignore-ssl-errors=true");
         processBuilder.directory(new File(path + "casperjs/js"));
         processBuilder.environment().put("PHANTOMJS_EXECUTABLE", phantomJsPath);
         try {
@@ -132,5 +132,8 @@ public class GeetestCaptchaIdentification {
 
 
     }
+
+
+
 
 }

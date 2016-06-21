@@ -9,7 +9,7 @@
     "testing",
     "scraping"
   ],
-  "bin": "./bin1/casperjs",
+  "bin": "./bin/casperjs",
   "author": {
     "name": "CasperJS Organization",
     "web": "https://casperjs.org/"
