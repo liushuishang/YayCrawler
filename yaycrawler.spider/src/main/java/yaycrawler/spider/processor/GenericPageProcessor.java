@@ -15,6 +15,7 @@ import us.codecraft.webmagic.selector.Selectable;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.dao.domain.*;
 import yaycrawler.dao.service.PageParserRuleService;
+import yaycrawler.monitor.captcha.CaptchaIdentificationProxy;
 import yaycrawler.spider.listener.IPageParseListener;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
 import yaycrawler.spider.service.PageSiteService;
@@ -24,24 +25,24 @@ import java.util.*;
 /**
  * Created by yuananyun on 2016/5/1.
  */
-@Component(value="genericPageProcessor")
+@Component(value = "genericPageProcessor")
 public class GenericPageProcessor implements PageProcessor {
     private static Logger logger = LoggerFactory.getLogger(GenericPageProcessor.class);
     @Autowired(required = false)
     private IPageParseListener pageParseListener;
-
     @Autowired
     private PageParserRuleService pageParserRuleService;
-
     @Autowired
     private PageSiteService pageSiteService;
 
+    @Autowired
+    private CaptchaIdentificationProxy captchaIdentificationProxy;
 
     private static String DEFAULT_PAGE_SELECTOR = "page";
 
     public GenericPageProcessor() {
-    }
 
+    }
 
     @Override
     public void process(Page page) {
@@ -70,9 +71,13 @@ public class GenericPageProcessor implements PageProcessor {
             //页面下载错误，验证码或cookie失效
             if (pageParseListener != null)
                 pageParseListener.onError(page.getRequest(), "下载的页面不是我想要的");
+            //刷新验证码
+            if (captchaIdentificationProxy.recognition(page.getRequest().getUrl(), page.getRawText())) {
+                logger.info("刷新{}页面的验证码成功！", page.getRequest().getUrl());
+            }
+            //移除失效的cookie
             Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
             if (cookieIds != null && cookieIds.size() > 0) {
-                //移除失效的cookie
                 pageSiteService.deleteCookieByIds(cookieIds);
             }
         }
@@ -80,6 +85,7 @@ public class GenericPageProcessor implements PageProcessor {
 
     /**
      * 验证是否正确的页面
+     *
      * @param page
      * @param pageValidationExpression
      * @return
@@ -119,6 +125,7 @@ public class GenericPageProcessor implements PageProcessor {
 
     /**
      * 获取一个region的上下文
+     *
      * @param page
      * @param request
      * @param regionSelectExpression
@@ -128,7 +135,7 @@ public class GenericPageProcessor implements PageProcessor {
         Selectable context;
         if (StringUtils.isBlank(regionSelectExpression) || DEFAULT_PAGE_SELECTOR.equals(regionSelectExpression))
             context = page.getHtml();
-       else if (regionSelectExpression.toLowerCase().contains("getjson()"))
+        else if (regionSelectExpression.toLowerCase().contains("getjson()"))
             context = SelectorExpressionResolver.resolve(request, page.getJson(), regionSelectExpression);
         else
             context = SelectorExpressionResolver.resolve(request, page.getHtml(), regionSelectExpression);

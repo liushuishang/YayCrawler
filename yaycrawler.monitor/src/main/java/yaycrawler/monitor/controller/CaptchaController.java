@@ -1,4 +1,4 @@
-package yaycrawler.worker.controller;
+package yaycrawler.monitor.controller;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.collections.MapUtils;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import yaycrawler.common.model.RestFulResult;
 import yaycrawler.common.utils.ImageUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ import java.util.Map;
 public class CaptchaController {
 
     @RequestMapping(value = "resolveGeetestSlicePosition", method = RequestMethod.POST)
-    public RestFulResult resolveGeetestSlicePosition(HttpServletRequest request, HttpServletResponse response, String params) {
+    public RestFulResult resolveGeetestSlicePosition(HttpServletResponse response, String params) {
         response.addHeader("Access-Control-Allow-Origin", "*");
         Map<String, Object> paramMap = (Map<String, Object>) JSON.parseObject(params, Map.class);
         if (paramMap == null)

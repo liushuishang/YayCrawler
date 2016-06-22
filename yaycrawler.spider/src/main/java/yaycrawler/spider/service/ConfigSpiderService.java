@@ -15,7 +15,6 @@ import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.RestFulResult;
 import yaycrawler.dao.domain.PageInfo;
 import yaycrawler.dao.domain.PageParseRegion;
-import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.spider.downloader.GenericCrawlerDownLoader;
 import yaycrawler.spider.processor.GenericPageProcessor;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
@@ -32,18 +31,14 @@ public class ConfigSpiderService {
 
     @Autowired
     private GenericCrawlerDownLoader downloader;
+    @Autowired
     private GenericPageProcessor pageProcessor;
 
     @Autowired
     private PageSiteService pageSiteService;
 
-    @Autowired
-    private PageParserRuleService pageParserRuleService;
-
-    private static String DEFAULT_PAGE_SELECTOR = "page";
-
     public ConfigSpiderService() {
-        pageProcessor = new GenericPageProcessor();
+
     }
 
     /**

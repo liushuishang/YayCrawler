@@ -78,6 +78,11 @@
 			<artifactId>yaycrawler-dao</artifactId>
 			<version>${yaycrawler.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.example</groupId>
+			<artifactId>yaycrawler-monitor</artifactId>
+			<version>${yaycrawler.version}</version>
+		</dependency>
 
 	</dependencies>
 	

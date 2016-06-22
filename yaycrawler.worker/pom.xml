@@ -111,6 +111,10 @@ http://www.w3.org/2001/XMLSchema-instance ">
                                 <copy todir="${basedir}/target/${artifactId}-${version}/WEB-INF/classes/phantomjs">
                                     <fileset dir="../exec/phantomjs"/>
                                 </copy>
+                                <mkdir dir="${basedir}/target/${artifactId}-${version}/WEB-INF/classes/casperjs"/>
+                                <copy todir="${basedir}/target/${artifactId}-${version}/WEB-INF/classes/casperjs">
+                                    <fileset dir="../exec/casperjs"/>
+                                </copy>
                             </tasks>
                         </configuration>
                     </execution>
