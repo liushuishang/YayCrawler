@@ -90,7 +90,7 @@ public class PhantomJsMockDonwnloader extends AbstractDownloader {
                                 progam = path + "casperjs/bin/casperjs";
                             }
 
-                            ProcessBuilder processBuilder = new ProcessBuilder(progam, "casperjsDownload.js", "http://www.jiayuan.com/4764431", methodName, URLEncoder.encode(paramArray[0], "utf-8"), "www.jiayuan.com", URLEncoder.encode(cookie, "utf-8"));
+                            ProcessBuilder processBuilder = new ProcessBuilder(progam, "casperjsDownload.js", "http://www.jiayuan.com/4764431", methodName, URLEncoder.encode(paramArray[0], "utf-8"), domain, URLEncoder.encode(cookie, "utf-8"));
                             processBuilder.directory(new File(path + "phantomjs/js"));
 
                             p = processBuilder.start();
