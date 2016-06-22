@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        #c {
+            position: absolute;
+        }
+        #num {
+            position: absolute;
+            top:30px;
+            left:310px;
+            width:50px;
+        }
+        #reset {
+            position: absolute;
+            top:60px;
+            left:310px;
+        }
+    </style>
+    <script type="text/javascript">
+        var height = 300, width = 300,px =[], py = [], mx = [], my = [], count;
+        var canvas  = document.getElementById("c");
+        var context = canvas.getContext('2d');
+        (init = function(){
+            count=document.getElementById("num").value;
+            for (var i=0; i<4*count; i++) {
+                px[i] = Math.random()*width, py[i] = Math.random()*width;
+                mx[i] = Math.round(Math.random()*3-1),my[i] = Math.round(Math.random()*3-1);
+            }
+        })();
+        document.getElementById("reset").onclick = init;
+        setInterval(function() {
+            for (i=0; i<4*count; i++) {
+                px[i] += mx[i], py[i] += my[i];
+                if (px[i]>width || px[i]<0)  mx[i] *= -1;
+                if (py[i]>width || py[i]<0)  my[i] *= -1;
+            }
+            context.clearRect(0, 0, width, height);
+            context.fillStyle = "#000000";
+            context.fillRect(0,0,width,height);
+            for(i=0; i<count; i++) {
+                context.moveTo(px[0+i*4], py[0+i*4]);
+                context.beginPath();
+                context.lineWidth = 2;
+                context.strokeStyle='rgb(255, 255, 66)';
+                context.bezierCurveTo(px[1+i], py[1+i], px[2+i], py[2+i], px[3+i], py[3+i]);
+                context.stroke();
+            }
+        }, 20);
+    </script>
+</head>
+<body>
+<canvas id="c" height="300" width="300"></canvas>
+<input id="num" value="4" />
+<input type="button" id="reset" value=" reset ">
+</body>
+</html>

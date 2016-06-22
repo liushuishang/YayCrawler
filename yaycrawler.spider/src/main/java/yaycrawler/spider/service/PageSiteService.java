@@ -46,7 +46,7 @@ public class PageSiteService {
             site.setUserAgent(pageSite.getUserAgent());
             site.setUseGzip(true);
 
-            if (pageSite.getHeaders() != null) {
+            if (StringUtils.isNotEmpty(pageSite.getHeaders())) {
                 Map<String, String> headMap = JSON.parseObject(pageSite.getHeaders(), Map.class);
                 for (Map.Entry<String, String> entry : headMap.entrySet()) {
                     site.addHeader(entry.getKey(), entry.getValue());

@@ -35,8 +35,10 @@ public class GenericCrawlerDownLoader extends AbstractDownloader {
         PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(request.getUrl());
         if(pageInfo == null)
             return httpClientDownloader.download(request, task);;
-        if ("1".equals(pageInfo.getIsJsRendering()))
+        if ("1".equals(pageInfo.getIsJsRendering())) {
+            request.putExtra("$pageInfo",pageInfo);
             return mockDonwnloader.download(request, task);
+        }
         else
             return httpClientDownloader.download(request, task);
     }
