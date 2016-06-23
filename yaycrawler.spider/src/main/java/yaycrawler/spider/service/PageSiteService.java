@@ -5,12 +5,14 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Site;
+import yaycrawler.common.model.PhantomCookie;
 import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.PageSite;
 import yaycrawler.dao.domain.SiteCookie;
 import yaycrawler.dao.repositories.PageSiteRepository;
 import yaycrawler.dao.repositories.SiteCookieRepository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -82,5 +84,17 @@ public class PageSiteService {
         String domain = UrlUtils.getDomain(pageUrl);
         if (StringUtils.isBlank(domain)) return null;
         return siteRepository.findByDomain(domain);
+    }
+
+    public boolean saveCookies(String siteId, List<PhantomCookie> cookies) {
+        if (StringUtils.isBlank(siteId) || cookies == null || cookies.size() == 0) return false;
+        try {
+            for (PhantomCookie cookie : cookies) {
+                cookieRepository.save(new SiteCookie(siteId, cookie.getDomain(), cookie.getValue()));
+            }
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 }

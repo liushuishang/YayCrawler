@@ -224,10 +224,11 @@ public class GenericPageProcessor implements PageProcessor {
                 }
                 //需要登录了
                 LoginResult loginResult= autoLoginProxy.login(pageUrl, loginJsFileName, page.getRawText());
-                if(loginResult.isSuccess()) {
+                if (loginResult.isSuccess()) {
                     logger.info("自动登录{}成功！", pageUrl);
-                    //TODO 保存cookie
-
+                    if (pageSiteService.saveCookies(pageSite.getId(), loginResult.getCookies()))
+                        logger.info("保存{}的cookie成功！", pageUrl);
+                    else logger.info("保存{}的cookie失败！", pageUrl);
                 }
                 else logger.info("自动登录{}失败！", pageUrl);
             } else {
