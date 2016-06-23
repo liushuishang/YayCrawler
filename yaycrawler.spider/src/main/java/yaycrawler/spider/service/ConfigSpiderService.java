@@ -15,6 +15,7 @@ import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.RestFulResult;
 import yaycrawler.dao.domain.PageInfo;
 import yaycrawler.dao.domain.PageParseRegion;
+import yaycrawler.monitor.captcha.CaptchaIdentificationProxy;
 import yaycrawler.spider.downloader.GenericCrawlerDownLoader;
 import yaycrawler.spider.processor.GenericPageProcessor;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
@@ -75,7 +76,7 @@ public class ConfigSpiderService {
         Request request = RequestHelper.createRequest(targetUrl, pageInfo.getMethod(), paramsMap);
         Page page = downloadPage(request, null);
         if (page == null) return RestFulResult.failure("页面下载失败！");
-
+        pageProcessor.process(page);
         if (!pageProcessor.pageValidated(page, pageInfo.getPageValidationRule())) {
             pageMap.remove(request.getUrl());
             return RestFulResult.failure("页面内容不正确!");

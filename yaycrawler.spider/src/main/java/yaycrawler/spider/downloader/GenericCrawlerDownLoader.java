@@ -28,7 +28,7 @@ public class GenericCrawlerDownLoader extends AbstractDownloader {
         mockDonwnloader = new PhantomJsMockDonwnloader();
     }
 
-    private static Pattern redirectPattern = Pattern.compile("<script>window.location.href='.*';</script>");
+    private static Pattern redirectPattern = Pattern.compile("<script.*(?s).*location.href =.*(?s).*</script>");
     @Override
     public Page download(Request request, Task task) {
         //记录当前请求使用的Cookie
@@ -42,7 +42,7 @@ public class GenericCrawlerDownLoader extends AbstractDownloader {
         else
             page= httpClientDownloader.download(request, task);
 
-        if(redirectPattern.matcher( page.getRawText()).matches())
+        if(page != null && redirectPattern.matcher( page.getRawText()).find())
             page=mockDonwnloader.download(request, task);
         return page;
     }
