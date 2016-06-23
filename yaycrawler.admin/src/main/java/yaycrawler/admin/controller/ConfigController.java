@@ -298,7 +298,7 @@ public class ConfigController {
 
     @RequestMapping(value = "/addSite", method = RequestMethod.POST)
     @ResponseBody
-    public Object deleteSites(PageSite pageSite) {
+    public Object addSite(PageSite pageSite) {
         if (StringUtils.isBlank(pageSite.getDomain())) {
             return false;
         }

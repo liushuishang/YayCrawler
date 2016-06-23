@@ -86,13 +86,12 @@ public class PageSiteService {
         return siteRepository.findByDomain(domain);
     }
 
-    public boolean saveCookies(String siteId, List<PhantomCookie> cookies) {
+    public boolean saveCookies(String siteId, String domain, List<PhantomCookie> cookies) {
         if (StringUtils.isBlank(siteId) || cookies == null || cookies.size() == 0) return false;
         try {
-            for (PhantomCookie cookie : cookies) {
-                cookieRepository.save(new SiteCookie(siteId, cookie.getDomain(), cookie.getValue()));
-            }
-            return true;
+            StringBuilder cookieBuild = new StringBuilder();
+            cookies.forEach(phantomCookie -> cookieBuild.append(String.format("%s=%s;", phantomCookie.getName(), phantomCookie.getValue())));
+            return cookieRepository.save(new SiteCookie(siteId, domain, cookieBuild.toString()))!=null;
         } catch (Exception ex) {
             return false;
         }

@@ -27,13 +27,13 @@ public class PageSite implements Serializable {
     private String defaultCookies;
     @Column(name = "charset", columnDefinition = "varchar(10) default 'utf-8'")
     private String charset;
-    @Column(name = "sleepTime", insertable = false, updatable = false)
+    @Column(name = "sleepTime", columnDefinition = "long default 500")
     private Long sleepTime;
     @Column(name = "retryTimes", columnDefinition = "int default 3")
     private int retryTimes;
     @Column(name = "cycleRetryTimes", columnDefinition = "int default 1")
     private int cycleRetryTimes;
-    @Column(name = "sleepTime", columnDefinition = "long default 10000")
+    @Column(name = "timeOut", columnDefinition = "long default 10000")
     private Long timeOut;
     @Column(name = "headers", columnDefinition = "varchar(1000)")
     private String headers;
