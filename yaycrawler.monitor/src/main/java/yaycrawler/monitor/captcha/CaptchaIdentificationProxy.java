@@ -24,12 +24,16 @@ public class CaptchaIdentificationProxy {
 
 
 
-    public boolean recognition(String pageUrl, String pageContent) {
+    public boolean recognition(String pageUrl,String jsFileName, String pageContent) {
+        if(StringUtils.isBlank(jsFileName))
+        {
+            logger.error("jsFileName不能为空！");
+            return false;
+        }
         if (StringUtils.isBlank(pageContent)) return false;
-        logger.debug(pageContent);
         if (pageContent.contains("http://api.geetest.com/get.php")) {
             String resolverAddress = String.format("http://%s:%s%s/%s", serverIP, serverPort, serverContextPath, "resolveGeetestSlicePosition");
-            return GeetestCaptchaIdentification.process(pageUrl, resolverAddress);
+            return GeetestCaptchaIdentification.process(pageUrl,jsFileName, resolverAddress);
         }
         return false;
     }

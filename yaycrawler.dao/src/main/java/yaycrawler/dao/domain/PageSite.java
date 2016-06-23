@@ -38,6 +38,13 @@ public class PageSite implements Serializable {
     @Column(name = "headers", columnDefinition = "varchar(1000)")
     private String headers;
 
+    /**
+     * 验证码识别Js脚步文件名称
+     */
+    @Column(name = "captchaJsFileName", columnDefinition = "varchar(200)")
+    private String captchaJsFileName;
+
+
     @OneToMany( fetch = FetchType.EAGER,cascade=CascadeType.REMOVE,orphanRemoval=true)
     @JoinColumn(name = "siteId", insertable = false, updatable = false)
     private List<SiteCookie> cookieList;
@@ -129,5 +136,13 @@ public class PageSite implements Serializable {
 
     public void setCookieList(List<SiteCookie> cookieList) {
         this.cookieList = cookieList;
+    }
+
+    public String getCaptchaJsFileName() {
+        return captchaJsFileName;
+    }
+
+    public void setCaptchaJsFileName(String captchaJsFileName) {
+        this.captchaJsFileName = captchaJsFileName;
     }
 }

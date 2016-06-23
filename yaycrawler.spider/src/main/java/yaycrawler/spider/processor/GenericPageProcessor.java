@@ -38,7 +38,6 @@ public class GenericPageProcessor implements PageProcessor {
 
     @Autowired
     private CaptchaIdentificationProxy captchaIdentificationProxy;
-
     private static String DEFAULT_PAGE_SELECTOR = "page";
 
     public GenericPageProcessor() {
@@ -51,7 +50,6 @@ public class GenericPageProcessor implements PageProcessor {
         String pageUrl = page.getRequest().getUrl();
         PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
         String pageValidationExpression = pageInfo.getPageValidationRule();
-
         if (pageValidated(page, pageValidationExpression)) {
             try {
                 List<CrawlerRequest> childRequestList = new LinkedList<>();
@@ -75,8 +73,9 @@ public class GenericPageProcessor implements PageProcessor {
             if (pageParseListener != null)
                 pageParseListener.onError(page.getRequest(), "下载的页面不是我想要的");
             //刷新验证码
-            if (captchaIdentificationProxy.recognition(page.getRequest().getUrl(), page.getRawText())) {
-                logger.info("刷新{}页面的验证码成功！", page.getRequest().getUrl());
+            String jsFileName = pageSiteService.getCaptchaJsFileNameByUrl(pageUrl);
+            if (captchaIdentificationProxy.recognition(pageUrl, jsFileName, page.getRawText())) {
+                logger.info("刷新{}页面的验证码成功！", pageUrl);
             }
 //            else {
 //                //移除失效的cookie

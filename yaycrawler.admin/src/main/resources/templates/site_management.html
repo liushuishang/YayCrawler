@@ -91,11 +91,11 @@
                                 <input type="text" class="form-control" name="charset"
                                        value="utf-8" placeholder="输入页面编码"/>
                             </div>
-                            <div class="form-group">
-                                <label class="control-label">超时时间</label>
-                                <input type="text" class="form-control" name="timeOut"
-                                       value="500" placeholder="输入超时时间(毫秒)"/>
-                            </div>
+                            <!--<div class="form-group">-->
+                                <!--<label class="control-label">超时时间</label>-->
+                                <!--<input type="text" class="form-control" name="timeOut"-->
+                                       <!--value="500" placeholder="输入超时时间(毫秒)"/>-->
+                            <!--</div>-->
                             <!--<div class="form-group">-->
                             <!--<label class="control-label">重试次数</label>-->
                             <!--<input type="text" class="form-control" name="tryTimes"-->
@@ -110,10 +110,16 @@
                                 </textarea>
                             </div>
                             <div class="form-group">
+                                <label class="control-label">验证码识别脚本文件名</label>
+                                <input type="text" class="form-control" name="captchaJsFileName" value="200"
+                                       placeholder="输入'根目录/casperjs/js'中的文件名"/>
+                            </div>
+                            <div class="form-group">
                                 <label class="control-label">浏览器标识</label>
                                 <textarea name="userAgent" rows="3" class="form-control"
                                           value="">Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36</textarea>
                             </div>
+
                         </div>
                     </form>
                 </div>

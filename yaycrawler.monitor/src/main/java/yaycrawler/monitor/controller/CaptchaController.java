@@ -27,7 +27,7 @@ public class CaptchaController {
         response.addHeader("Access-Control-Allow-Origin", "*");
         Map<String, Object> paramMap = (Map<String, Object>) JSON.parseObject(params, Map.class);
         if (paramMap == null)
-            if (paramMap == null) return RestFulResult.failure("参数不能为空！");
+          return RestFulResult.failure("参数不能为空！");
         List<String> fullbgSrcList = (List<String>) paramMap.get("fullbgSrcArray");
         List<String> fullbgPositionList = (List<String>) paramMap.get("fullbgPositionArray");
         List<String> bgSrcList = (List<String>) paramMap.get("bgSrcArray");

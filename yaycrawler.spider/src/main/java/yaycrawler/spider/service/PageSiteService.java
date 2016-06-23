@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Site;
+import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.PageSite;
 import yaycrawler.dao.domain.SiteCookie;
 import yaycrawler.dao.repositories.PageSiteRepository;
@@ -75,5 +76,12 @@ public class PageSiteService {
         for (String cookieId : cookieIds) {
             cookieRepository.delete(cookieId);
         }
+    }
+
+    public String getCaptchaJsFileNameByUrl(String pageUrl) {
+        String domain = UrlUtils.getDomain(pageUrl);
+        if (StringUtils.isBlank(domain)) return null;
+        PageSite site = siteRepository.findByDomain(domain);
+        return site == null ? null : site.getCaptchaJsFileName();
     }
 }
