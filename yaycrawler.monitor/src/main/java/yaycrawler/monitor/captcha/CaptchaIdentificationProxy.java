@@ -1,6 +1,8 @@
 package yaycrawler.monitor.captcha;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import yaycrawler.monitor.captcha.geetest.GeetestCaptchaIdentification;
@@ -11,6 +13,7 @@ import yaycrawler.monitor.captcha.geetest.GeetestCaptchaIdentification;
  */
 @Component
 public class CaptchaIdentificationProxy {
+    private static Logger logger = LoggerFactory.getLogger(CaptchaIdentificationProxy.class);
 
     @Value("${server.address}")
     private String serverIP;
@@ -23,6 +26,7 @@ public class CaptchaIdentificationProxy {
 
     public boolean recognition(String pageUrl, String pageContent) {
         if (StringUtils.isBlank(pageContent)) return false;
+        logger.debug(pageContent);
         if (pageContent.contains("http://api.geetest.com/get.php")) {
             String resolverAddress = String.format("http://%s:%s%s/%s", serverIP, serverPort, serverContextPath, "resolveGeetestSlicePosition");
             return GeetestCaptchaIdentification.process(pageUrl, resolverAddress);

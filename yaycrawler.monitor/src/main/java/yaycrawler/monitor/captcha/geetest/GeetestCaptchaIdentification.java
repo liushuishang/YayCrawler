@@ -27,6 +27,7 @@ public class GeetestCaptchaIdentification {
      * @return
      */
     public static boolean process(String pageUrl,String deltaResolveAddress) {
+        logger.info("滑块位置服务：" + deltaResolveAddress);
         if (pageUrl == null) return false;
         String path =GeetestCaptchaIdentification.class.getResource("/").getPath();
         path = path.substring(1, path.lastIndexOf("/") + 1);
@@ -54,7 +55,7 @@ public class GeetestCaptchaIdentification {
             while ((tmp = br.readLine()) != null) {
                 sbf.append(tmp).append("\r\n");
             }
-            System.out.println(sbf.toString());
+            logger.info(sbf.toString());
             if (sbf.indexOf("验证通过") >= 0)
                 return true;
             return false;
@@ -65,7 +66,7 @@ public class GeetestCaptchaIdentification {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        int totalCount = 10;
+        int totalCount = 1;
         int successCount = 0;
         int retryCount = 0;
         StopWatch stopWatch = new StopWatch();
@@ -89,6 +90,7 @@ public class GeetestCaptchaIdentification {
             System.out.println("本次调用耗时：(毫秒)" + stopWatch.getTime());
         }
         System.out.println("调用" + totalCount + "次，失败重试" + retryCount + "次的情况下，共成功" + successCount + "次");
+        System.exit(0);
     }
 
     private static ExecutorService threadPool = Executors.newFixedThreadPool(10);
@@ -97,7 +99,8 @@ public class GeetestCaptchaIdentification {
         Future<Boolean> future = threadPool.submit(new Callable<Boolean>() {
                                                        @Override
                                                        public Boolean call() throws Exception {
-                                                           return GeetestCaptchaIdentification.process("http://user.geetest.com/login?url=http:%2F%2Faccount.geetest.com%2Freport","http://localhost:8086/worker/resolveGeetestSlicePosition");
+//                                                           return GeetestCaptchaIdentification.process("http://user.geetest.com/login?url=http:%2F%2Faccount.geetest.com%2Freport","http://localhost:8086/worker/resolveGeetestSlicePosition");
+                                                           return GeetestCaptchaIdentification.process("http://www.qichacha.com/search_index?index=0&p=1&key=%E5%BD%A6%E4%B8%9C%E5%A1%91%E8%83%B6%E5%85%AC%E5%8F%B8","http://localhost:8086/worker/resolveGeetestSlicePosition");
                                                        }
                                                    }
         );

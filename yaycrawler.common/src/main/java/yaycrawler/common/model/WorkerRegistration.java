@@ -12,7 +12,7 @@ public class WorkerRegistration {
     /**
      * 最后的心跳时间
      */
-    private Long lastHeartbeatTime;
+    private Long lastHeartbeatTime=0L;
 
     public WorkerRegistration() {
     }

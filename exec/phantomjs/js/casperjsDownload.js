@@ -1,26 +1,59 @@
 /**
  * Created by ucs_guoguibiao on 6/20 0020.
  */
-system = require('system')
+var utils = require('utils');
 var casper = require('casper').create({
-    clientScripts:  [
-    //    //'jquery.min.js',      // These two scripts will be injected in remote
-    //    'underscore-min.js'   // DOM on every request
-    ],
-    remoteScripts:[
-        //'http://libs.baidu.com/jquery/1.11.1/jquery.min.js',
-        //'http://www.bootcss.com/p/underscore/underscore-min.js'
-    ],
+    //clientScripts: ["jquery-2.1.3.min.js"],
     pageSettings: {
-        loadImages:  false,        // The WebPage instance used by Casper will
-        loadPlugins: false         // use these settings
+        javascriptEnabled: true,
+        XSSAuditingEnabled: true,
+        loadImages: true,        // The WebPage instance used by Casper will
+        loadPlugins: false,         // use these settings
+        userAgent: "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36"
     },
-    logLevel: "info",              // Only "info" level messages will be logged
+    waitTimeout: 10000,
+    exitOnError: false,
+    httpStatusHandlers: {
+        404: function () {
+            console.log(404);
+        }
+    },
+    onAlert: function (msg) {
+        console.log(msg);
+    },
+    onError: function (self, m) {
+        console.log("FATAL:" + m);
+        self.exit();
+    },
+    onDie: function () {
+        console.log('dieing');
+    },
+    onLoadError: function (casper, url) {
+        console.log(url + ' can\'t be loaded');
+    },
+    onPageInitialized: function () {
+
+    },
+    onResourceReceived: function () {
+        //console.log(arguments[1]['url'] + ' Received');
+    },
+    onResourceRequested: function () {
+        //console.log(arguments[1]['url'] + ' requested');
+    },
+    onStepComplete: function () {
+        //console.log('onStepComplete');
+    },
+    onStepTimeout: function () {
+        console.log('timeout');
+    },
+    logLevel: "debug",              // Only "info" level messages will be logged
     verbose: false                  // log messages will be printed out to the console
 });
-//require("utils").dump(casper.cli.args);
-//require("utils").dump(system.args);
-casper.options.waitTimeout = 20000;
+casper.on('remote.message', function (msg) {
+    this.log(msg, 'info');
+});
+
+
 var address = casper.cli.get(0);//获得命令行第二个参数 接下来会用到
 var methodName = casper.cli.get(1);
 var param = decodeURIComponent(decodeURIComponent(casper.cli.get(2)));
@@ -60,22 +93,19 @@ casper.on('http.status.404', function(resource) {
     this.echo('Hey, this one is 404: ' + resource.url, 'warning');
 });
 casper.start(address);
-
-casper.then(function() {
-    this.capture('baidu-homepage.png');
-});
-
-//casper.then(function() {
-//    this.fill('form[action="/s"]', { wd: 'thoughtworks' }, true);//填入form，进行搜索
-//});
-
-casper.then( function() {
-    this.waitForSelector(checkExist, function() {                  //等到exist选择器匹配的元素出现时再执行回调函数
-        this.captureSelector('twitter.png', 'html');                 //成功时调用的函数,给整个页面截图
+casper.then(function(){
+    this.wait(10000, function () {
         this.echo(this.getPageContent());
-    }, function() {
-        this.die('页面解析失败').exit();             //失败时调用的函数,输出一个消息,并退出
-    }, 2000);                                                        //超时时间,两秒钟后指定的选择器还没出现,就算失败
-});
+        this.exit();
+    });
+}).then(function(){this.exit();});
+//casper.then( function() {
+//    this.waitForSelector(checkExist, function() {                  //等到exist选择器匹配的元素出现时再执行回调函数
+//        this.captureSelector('twitter.png', 'html');                 //成功时调用的函数,给整个页面截图
+//        this.echo(this.getPageContent());
+//    }, function() {
+//        this.die('页面解析失败').exit();             //失败时调用的函数,输出一个消息,并退出
+//    }, 1000);                                                        //超时时间,两秒钟后指定的选择器还没出现,就算失败
+//});
 
 casper.run();

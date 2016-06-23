@@ -377,6 +377,7 @@ public class CrawlerQueueService {
             return false;
         String data = String.valueOf(hashOperations.get(runningQueue, field));
         CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
+        if(crawlerRequest==null) return false;
         crawlerRequest.setStartTime(System.currentTimeMillis());
         moveSuccessQueue(crawlerRequest);
         hashOperations.delete(runningQueue, field);

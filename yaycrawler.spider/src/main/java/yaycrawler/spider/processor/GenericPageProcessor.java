@@ -28,6 +28,7 @@ import java.util.*;
 @Component(value = "genericPageProcessor")
 public class GenericPageProcessor implements PageProcessor {
     private static Logger logger = LoggerFactory.getLogger(GenericPageProcessor.class);
+
     @Autowired(required = false)
     private IPageParseListener pageParseListener;
     @Autowired
@@ -44,11 +45,13 @@ public class GenericPageProcessor implements PageProcessor {
 
     }
 
+
     @Override
     public void process(Page page) {
         String pageUrl = page.getRequest().getUrl();
         PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
         String pageValidationExpression = pageInfo.getPageValidationRule();
+
         if (pageValidated(page, pageValidationExpression)) {
             try {
                 List<CrawlerRequest> childRequestList = new LinkedList<>();
@@ -75,11 +78,13 @@ public class GenericPageProcessor implements PageProcessor {
             if (captchaIdentificationProxy.recognition(page.getRequest().getUrl(), page.getRawText())) {
                 logger.info("刷新{}页面的验证码成功！", page.getRequest().getUrl());
             }
-            //移除失效的cookie
-            Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
-            if (cookieIds != null && cookieIds.size() > 0) {
-                pageSiteService.deleteCookieByIds(cookieIds);
-            }
+//            else {
+//                //移除失效的cookie
+//                Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
+//                if (cookieIds != null && cookieIds.size() > 0) {
+//                    pageSiteService.deleteCookieByIds(cookieIds);
+//                }
+//            }
         }
     }
 
