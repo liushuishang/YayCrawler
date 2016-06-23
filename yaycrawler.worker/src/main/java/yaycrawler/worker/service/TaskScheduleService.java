@@ -61,7 +61,7 @@ public class TaskScheduleService {
     public Integer getRunningTaskCount() {
         int count = 0;
         for (Map.Entry<String, YaySpider> entry : spiderMap.entrySet()) {
-            CrawlerQueueScheduler crawlerQueueScheduler = (CrawlerQueueScheduler)entry.getValue().getScheduler();
+            CrawlerQueueScheduler crawlerQueueScheduler = (CrawlerQueueScheduler) entry.getValue().getScheduler();
             count += crawlerQueueScheduler.getLeftRequestsCount(null);
         }
         logger.info("worker还有{}个运行中任务", count);
@@ -73,9 +73,9 @@ public class TaskScheduleService {
             logger.info("worker接收到{}个任务", taskList.size());
             for (CrawlerRequest crawlerRequest : taskList) {
                 //如果查找不到与url相关的解析规则，则该任务不能执行
-                if (pageParserRuleService.findOnePageInfoByRgx(crawlerRequest.getUrl())==null) {
-                    logger.info("查找不到与{}匹配的解析规则，该任务失败！",crawlerRequest.getUrl());
-                    pageParseListener.onError(convertCrawlerRequestToSpiderRequest(crawlerRequest),"查找不到匹配的页面解析规则！");
+                if (pageParserRuleService.findOnePageInfoByRgx(crawlerRequest.getUrl()) == null) {
+                    logger.info("查找不到与{}匹配的解析规则，该任务失败！", crawlerRequest.getUrl());
+                    pageParseListener.onError(convertCrawlerRequestToSpiderRequest(crawlerRequest), "查找不到匹配的页面解析规则！");
                     continue;
                 }
                 String domain = crawlerRequest.getDomain();
@@ -108,4 +108,19 @@ public class TaskScheduleService {
     }
 
 
+    /**
+     * 中断Worker的所有任务
+     */
+    public void interruptAllTasks() {
+        logger.info("Worker开始停止所有的爬虫……");
+        for (YaySpider spider : spiderMap.values()) {
+            try {
+                spider.stop();
+                spider.close();
+            } catch (Exception ex) {
+                logger.error(ex.getMessage());
+            }
+        }
+        logger.info("Worker的所有爬虫停止完成");
+    }
 }

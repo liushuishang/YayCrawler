@@ -14,6 +14,7 @@ public class WorkerContext {
     private static String masterAddress;
     private static Long heartbeatInteval;
     private static String token;
+    public  static Integer heartbeatFailCount=0;
     public static boolean isSuccessRegisted = false;
     public static WebApplicationContext webApplicationContext;
     public  static ConcurrentHashMap<String,CrawlerResult> completedResultMap=new ConcurrentHashMap<>();

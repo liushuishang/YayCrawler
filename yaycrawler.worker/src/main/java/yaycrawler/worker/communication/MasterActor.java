@@ -7,12 +7,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import yaycrawler.common.model.*;
 import yaycrawler.common.utils.HttpUtils;
-import yaycrawler.worker.exception.WorkerHeartbeatFailureException;
 import yaycrawler.worker.exception.WorkerResultNotifyFailureException;
 import yaycrawler.worker.model.WorkerContext;
 import yaycrawler.worker.service.TaskScheduleService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -63,8 +65,16 @@ public class MasterActor {
         heartbeat.setWaitTaskCount(taskScheduleService.getRunningTaskCount());
         RestFulResult result = HttpUtils.doSignedHttpExecute(WorkerContext.getSignatureSecret(), targetUrl, HttpMethod.POST, heartbeat);
 
-        if (result.hasError())
-            throw new WorkerHeartbeatFailureException();
+        if (result.hasError()) {
+            //心跳失败的处理
+            WorkerContext.heartbeatFailCount++;
+            if(WorkerContext.heartbeatFailCount>=3){
+                //worker应该停止自身所有的任务
+                logger.info("Worker已经与Master失联超过3个心跳周期，现在停止自身所有的任务");
+                taskScheduleService.interruptAllTasks();
+                WorkerContext.heartbeatFailCount = 0;
+            }
+        }
         else{
             //移除已经汇报成功的任务
             for (Map.Entry<String, CrawlerResult> resultEntry : completedResultSet) {
