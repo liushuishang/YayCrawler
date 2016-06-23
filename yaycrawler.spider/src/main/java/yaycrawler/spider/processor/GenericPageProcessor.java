@@ -16,6 +16,8 @@ import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.dao.domain.*;
 import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.monitor.captcha.CaptchaIdentificationProxy;
+import yaycrawler.monitor.login.AutoLoginProxy;
+import yaycrawler.monitor.login.LoginResult;
 import yaycrawler.spider.listener.IPageParseListener;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
 import yaycrawler.spider.service.PageSiteService;
@@ -28,6 +30,7 @@ import java.util.*;
 @Component(value = "genericPageProcessor")
 public class GenericPageProcessor implements PageProcessor {
     private static Logger logger = LoggerFactory.getLogger(GenericPageProcessor.class);
+    private static String DEFAULT_PAGE_SELECTOR = "page";
 
     @Autowired(required = false)
     private IPageParseListener pageParseListener;
@@ -35,25 +38,21 @@ public class GenericPageProcessor implements PageProcessor {
     private PageParserRuleService pageParserRuleService;
     @Autowired
     private PageSiteService pageSiteService;
-
+    @Autowired
+    private AutoLoginProxy autoLoginProxy;
     @Autowired
     private CaptchaIdentificationProxy captchaIdentificationProxy;
-    private static String DEFAULT_PAGE_SELECTOR = "page";
-
-    public GenericPageProcessor() {
-
-    }
-
 
     @Override
     public void process(Page page) {
-        String pageUrl = page.getRequest().getUrl();
+        Request pageRequest = page.getRequest();
+        String pageUrl = pageRequest.getUrl();
         PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
         String pageValidationExpression = pageInfo.getPageValidationRule();
         if (pageValidated(page, pageValidationExpression)) {
             try {
                 List<CrawlerRequest> childRequestList = new LinkedList<>();
-                Set<PageParseRegion> regionList = getPageRegions(pageUrl);
+                Set<PageParseRegion> regionList = pageParserRuleService.getPageRegions(pageUrl);
                 for (PageParseRegion pageParseRegion : regionList) {
                     Map<String, Object> result = parseOneRegion(page, pageParseRegion, childRequestList);
                     if (result != null) {
@@ -62,49 +61,20 @@ public class GenericPageProcessor implements PageProcessor {
                     }
                 }
                 if (pageParseListener != null)
-                    pageParseListener.onSuccess(page.getRequest(), childRequestList);
+                    pageParseListener.onSuccess(pageRequest, childRequestList);
             } catch (Exception ex) {
                 logger.error(ex.getMessage());
                 if (pageParseListener != null)
-                    pageParseListener.onError(page.getRequest(), "页面解析失败");
+                    pageParseListener.onError(pageRequest, "页面解析失败");
             }
         } else {
             //页面下载错误，验证码或cookie失效
             if (pageParseListener != null)
-                pageParseListener.onError(page.getRequest(), "下载的页面不是我想要的");
-            //刷新验证码
-            String jsFileName = pageSiteService.getCaptchaJsFileNameByUrl(pageUrl);
-            if (captchaIdentificationProxy.recognition(pageUrl, jsFileName, page.getRawText())) {
-                logger.info("刷新{}页面的验证码成功！", pageUrl);
-            }
-//            else {
-//                //移除失效的cookie
-//                Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
-//                if (cookieIds != null && cookieIds.size() > 0) {
-//                    pageSiteService.deleteCookieByIds(cookieIds);
-//                }
-//            }
+                pageParseListener.onError(pageRequest, "下载的页面不是我想要的");
+            automaticRecovery(page, pageRequest, pageUrl);
         }
     }
 
-    /**
-     * 验证是否正确的页面
-     *
-     * @param page
-     * @param pageValidationExpression
-     * @return
-     */
-    public boolean pageValidated(Page page, String pageValidationExpression) {
-        if (StringUtils.isEmpty(pageValidationExpression)) return true;
-        Request request = page.getRequest();
-        Object result = getPageRegionContext(page, request, pageValidationExpression);
-        if (result == null) return false;
-        if (result instanceof Selectable)
-            return ((Selectable) result).match();
-        else
-            return StringUtils.isNotEmpty(String.valueOf(result));
-
-    }
 
     @SuppressWarnings("all")
     public Map<String, Object> parseOneRegion(Page page, PageParseRegion pageParseRegion, List<CrawlerRequest> childRequestList) {
@@ -230,8 +200,66 @@ public class GenericPageProcessor implements PageProcessor {
         return Site.me();
     }
 
-    public Set<PageParseRegion> getPageRegions(String pageUrl) {
-        return pageParserRuleService.getPageRegions(pageUrl);
+    /**
+     * 页面自动恢复
+     *
+     * @param page
+     * @param pageRequest
+     * @param pageUrl
+     */
+    private void automaticRecovery(Page page, Request pageRequest, String pageUrl) {
+        PageSite pageSite = pageSiteService.getPageSiteByUrl(pageUrl);
+        if (pageSite != null) {
+            String loginJudgeExpression = pageSite.getLoginJudgeExpression();
+            String captchaJudgeExpression = pageSite.getCaptchaJudgeExpression();
+            String loginJsFileName = pageSite.getLoginJsFileName();
+            String captchaJsFileName = pageSite.getCaptchaJsFileName();
+
+            Selectable judgeContext = StringUtils.isNotBlank(loginJsFileName) ? getPageRegionContext(page, pageRequest, loginJudgeExpression) : null;
+            if (judgeContext != null && judgeContext.match()) {
+                //干掉失效的验证码
+                Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
+                if (cookieIds != null && cookieIds.size() > 0) {
+                    pageSiteService.deleteCookieByIds(cookieIds);
+                }
+                //需要登录了
+                LoginResult loginResult= autoLoginProxy.login(pageUrl, loginJsFileName, page.getRawText());
+                if(loginResult.isSuccess()) {
+                    logger.info("自动登录{}成功！", pageUrl);
+                    //TODO 保存cookie
+
+                }
+                else logger.info("自动登录{}失败！", pageUrl);
+            } else {
+                judgeContext = StringUtils.isNotBlank(captchaJsFileName) ? getPageRegionContext(page, pageRequest, captchaJudgeExpression) : null;
+                if (judgeContext != null && judgeContext.match()) {
+                    //需要刷新验证码了
+                    if (captchaIdentificationProxy.recognition(pageUrl, captchaJsFileName, page.getRawText())) {
+                        logger.info("刷新{}页面的验证码成功！", page.getRequest().getUrl());
+                    } else
+                        logger.info("刷新{}页面的验证码失败！", page.getRequest().getUrl());
+                }
+            }
+        }
+    }
+
+    /**
+     * 验证是否正确的页面
+     *
+     * @param page
+     * @param pageValidationExpression
+     * @return
+     */
+    public boolean pageValidated(Page page, String pageValidationExpression) {
+        if (StringUtils.isEmpty(pageValidationExpression)) return true;
+        Request request = page.getRequest();
+        Object result = getPageRegionContext(page, request, pageValidationExpression);
+        if (result == null) return false;
+        if (result instanceof Selectable)
+            return ((Selectable) result).match();
+        else
+            return StringUtils.isNotEmpty(String.valueOf(result));
+
     }
 
 

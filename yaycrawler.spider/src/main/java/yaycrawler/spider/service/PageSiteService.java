@@ -78,10 +78,9 @@ public class PageSiteService {
         }
     }
 
-    public String getCaptchaJsFileNameByUrl(String pageUrl) {
+    public PageSite getPageSiteByUrl(String pageUrl) {
         String domain = UrlUtils.getDomain(pageUrl);
         if (StringUtils.isBlank(domain)) return null;
-        PageSite site = siteRepository.findByDomain(domain);
-        return site == null ? null : site.getCaptchaJsFileName();
+        return siteRepository.findByDomain(domain);
     }
 }

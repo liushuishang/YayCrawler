@@ -92,9 +92,9 @@
                                        value="utf-8" placeholder="输入页面编码"/>
                             </div>
                             <!--<div class="form-group">-->
-                                <!--<label class="control-label">超时时间</label>-->
-                                <!--<input type="text" class="form-control" name="timeOut"-->
-                                       <!--value="500" placeholder="输入超时时间(毫秒)"/>-->
+                            <!--<label class="control-label">超时时间</label>-->
+                            <!--<input type="text" class="form-control" name="timeOut"-->
+                            <!--value="500" placeholder="输入超时时间(毫秒)"/>-->
                             <!--</div>-->
                             <!--<div class="form-group">-->
                             <!--<label class="control-label">重试次数</label>-->
@@ -108,6 +108,21 @@
  "Content-Type":"application/x-www-form-urlencoded"
  }
                                 </textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">登录页面判断表达式</label>
+                                <input type="text" class="form-control" name="loginJudgeExpression" value="200"
+                                       placeholder="用于识别登录页面"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">验证码页面判断表达式</label>
+                                <input type="text" class="form-control" name="captchaJudgeExpression" value="200"
+                                       placeholder="用于识别验证码页面"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">自动登录Js脚本文件名称</label>
+                                <input type="text" class="form-control" name="loginJsFileName" value="200"
+                                       placeholder="输入'根目录/casperjs/js'中的文件名"/>
                             </div>
                             <div class="form-group">
                                 <label class="control-label">验证码识别脚本文件名</label>
@@ -211,12 +226,19 @@
                         field: 'charset',
                         title: '编码'
                     }, {
-                        field: 'timeOut',
-                        title: '超时时间'
+                        field: 'loginJudgeExpression',
+                        title: '登录页面判断表达式'
                     }, {
-                        field: 'sleepTime',
-                        title: '任务间隔时间'
+                        field: 'loginJsFileName',
+                        title: '自动登录Js脚本名'
                     },
+                        {
+                            field: 'captchaJudgeExpression',
+                            title: '验证码页面判断表达式'
+                        }, {
+                            field: 'captchaJsFileName',
+                            title: '验证码识别Js脚本名'
+                        },
                         {
                             field: 'headers',
                             title: '请求头'

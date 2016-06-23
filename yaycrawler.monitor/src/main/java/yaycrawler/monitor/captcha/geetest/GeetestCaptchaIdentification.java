@@ -38,7 +38,7 @@ public class GeetestCaptchaIdentification {
     }
 
     private static boolean startIdentification(String pageUrl,String jsFileName, String deltaResolveAddress) {
-        String result = CasperjsProgramManager.launch(jsFileName, pageUrl, deltaResolveAddress, UUID.randomUUID().toString(), " --web-security=no", "--ignore-ssl-errors=true");
+        String result = CasperjsProgramManager.launch(jsFileName, pageUrl, deltaResolveAddress, UUID.randomUUID().toString(), " web-security=no", "ignore-ssl-errors=true");
         logger.info("验证码识别结果：\r\n" + result);
         if (result != null && result.contains("验证通过"))
             return true;

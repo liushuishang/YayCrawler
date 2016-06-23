@@ -39,7 +39,23 @@ public class PageSite implements Serializable {
     private String headers;
 
     /**
-     * 验证码识别Js脚步文件名称
+     * 登录页面判断表达式
+     */
+    @Column(name = "loginJudgeExpression", columnDefinition = "varchar(200)")
+    private String loginJudgeExpression;
+    /**
+     * 验证码页面判断表达式
+     */
+    @Column(name = "captchaJudgeExpression", columnDefinition = "varchar(200)")
+    private String captchaJudgeExpression;
+
+    /**
+     * 自动登录Js脚本文件名称
+     */
+    @Column(name = "loginJsFileName", columnDefinition = "varchar(200)")
+    private String loginJsFileName;
+    /**
+     * 验证码识别Js脚本文件名称
      */
     @Column(name = "captchaJsFileName", columnDefinition = "varchar(200)")
     private String captchaJsFileName;
@@ -144,5 +160,29 @@ public class PageSite implements Serializable {
 
     public void setCaptchaJsFileName(String captchaJsFileName) {
         this.captchaJsFileName = captchaJsFileName;
+    }
+
+    public String getLoginJudgeExpression() {
+        return loginJudgeExpression;
+    }
+
+    public void setLoginJudgeExpression(String loginJudgeExpression) {
+        this.loginJudgeExpression = loginJudgeExpression;
+    }
+
+    public String getCaptchaJudgeExpression() {
+        return captchaJudgeExpression;
+    }
+
+    public void setCaptchaJudgeExpression(String captchaJudgeExpression) {
+        this.captchaJudgeExpression = captchaJudgeExpression;
+    }
+
+    public String getLoginJsFileName() {
+        return loginJsFileName;
+    }
+
+    public void setLoginJsFileName(String loginJsFileName) {
+        this.loginJsFileName = loginJsFileName;
     }
 }
