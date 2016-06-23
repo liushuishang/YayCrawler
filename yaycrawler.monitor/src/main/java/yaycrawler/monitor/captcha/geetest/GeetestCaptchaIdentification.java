@@ -1,16 +1,9 @@
 package yaycrawler.monitor.captcha.geetest;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Properties;
-import java.util.concurrent.*;
+import yaycrawler.common.utils.CasperjsProgramManager;
 
 /**
  * 极验验证码识别
@@ -19,50 +12,22 @@ import java.util.concurrent.*;
 public class GeetestCaptchaIdentification {
     private static Logger logger = LoggerFactory.getLogger(GeetestCaptchaIdentification.class);
 
-
     /**
      * 验证码自动识别     *
-     * @param pageUrl 包含验证码的页面url
+     *
+     * @param pageUrl             包含验证码的页面url
      * @param deltaResolveAddress 能够解析验证码移动位移的服务地址
      * @return
      */
-    public static boolean process(String pageUrl,String deltaResolveAddress) {
+    public static boolean process(String pageUrl, String deltaResolveAddress) {
         logger.info("滑块位置服务：" + deltaResolveAddress);
         if (pageUrl == null) return false;
-        String path =GeetestCaptchaIdentification.class.getResource("/").getPath();
-        path = path.substring(1, path.lastIndexOf("/") + 1);
-        String progam = "";
-        Properties prop = System.getProperties();
-        String os = prop.getProperty("os.name");
-        String phantomJsPath = "";
-        if (StringUtils.startsWithIgnoreCase(os, "win")) {
-            progam = path + "casperjs/bin/casperjs.exe";
-            phantomJsPath = path + "phantomjs/window/phantomjs.exe";
-        } else {
-            progam = path + "casperjs/bin/casperjs";
-            phantomJsPath = path + "phantomjs/linux/phantomjs";
-        }
-        logger.info("程序地址:{}", progam);
-        ProcessBuilder processBuilder = new ProcessBuilder(progam, "geetest.js", pageUrl, deltaResolveAddress, " --web-security=no", "--ignore-ssl-errors=true");
-        processBuilder.directory(new File(path + "casperjs/js"));
-        processBuilder.environment().put("PHANTOMJS_EXECUTABLE", phantomJsPath);
-        try {
-            Process p = processBuilder.start();
-            InputStream is = p.getInputStream();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-            StringBuffer sbf = new StringBuffer();
-            String tmp = "";
-            while ((tmp = br.readLine()) != null) {
-                sbf.append(tmp).append("\r\n");
-            }
-            logger.info(sbf.toString());
-            if (sbf.indexOf("验证通过") >= 0)
-                return true;
-            return false;
-        } catch (Exception ex) {
-            logger.error(ex.getMessage());
-            return false;
-        }
+
+        String result = CasperjsProgramManager.launch("geetest.js", pageUrl, deltaResolveAddress, " --web-security=no", "--ignore-ssl-errors=true");
+        logger.info("验证码识别结果：" + result);
+        if (result != null && result.contains("验证通过"))
+            return true;
+        return false;
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -90,28 +55,11 @@ public class GeetestCaptchaIdentification {
             System.out.println("本次调用耗时：(毫秒)" + stopWatch.getTime());
         }
         System.out.println("调用" + totalCount + "次，失败重试" + retryCount + "次的情况下，共成功" + successCount + "次");
-        System.exit(0);
     }
 
-    private static ExecutorService threadPool = Executors.newFixedThreadPool(10);
 
     private static boolean startIdentification() {
-        Future<Boolean> future = threadPool.submit(new Callable<Boolean>() {
-                                                       @Override
-                                                       public Boolean call() throws Exception {
-//                                                           return GeetestCaptchaIdentification.process("http://user.geetest.com/login?url=http:%2F%2Faccount.geetest.com%2Freport","http://localhost:8086/worker/resolveGeetestSlicePosition");
-                                                           return GeetestCaptchaIdentification.process("http://www.qichacha.com/search_index?index=0&p=1&key=%E5%BD%A6%E4%B8%9C%E5%A1%91%E8%83%B6%E5%85%AC%E5%8F%B8","http://localhost:8086/worker/resolveGeetestSlicePosition");
-                                                       }
-                                                   }
-        );
-        try {
-            return future.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return false;
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            return false;
-        }
+//  return GeetestCaptchaIdentification.process("http://user.geetest.com/login?url=http:%2F%2Faccount.geetest.com%2Freport","http://localhost:8086/worker/resolveGeetestSlicePosition");
+        return GeetestCaptchaIdentification.process("http://www.qichacha.com/search_index?index=0&p=1&key=%E5%BD%A6%E4%B8%9C%E5%A1%91%E8%83%B6%E5%85%AC%E5%8F%B8", "http://localhost:8086/worker/resolveGeetestSlicePosition");
     }
 }
