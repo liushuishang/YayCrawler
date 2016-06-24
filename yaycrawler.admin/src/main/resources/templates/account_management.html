@@ -57,7 +57,7 @@
                             <div class="form-group">
                                 <label class="control-label">账户名称</label>
                                 <input type="text" class="form-control" name="userName"
-                                       value="utf-8" placeholder="输入用户名称"/>
+                                       value="13175315644" placeholder="输入用户名称"/>
                             </div>
                             <div class="form-group">
                                 <label class="control-label">账户密码</label>
@@ -149,13 +149,16 @@
                     }, {
                         field: 'passWord',
                         title: '账户密码'
-                    },
-                        {
-                            field: 'action',
-                            title: '操作',
-                            formatter: oTableInit.actionFormatter,
-                            events: oTableInit.actionEvents
+                    }, {
+                        field: 'available',
+                        title: '是否可用',
+                        formatter: function (value, row, index) {
+                            if (value == 1)
+                                return "可用";
+                            else
+                                return "不可用";
                         }
+                    }
                     ]
                 }));
             };

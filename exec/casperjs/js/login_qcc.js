@@ -51,9 +51,11 @@ casper.on('remote.message', function (msg) {
 });
 
 var pageUrl = "http://www.qichacha.com/user_login";
-    //casper.cli.get(0);
+//casper.cli.get(0);
 var deltaResolveServer = casper.cli.get(1);
 var id = casper.cli.get(2);
+var username = casper.cli.get(3);
+var password = casper.cli.get(4);
 var pageParam = null;
 
 casper.start(pageUrl).then(function () {
@@ -188,8 +190,8 @@ casper.then(function () {
         this.capture(status.replace(":","_")+ id + "_" + currentTrailIndex + '.png');
         if (status.indexOf("通过") > -1) {
             this.fillSelectors('form#user_login_normal', {
-                'input[name="nameNormal"]': '13175315644',
-                'input[name="pwdNormal"]':'123456789'
+                'input[name="nameNormal"]': username,
+                'input[name="pwdNormal"]':password
             }, true);
         }
     }, function () {
@@ -197,13 +199,15 @@ casper.then(function () {
         this.exit();
     }, 10000);
 }).then(function() {
-    this.waitWhileSelector('a.dropdown-toggle:last-child', function() {
+    this.waitForSelector('li.nav-user', function() {
+        //this.echo(this.getPageContent());
         this.echo("自动登录成功！");
         this.echo("$CookieStart");
         this.echo(JSON.stringify(phantom.cookies));
         this.echo("$CookieEnd");
         this.exit();
     },function() {
+        //this.echo(this.getPageContent());
         this.echo("自动登录失败！");
         this.exit();
     },10000);

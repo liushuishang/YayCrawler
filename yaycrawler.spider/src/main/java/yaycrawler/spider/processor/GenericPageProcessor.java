@@ -13,7 +13,9 @@ import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Json;
 import us.codecraft.webmagic.selector.Selectable;
 import yaycrawler.common.model.CrawlerRequest;
+import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.*;
+import yaycrawler.dao.repositories.SiteAccountRepository;
 import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.monitor.captcha.CaptchaIdentificationProxy;
 import yaycrawler.monitor.login.AutoLoginProxy;
@@ -42,6 +44,9 @@ public class GenericPageProcessor implements PageProcessor {
     private AutoLoginProxy autoLoginProxy;
     @Autowired
     private CaptchaIdentificationProxy captchaIdentificationProxy;
+
+    @Autowired
+    private SiteAccountRepository siteAccountRepository;
 
     @Override
     public void process(Page page) {
@@ -231,8 +236,11 @@ public class GenericPageProcessor implements PageProcessor {
                 if (cookieIds != null && cookieIds.size() > 0) {
                     pageSiteService.deleteCookieByIds(cookieIds);
                 }
+                List<SiteAccount> siteAccounts = siteAccountRepository.findByDomain(UrlUtils.getDomain(pageUrl));
+                Random random = new Random();
+                SiteAccount siteAccount = siteAccounts.get(random.nextInt(siteAccounts.size()));
                 //需要登录了
-                LoginResult loginResult = autoLoginProxy.login(pageUrl, loginJsFileName, page.getRawText());
+                LoginResult loginResult = autoLoginProxy.login(pageUrl, loginJsFileName, page.getRawText(),siteAccount.getUserName(),siteAccount.getPassWord());
                 if (loginResult.isSuccess()) {
                     logger.info("自动登录{}成功！", pageUrl);
                     if (loginResult.getCookies() != null) {
