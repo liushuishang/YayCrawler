@@ -28,7 +28,7 @@ public class GeetestCaptchaIdentification {
         boolean flag = startIdentification(pageUrl,jsFileName, deltaResolveAddress);
         if (!flag) {
             int i = 0;
-            while (i++ > 3) {
+            while (i++ < 3) {
                 flag = startIdentification(pageUrl,jsFileName, deltaResolveAddress);
                 logger.info("第{}次重试！", i);
                 if (flag) break;

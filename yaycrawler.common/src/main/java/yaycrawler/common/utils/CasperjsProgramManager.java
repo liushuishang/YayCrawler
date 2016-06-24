@@ -18,7 +18,7 @@ public class CasperjsProgramManager {
     private static Logger logger = LoggerFactory.getLogger(CasperjsProgramManager.class);
     private static final Semaphore semaphore = new Semaphore(10, true);
 
-    public static String launch(String jsFileName, String... params) {
+    public static String launch(String jsFileName, Object... params) {
         if (StringUtils.isBlank(jsFileName)) {
             logger.error("待执行的js文件名不能为空！");
             return null;
@@ -40,8 +40,8 @@ public class CasperjsProgramManager {
             logger.info("CasperJs程序地址:{}", casperJsPath);
             ProcessBuilder processBuilder = new ProcessBuilder(casperJsPath, jsFileName);
             if (params != null) {
-                for (String param : params) {
-                    processBuilder.command().add(param);
+                for (Object param : params) {
+                    processBuilder.command().add(String.valueOf(param));
                 }
             }
             processBuilder.directory(new File(path + "casperjs/js"));
