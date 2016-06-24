@@ -10,6 +10,7 @@ import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.PageSite;
 import yaycrawler.dao.domain.SiteCookie;
 import yaycrawler.dao.repositories.PageSiteRepository;
+import yaycrawler.dao.repositories.SiteAccountRepository;
 import yaycrawler.dao.repositories.SiteCookieRepository;
 
 import java.util.List;
@@ -25,6 +26,9 @@ public class PageSiteService {
     private PageSiteRepository siteRepository;
     @Autowired
     private SiteCookieRepository cookieRepository;
+
+    @Autowired
+    private SiteAccountRepository accountRepository;
 
     public Site getSite(String domain) {
         return getSite(domain, false);

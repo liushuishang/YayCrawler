@@ -285,6 +285,11 @@ public class ConfigController {
         return new ModelAndView("site_management");
     }
 
+    @RequestMapping("/accountManagement")
+    public ModelAndView accountManagement() {
+        return new ModelAndView("account_management");
+    }
+
     @RequestMapping(value = "/queryPageSites", method = RequestMethod.GET)
     @ResponseBody
     public Object querySites(int pageIndex, int pageSize) {
@@ -293,6 +298,16 @@ public class ConfigController {
         result.put("rows", data.getContent());
         result.put("total", data.getTotalElements());
 
+        return result;
+    }
+
+    @RequestMapping(value = "/queryPageAccounts", method = RequestMethod.GET)
+    @ResponseBody
+    public Object queryAccounts(int pageIndex, int pageSize) {
+        Map<String, Object> result = new HashMap<>();
+        Page<SiteAccount> data = pageParseRuleService.queryAccounts(pageIndex, pageSize);
+        result.put("rows", data.getContent());
+        result.put("total", data.getTotalElements());
         return result;
     }
 
@@ -310,6 +325,22 @@ public class ConfigController {
     public Object deleteSites(@RequestBody List<String> deleteIds) {
         Assert.notNull(deleteIds);
         return pageParseRuleService.deleteSiteByIds(deleteIds);
+    }
+
+    @RequestMapping(value = "/addAccount", method = RequestMethod.POST)
+    @ResponseBody
+    public Object addAccount(SiteAccount siteAccount) {
+        if (StringUtils.isBlank(siteAccount.getDomain())) {
+            return false;
+        }
+        return pageParseRuleService.addAccount(siteAccount);
+    }
+
+    @RequestMapping(value = "/deleteAccounts", method = RequestMethod.POST)
+    @ResponseBody
+    public Object deleteAccounts(@RequestBody List<String> deleteIds) {
+        Assert.notNull(deleteIds);
+        return pageParseRuleService.deleteAccountByIds(deleteIds);
     }
 
     @RequestMapping(value = "/testPageUrlMatchRegex", method = RequestMethod.POST)

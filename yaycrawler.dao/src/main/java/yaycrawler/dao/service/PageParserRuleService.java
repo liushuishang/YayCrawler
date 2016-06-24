@@ -37,6 +37,8 @@ public class PageParserRuleService {
     @Autowired
     private PageSiteRepository siteRepository;
 
+    @Autowired
+    private SiteAccountRepository accountRepository;
 
     public Set<PageParseRegion> getPageRegions(String pageUrl) {
         if (StringUtils.isBlank(pageUrl)) return null;
@@ -50,6 +52,10 @@ public class PageParserRuleService {
         return siteRepository.findAll(new PageRequest(pageIndex, pageSize));
     }
 
+    public Page<SiteAccount> queryAccounts(int pageIndex, int pageSize) {
+        return accountRepository.findAll(new PageRequest(pageIndex,pageSize));
+    }
+
     public boolean deleteSiteByIds(List<String> deleteIds) {
         for (String deleteId : deleteIds) {
             //先删除cookies
@@ -58,10 +64,21 @@ public class PageParserRuleService {
         return true;
     }
 
+    public boolean deleteAccountByIds(List<String> deleteIds) {
+        for (String deleteId : deleteIds) {
+            //先删除cookies
+            accountRepository.delete(deleteId);
+        }
+        return true;
+    }
+
     public boolean addSite(PageSite pageSite) {
         return siteRepository.save(pageSite) != null;
     }
 
+    public boolean addAccount(SiteAccount siteAccount) {
+        return accountRepository.save(siteAccount) != null;
+    }
 
     public Page<PageInfo> queryPageInfos(int pageIndex, int pageSize) {
         return pageInfoRepository.findAll(new PageRequest(pageIndex, pageSize));

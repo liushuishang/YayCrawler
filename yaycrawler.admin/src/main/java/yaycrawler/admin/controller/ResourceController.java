@@ -21,8 +21,6 @@ public class ResourceController {
     @Autowired
     private SiteCookieRepository cookieRepository;
 
-
-
     @RequestMapping(value = "/addCookie", method = RequestMethod.POST)
     public Object addCookie(String siteId, String domain, String cookie) {
         Assert.notNull(siteId);
