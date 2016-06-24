@@ -13,9 +13,8 @@ import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Json;
 import us.codecraft.webmagic.selector.Selectable;
 import yaycrawler.common.model.CrawlerRequest;
-import yaycrawler.common.utils.UrlUtils;
+import yaycrawler.common.model.PhantomCookie;
 import yaycrawler.dao.domain.*;
-import yaycrawler.dao.repositories.SiteAccountRepository;
 import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.monitor.captcha.CaptchaIdentificationProxy;
 import yaycrawler.monitor.login.AutoLoginProxy;
@@ -45,8 +44,6 @@ public class GenericPageProcessor implements PageProcessor {
     @Autowired
     private CaptchaIdentificationProxy captchaIdentificationProxy;
 
-    @Autowired
-    private SiteAccountRepository siteAccountRepository;
 
     @Override
     public void process(Page page) {
@@ -194,11 +191,6 @@ public class GenericPageProcessor implements PageProcessor {
         List<Selectable> nodes = new LinkedList<>();
 
         if (context instanceof Json) {
-//            List<Selectable> childs = ((Json) context).nodes();
-//            for (Selectable child : childs) {
-//                if(child instanceof PlainText)
-//                nodes.add(new Json(((PlainText)child).getSourceTexts());
-//            }
             nodes.add(context);
         } else nodes.addAll(context.nodes());
         return nodes;
@@ -229,26 +221,32 @@ public class GenericPageProcessor implements PageProcessor {
             Selectable judgeContext = StringUtils.isNotBlank(loginJsFileName) ? getPageRegionContext(page, pageRequest, loginJudgeExpression) : null;
             if (judgeContext != null && judgeContext.match()) {
                 doRecovery = true;
+                boolean isCookieChanged = false;
                 //重新加入队列
                 page.addTargetRequest(page.getRequest());
                 //干掉失效的验证码
                 Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
                 if (cookieIds != null && cookieIds.size() > 0) {
                     pageSiteService.deleteCookieByIds(cookieIds);
+                    isCookieChanged = true;
                 }
-                List<SiteAccount> siteAccounts = siteAccountRepository.findByDomain(UrlUtils.getDomain(pageUrl));
-                Random random = new Random();
-                SiteAccount siteAccount = siteAccounts.get(random.nextInt(siteAccounts.size()));
+
                 //需要登录了
-                LoginResult loginResult = autoLoginProxy.login(pageUrl, loginJsFileName, page.getRawText(),siteAccount.getUserName(),siteAccount.getPassWord());
+                LoginResult loginResult = autoLoginProxy.login(pageUrl, loginJsFileName, page.getRawText());
                 if (loginResult.isSuccess()) {
                     logger.info("自动登录{}成功！", pageUrl);
-                    if (loginResult.getCookies() != null) {
-                        if (pageSiteService.saveCookies(pageSite.getId(), pageSite.getDomain(), loginResult.getCookies()))
+                    List<PhantomCookie> phantomCookies = loginResult.getCookies();
+                    if (phantomCookies != null) {
+                        if (pageSiteService.saveCookies(pageSite.getId(), pageSite.getDomain(), phantomCookies)) {
+                            isCookieChanged = true;
                             logger.info("保存{}的cookie成功！", pageUrl);
-                        else logger.info("保存{}的cookie失败！", pageUrl);
+                        } else logger.info("保存{}的cookie失败！", pageUrl);
                     } else logger.info("没有cookie需要保存");
                 } else logger.info("自动登录{}失败！", pageUrl);
+
+                if (isCookieChanged && pageParseListener != null)
+                    pageParseListener.onCookieChanged(pageRequest);
+
             } else {
                 judgeContext = StringUtils.isNotBlank(captchaJsFileName) ? getPageRegionContext(page, pageRequest, captchaJudgeExpression) : null;
                 if (judgeContext != null && judgeContext.match()) {

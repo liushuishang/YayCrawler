@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Request;
+import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.dao.service.PageParserRuleService;
@@ -57,6 +58,14 @@ public class TaskScheduleService {
 
     public TaskScheduleService() {
     }
+
+    public void refreshSpiderSite(String domain) {
+        YaySpider spider = spiderMap.get(domain);
+        if (spider == null) return;
+        Site newSite = pageSiteService.getSite(domain);
+        spider.setSite(newSite);
+    }
+
 
     public Integer getRunningTaskCount() {
         int count = 0;

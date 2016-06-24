@@ -2,11 +2,10 @@ package yaycrawler.dao.repositories;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import yaycrawler.dao.domain.PageSite;
 import yaycrawler.dao.domain.SiteAccount;
-import yaycrawler.dao.domain.SiteCookie;
 
 import java.util.List;
 
@@ -18,5 +17,7 @@ public interface SiteAccountRepository extends CrudRepository<SiteAccount, Strin
     Page<SiteAccount> findAll(Pageable pageable);
 
     List<SiteAccount> findByDomainAndAvailable(String url, int i);
-    List<SiteAccount> findByDomain(String domain);
+
+    @Query(value = "select *  from res_site_account where domain=? and available=1  limit 1", nativeQuery = true)
+    SiteAccount findOneByDomain(String domain);
 }

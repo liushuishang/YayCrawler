@@ -26,6 +26,11 @@ public class YaySpider extends Spider {
         this.domain = domain;
     }
 
+    public void setSite(Site site)
+    {
+        this.site = site;
+    }
+
     @Override
     protected void onError(Request request) {
         //失败后换代理重试一次
@@ -41,6 +46,7 @@ public class YaySpider extends Spider {
             super.onError(request);
 
     }
+
 
     public String getDomain() {
         return domain;

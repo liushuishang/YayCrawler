@@ -6,9 +6,11 @@ import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Request;
 import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.CrawlerResult;
+import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.spider.listener.IPageParseListener;
 import yaycrawler.worker.communication.MasterActor;
 import yaycrawler.worker.model.WorkerContext;
+import yaycrawler.worker.service.TaskScheduleService;
 
 import java.util.List;
 
@@ -18,9 +20,11 @@ import java.util.List;
 @Component
 public class PageParseListener implements IPageParseListener {
 
-
     @Autowired
     private MasterActor masterActor;
+
+    @Autowired
+    private TaskScheduleService taskScheduleService;
 
     @Override
     public void onSuccess(Request request, List<CrawlerRequest> childRequestList) {
@@ -34,6 +38,12 @@ public class PageParseListener implements IPageParseListener {
     public void onError(Request request, String failureInfo) {
         CrawlerResult crawlerResult = new CrawlerResult(false, DigestUtils.sha1Hex(request.getUrl()), null, failureInfo);
         WorkerContext.completedResultMap.put(crawlerResult.getKey(),crawlerResult);
+    }
+
+    @Override
+    public void onCookieChanged(Request request) {
+        String domain = UrlUtils.getDomain(request.getUrl());
+        taskScheduleService.refreshSpiderSite(domain);
     }
 
 }

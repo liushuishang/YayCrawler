@@ -14,4 +14,6 @@ public interface IPageParseListener {
 
     void onError(Request request,String failureInfo);
 
+    void onCookieChanged(Request request);
+
 }
