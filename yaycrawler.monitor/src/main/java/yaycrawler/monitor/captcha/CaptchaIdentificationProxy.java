@@ -5,7 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.monitor.captcha.geetest.GeetestCaptchaIdentification;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * 验证码识别代理类
@@ -24,7 +28,7 @@ public class CaptchaIdentificationProxy {
 
 
 
-    public boolean recognition(String pageUrl,String jsFileName, String pageContent) {
+    public boolean recognition(String pageUrl,String cookies,String jsFileName, String pageContent) {
         if(StringUtils.isBlank(jsFileName))
         {
             logger.error("jsFileName不能为空！");
@@ -33,7 +37,15 @@ public class CaptchaIdentificationProxy {
         if (StringUtils.isBlank(pageContent)) return false;
         if (pageContent.contains("http://api.geetest.com/get.php")) {
             String resolverAddress = String.format("http://%s:%s%s/%s", serverIP, serverPort, serverContextPath, "resolveGeetestSlicePosition");
-            return GeetestCaptchaIdentification.process(pageUrl,jsFileName, resolverAddress);
+
+            String domain = UrlUtils.getDomain(pageUrl);
+            String cookieValue= null;
+            try {
+                cookieValue = URLEncoder.encode(cookies.replaceAll(" ", "%20"), "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                logger.error(e.getMessage());
+            }
+            return GeetestCaptchaIdentification.process(pageUrl,domain,cookieValue,jsFileName, resolverAddress);
         }
         return false;
     }

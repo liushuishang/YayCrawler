@@ -52,9 +52,24 @@ casper.on('remote.message', function (msg) {
 
 var pageUrl = casper.cli.get(0);
 var deltaResolveServer = casper.cli.get(1);
-var id = casper.cli.get(2);
-var pageParam = null;
+var domain=casper.cli.get(2);
+var cookie= decodeURIComponent(decodeURIComponent(casper.cli.get(3)));
 
+//casper.echo(pageUrl);
+//casper.echo(deltaResolveServer);
+//casper.echo(domain);
+//casper.echo(cookie);
+
+if (cookie != null) {
+    cookie.split(";").forEach(function(pair){
+        pair = pair.split("=");
+        phantom.addCookie({
+            'name': pair[0],
+            'value': pair[1],
+            'domain': domain,
+        });
+    });
+}
 casper.start(pageUrl).then(function () {
     this.wait(5000, function () {
         //this.echo("等待5秒以便页面充分渲染");
@@ -67,6 +82,7 @@ casper.then(function () {
         this.exit();
     }
 });
+var pageParam = null;
 casper.waitFor(function check() {
     return this.evaluate(function () {
         return (document.querySelectorAll('.gt_cut_bg_slice').length == 52) && (document.querySelectorAll('.gt_cut_fullbg_slice').length == 52);

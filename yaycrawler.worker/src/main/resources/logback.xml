@@ -82,7 +82,7 @@
         <appender-ref ref="ERROR-OUT"/>
     </logger>
 
-    <logger name="yaycrawler" level="DEBUG" additivity="false">
+    <logger name="yaycrawler" level="INFO" additivity="false">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ERROR-OUT"/>
         <appender-ref ref="INFO-OUT"/>

@@ -48,8 +48,8 @@ public class GenericPageProcessor implements PageProcessor {
         Request pageRequest = page.getRequest();
         String pageUrl = pageRequest.getUrl();
         if (doAutomaticRecovery(page, pageRequest, pageUrl)) {
-            //重新加入队列
-            page.addTargetRequest(page.getRequest());
+//            //重新加入队列
+//            page.addTargetRequest(page.getRequest());
             return;
         }
         //是否正确的页面
@@ -224,7 +224,8 @@ public class GenericPageProcessor implements PageProcessor {
             Selectable judgeContext = StringUtils.isNotBlank(loginJsFileName) ? getPageRegionContext(page, pageRequest, loginJudgeExpression) : null;
             if (judgeContext != null && judgeContext.match()) {
                 doRecovery = true;
-
+                //重新加入队列
+                page.addTargetRequest(page.getRequest());
                 //干掉失效的验证码
                 Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
                 if (cookieIds != null && cookieIds.size() > 0) {
@@ -245,7 +246,8 @@ public class GenericPageProcessor implements PageProcessor {
                 if (judgeContext != null && judgeContext.match()) {
                     doRecovery = true;
                     //需要刷新验证码了
-                    if (captchaIdentificationProxy.recognition(pageUrl, captchaJsFileName, page.getRawText())) {
+                    Set<String> cookieIdSet = (Set<String>) pageRequest.getExtra("cookieIds");
+                    if (captchaIdentificationProxy.recognition(pageUrl, getCookieFromSite(pageSite, cookieIdSet), captchaJsFileName, page.getRawText())) {
                         logger.info("刷新{}页面的验证码成功！", page.getRequest().getUrl());
                     } else
                         logger.info("刷新{}页面的验证码失败！", page.getRequest().getUrl());
@@ -254,6 +256,7 @@ public class GenericPageProcessor implements PageProcessor {
         }
         return doRecovery;
     }
+
 
     /**
      * 验证是否正确的页面
@@ -274,5 +277,14 @@ public class GenericPageProcessor implements PageProcessor {
 
     }
 
+    private String getCookieFromSite(PageSite site, Set<String> cookieIdSet) {
+        if (cookieIdSet == null || cookieIdSet.size() == 0 || site == null) return null;
+        String id = cookieIdSet.iterator().next();
+        for (SiteCookie cookie : site.getCookieList()) {
+            if (cookie.getId().equals(id))
+                return cookie.getCookie();
+        }
+        return null;
+    }
 
 }

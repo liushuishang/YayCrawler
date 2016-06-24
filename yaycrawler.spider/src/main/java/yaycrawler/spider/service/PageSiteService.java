@@ -43,13 +43,15 @@ public class PageSiteService {
      */
     public Site getSite(String domain, boolean needProxy) {
         Site site = Site.me();
+        site.setSleepTime(500);
         PageSite pageSite = siteRepository.findByDomain(domain);
         if (pageSite != null) {
             site.setDomain(pageSite.getDomain());
             site.setCharset(pageSite.getCharset());
             site.setCycleRetryTimes(pageSite.getCycleRetryTimes());
             site.setRetryTimes(pageSite.getRetryTimes());
-            site.setSleepTime((int) pageSite.getSleepTime());
+            int sleepTime = (int) pageSite.getSleepTime();
+            site.setSleepTime(sleepTime);
             site.setUserAgent(pageSite.getUserAgent());
             site.setUseGzip(true);
 

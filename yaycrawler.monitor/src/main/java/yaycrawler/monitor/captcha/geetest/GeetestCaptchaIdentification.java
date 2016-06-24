@@ -5,8 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yaycrawler.common.utils.CasperjsProgramManager;
 
-import java.util.UUID;
-
 /**
  * 极验验证码识别
  * Created by ucs_yuananyun on 2016/6/14.
@@ -22,14 +20,14 @@ public class GeetestCaptchaIdentification {
      * @param deltaResolveAddress 能够解析验证码移动位移的服务地址
      * @return
      */
-    public static boolean process(String pageUrl,String jsFileName, String deltaResolveAddress) {
+    public static boolean process(String pageUrl,String domain,String cookies,String jsFileName, String deltaResolveAddress) {
         logger.info("滑块位置服务：" + deltaResolveAddress);
         if (pageUrl == null) return false;
-        boolean flag = startIdentification(pageUrl,jsFileName, deltaResolveAddress);
+        boolean flag = startIdentification(pageUrl,domain,cookies,jsFileName, deltaResolveAddress);
         if (!flag) {
             int i = 0;
             while (i++ < 1) {
-                flag = startIdentification(pageUrl,jsFileName, deltaResolveAddress);
+                flag = startIdentification(pageUrl,domain,cookies,jsFileName, deltaResolveAddress);
                 logger.info("第{}次重试！", i);
                 if (flag) break;
             }
@@ -37,8 +35,8 @@ public class GeetestCaptchaIdentification {
         return flag;
     }
 
-    private static boolean startIdentification(String pageUrl,String jsFileName, String deltaResolveAddress) {
-        String result = CasperjsProgramManager.launch(jsFileName, pageUrl, deltaResolveAddress, UUID.randomUUID().toString(), " web-security=no", "ignore-ssl-errors=true");
+    private static boolean startIdentification(String pageUrl,String domain,String cookies,String jsFileName, String deltaResolveAddress) {
+        String result = CasperjsProgramManager.launch(jsFileName, pageUrl,deltaResolveAddress,domain,cookies, " web-security=no", "ignore-ssl-errors=true");
         logger.info("验证码识别结果：\r\n" + result);
         return result != null && (result.contains("验证通过") || result.contains("不存在极验验证码"));
     }
@@ -54,13 +52,13 @@ public class GeetestCaptchaIdentification {
         for (int i = 0; i < totalCount; i++) {
             stopWatch.reset();
             stopWatch.start();
-            if (startIdentification(pageUrl,"geetest_refresh.js", deltaResolveAddress))
+            if (startIdentification(pageUrl,"geetest_refresh.js",null,null, deltaResolveAddress))
                 successCount++;
             else {
                 int t = retryCount;
                 while (t > 0) {
                     System.out.println("重试一次");
-                    if (startIdentification(pageUrl, "geetest_refresh.js",deltaResolveAddress)) {
+                    if (startIdentification(pageUrl, "geetest_refresh.js",null,null,deltaResolveAddress)) {
                         successCount++;
                         break;
                     }
