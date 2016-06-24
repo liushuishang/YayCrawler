@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import yaycrawler.common.model.PhantomCookie;
 import yaycrawler.common.utils.CasperjsProgramManager;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by ucs_yuananyun on 2016/6/23.
@@ -37,22 +38,18 @@ public class AutoLoginProxy {
         String result = null;
         LoginResult loginResult = new LoginResult();
         while (i++ < 10) {
-            result = CasperjsProgramManager.launch(loginJsFileName, pageUrl,resolverAddress," --web-security=no", "--ignore-ssl-errors=true");
-            logger.info(result);
-            if(result.contains("自动登录失败")) {
-                loginResult.setSuccess(false);
-                continue;
-            } else {
-                String cookie = StringUtils.substringBetween(result,"$CookieStart","$CookieEnd");
-                if(StringUtils.isNotEmpty(cookie)) {
-                    List<PhantomCookie> phantomCookies = JSON.parseArray(cookie,PhantomCookie.class);
+            result = CasperjsProgramManager.launch(loginJsFileName, pageUrl,resolverAddress, UUID.randomUUID().toString()," --web-security=no", "--ignore-ssl-errors=true");
+//            logger.info(result);
+            if (result.contains("自动登录成功")) {
+                String cookie = StringUtils.substringBetween(result, "$CookieStart", "$CookieEnd");
+                if (StringUtils.isNotEmpty(cookie)) {
+                    List<PhantomCookie> phantomCookies = JSON.parseArray(cookie, PhantomCookie.class);
                     loginResult.setCookies(phantomCookies);
                     loginResult.setSuccess(true);
                     break;
-                } else {
-                    loginResult.setSuccess(false);
-                    continue;
                 }
+            } else {
+                loginResult.setSuccess(false);
             }
         }
         return loginResult;

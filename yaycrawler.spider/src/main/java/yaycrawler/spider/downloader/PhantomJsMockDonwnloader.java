@@ -1,9 +1,7 @@
 package yaycrawler.spider.downloader;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import us.codecraft.webmagic.Page;
@@ -14,12 +12,10 @@ import us.codecraft.webmagic.downloader.AbstractDownloader;
 import us.codecraft.webmagic.selector.PlainText;
 import yaycrawler.common.utils.CasperjsProgramManager;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * Created by ucs_yuananyun on 2016/5/27.
@@ -51,7 +47,7 @@ public class PhantomJsMockDonwnloader extends AbstractDownloader {
         String result = null;
         try {
             result = CasperjsProgramManager.launch("casperjsDownload.js", request.getUrl(),URLEncoder.encode(site.getUserAgent().replaceAll(" ","%20"),"utf-8"),domain,site.isUseGzip(),site.getRetryTimes(),URLEncoder.encode(cookie.replaceAll(" ","%20"), "utf-8"), " --web-security=no", "--ignore-ssl-errors=true");
-            logger.info(result);
+//            logger.info(result);
              statusCode = Integer.parseInt(StringUtils.substringBefore(result,"\r\n").trim());
             request.putExtra(Request.STATUS_CODE, statusCode);
             if (statusAccept(acceptStatCode, statusCode)) {

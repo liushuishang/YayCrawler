@@ -63,7 +63,7 @@ casper.start(pageUrl).then(function () {
 casper.then(function () {
     if (!this.exists(".gt_slider_knob")) {
         this.echo("页面中不存在极验验证码模块");
-        this.echo(this.getPageContent());
+        //this.echo(this.getPageContent());
         this.exit();
     }
 });
@@ -113,7 +113,7 @@ var deltaX = 0;
 casper.then(function () {
     if (pageParam == null) {
         this.echo("收集图片参数失败!");
-        this.echo(this.getPageContent());
+        //this.echo(this.getPageContent());
         this.exit();
     }
     this.echo("开始请求滑块位置");
@@ -186,7 +186,7 @@ casper.then(function () {
     casper.waitForSelectorTextChange('.gt_info_type', function () {
         var status = this.fetchText('.gt_info_type');
         this.echo("验证结果:" + status);
-        this.capture(status.replace(":","_")+ id + "_" + currentTrailIndex + '.png');
+        //this.capture(status.replace(":","_")+ id + "_" + currentTrailIndex + '.png');
         if (status.indexOf("通过") > -1) {
             if (this.exists('#verify')) {
                 this.click("#verify");

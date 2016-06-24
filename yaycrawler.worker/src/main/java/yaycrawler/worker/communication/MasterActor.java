@@ -49,7 +49,7 @@ public class MasterActor {
     }
 
     public boolean sendHeartbeart() {
-        if (!WorkerContext.isSuccessRegisted) return false;
+//        if (!WorkerContext.isSuccessRegisted) return false;
         logger.debug("worker-{}开始向Master发送心跳", WorkerContext.getWorkerId());
         WorkerHeartbeat heartbeat = new WorkerHeartbeat(WorkerContext.getWorkerId());
         heartbeat.setWorkerContextPath(WorkerContext.getContextPath());

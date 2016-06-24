@@ -76,7 +76,12 @@ public class PageSiteService {
 
     public void deleteCookieByIds(Set<String> cookieIds) {
         for (String cookieId : cookieIds) {
-            cookieRepository.delete(cookieId);
+            try {
+                cookieRepository.delete(cookieId);
+            }catch (Exception ex)
+            {
+
+            }
         }
     }
 

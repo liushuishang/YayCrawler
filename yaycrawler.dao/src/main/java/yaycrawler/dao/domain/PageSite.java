@@ -39,7 +39,7 @@ public class PageSite implements Serializable {
     private String headers;
 
     /**
-     * 登录页面判断表达式
+     * 是否需要登录判断表达式
      */
     @Column(name = "loginJudgeExpression", columnDefinition = "varchar(200)")
     private String loginJudgeExpression;

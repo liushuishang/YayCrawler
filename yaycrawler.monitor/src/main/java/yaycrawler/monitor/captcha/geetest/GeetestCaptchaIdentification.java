@@ -28,7 +28,7 @@ public class GeetestCaptchaIdentification {
         boolean flag = startIdentification(pageUrl,jsFileName, deltaResolveAddress);
         if (!flag) {
             int i = 0;
-            while (i++ < 3) {
+            while (i++ < 1) {
                 flag = startIdentification(pageUrl,jsFileName, deltaResolveAddress);
                 logger.info("第{}次重试！", i);
                 if (flag) break;
@@ -40,7 +40,7 @@ public class GeetestCaptchaIdentification {
     private static boolean startIdentification(String pageUrl,String jsFileName, String deltaResolveAddress) {
         String result = CasperjsProgramManager.launch(jsFileName, pageUrl, deltaResolveAddress, UUID.randomUUID().toString(), " web-security=no", "ignore-ssl-errors=true");
         logger.info("验证码识别结果：\r\n" + result);
-        return result != null && (result.contains("验证通过") || result.contains("页面中不存在极验验证码模块"));
+        return result != null && (result.contains("验证通过") || result.contains("不存在极验验证码"));
     }
 
     public static void main(String[] args) throws InterruptedException {

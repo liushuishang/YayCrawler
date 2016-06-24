@@ -44,6 +44,8 @@ public class WorkerController {
         Assert.notNull(registration.getWorkerId());
         Assert.notNull(registration.getWorkerContextPath());
         MasterContext.registeWorker(registration);
+        //分派任务
+//        taskDispatcher.assignTasks(heartbeat);
         return RestFulResult.success(true);
     }
 

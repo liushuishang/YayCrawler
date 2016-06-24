@@ -22,8 +22,7 @@ public class YaySpider extends Spider {
         this.site = pageSiteService.getSite(domain);
         if(site==null) site = Site.me();
         this.setSpiderListeners(new ArrayList<SpiderListener>());
-        //不需要把子连接加入到本地队列，因为我们的队列由Master统一管理
-        spawnUrl=false;
+        spawnUrl=true;
         this.domain = domain;
     }
 

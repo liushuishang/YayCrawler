@@ -47,8 +47,11 @@ public class GenericPageProcessor implements PageProcessor {
     public void process(Page page) {
         Request pageRequest = page.getRequest();
         String pageUrl = pageRequest.getUrl();
-        if(doAutomaticRecovery(page, pageRequest, pageUrl))
+        if (doAutomaticRecovery(page, pageRequest, pageUrl)) {
+            //重新加入队列
+            page.addTargetRequest(page.getRequest());
             return;
+        }
         //是否正确的页面
         PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
         String pageValidationExpression = pageInfo.getPageValidationRule();
@@ -210,7 +213,7 @@ public class GenericPageProcessor implements PageProcessor {
      * @param pageUrl
      */
     private boolean doAutomaticRecovery(Page page, Request pageRequest, String pageUrl) {
-        boolean doRecovery=false;
+        boolean doRecovery = false;
         PageSite pageSite = pageSiteService.getPageSiteByUrl(pageUrl);
         if (pageSite != null) {
             String loginJudgeExpression = pageSite.getLoginJudgeExpression();
@@ -220,26 +223,27 @@ public class GenericPageProcessor implements PageProcessor {
 
             Selectable judgeContext = StringUtils.isNotBlank(loginJsFileName) ? getPageRegionContext(page, pageRequest, loginJudgeExpression) : null;
             if (judgeContext != null && judgeContext.match()) {
-                doRecovery=true;
+                doRecovery = true;
+
                 //干掉失效的验证码
                 Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
                 if (cookieIds != null && cookieIds.size() > 0) {
                     pageSiteService.deleteCookieByIds(cookieIds);
                 }
                 //需要登录了
-                LoginResult loginResult= autoLoginProxy.login(pageUrl, loginJsFileName, page.getRawText());
+                LoginResult loginResult = autoLoginProxy.login(pageUrl, loginJsFileName, page.getRawText());
                 if (loginResult.isSuccess()) {
                     logger.info("自动登录{}成功！", pageUrl);
-                    if (pageSiteService.saveCookies(pageSite.getId(),pageSite.getDomain(), loginResult.getCookies()))
-                        logger.info("保存{}的cookie成功！", pageUrl);
-                    else logger.info("保存{}的cookie失败！", pageUrl);
-                }
-                else logger.info("自动登录{}失败！", pageUrl);
-
+                    if (loginResult.getCookies() != null) {
+                        if (pageSiteService.saveCookies(pageSite.getId(), pageSite.getDomain(), loginResult.getCookies()))
+                            logger.info("保存{}的cookie成功！", pageUrl);
+                        else logger.info("保存{}的cookie失败！", pageUrl);
+                    } else logger.info("没有cookie需要保存");
+                } else logger.info("自动登录{}失败！", pageUrl);
             } else {
                 judgeContext = StringUtils.isNotBlank(captchaJsFileName) ? getPageRegionContext(page, pageRequest, captchaJudgeExpression) : null;
                 if (judgeContext != null && judgeContext.match()) {
-                    doRecovery=true;
+                    doRecovery = true;
                     //需要刷新验证码了
                     if (captchaIdentificationProxy.recognition(pageUrl, captchaJsFileName, page.getRawText())) {
                         logger.info("刷新{}页面的验证码成功！", page.getRequest().getUrl());

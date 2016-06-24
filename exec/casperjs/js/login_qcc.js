@@ -50,7 +50,8 @@ casper.on('remote.message', function (msg) {
     this.log(msg, 'info');
 });
 
-var pageUrl = casper.cli.get(0);
+var pageUrl = "http://www.qichacha.com/user_login";
+    //casper.cli.get(0);
 var deltaResolveServer = casper.cli.get(1);
 var id = casper.cli.get(2);
 var pageParam = null;
@@ -63,7 +64,6 @@ casper.start(pageUrl).then(function () {
 casper.then(function () {
     if (!this.exists(".gt_slider_knob")) {
         this.echo("页面中不存在极验验证码模块");
-        this.echo(this.getPageContent());
         this.exit();
     }
 });
@@ -113,7 +113,6 @@ var deltaX = 0;
 casper.then(function () {
     if (pageParam == null) {
         this.echo("收集图片参数失败!");
-        this.echo(this.getPageContent());
         this.exit();
     }
     this.echo("开始请求滑块位置");
@@ -188,21 +187,18 @@ casper.then(function () {
         this.echo("验证结果:" + status);
         this.capture(status.replace(":","_")+ id + "_" + currentTrailIndex + '.png');
         if (status.indexOf("通过") > -1) {
-            if (this.exists('#verify')) {
-                this.click("#verify");
-                this.echo("点击成功");
-            }
+            this.fillSelectors('form#user_login_normal', {
+                'input[name="nameNormal"]': '13175315644',
+                'input[name="pwdNormal"]':'123456789'
+            }, true);
         }
     }, function () {
         this.echo("等待滑块移动超时！");
+        this.exit();
     }, 10000);
-});
-casper.then(function() {
-    this.fillSelectors('form#user_login_normal', {
-        'input[name="nameNormal"]': '13175315644',
-        'input[name="pwdNormal"]':'123456789'
-    }, true);
+}).then(function() {
     this.waitWhileSelector('a.dropdown-toggle:last-child', function() {
+        this.echo("自动登录成功！");
         this.echo("$CookieStart");
         this.echo(JSON.stringify(phantom.cookies));
         this.echo("$CookieEnd");
