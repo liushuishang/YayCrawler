@@ -22,8 +22,8 @@ public class SiteAccount {
     private String userName;
 
     @NotNull
-    @Column(name = "pwd", columnDefinition = "varchar(100)")
-    private String pwd;
+    @Column(name = "_password", columnDefinition = "varchar(100)")
+    private String passWord;
 
     @NotNull
     @Column(columnDefinition = "varchar(38)")
@@ -35,12 +35,6 @@ public class SiteAccount {
     @NotNull
     @Column(name = "available",insertable = false,columnDefinition = "char default '1'")
     private String  available;
-
-    @Column(name = "createdDate", columnDefinition = "timestamp default now()")
-    private Date createdDate;
-
-    @Column(name = "lastUpdatedDate", columnDefinition = "date default now()")
-    private Date lastUpdatedDate;
 
     public String getId() {
         return id;
@@ -58,13 +52,6 @@ public class SiteAccount {
         this.userName = userName;
     }
 
-    public String getPwd() {
-        return pwd;
-    }
-
-    public void setPwd(String pwd) {
-        this.pwd = pwd;
-    }
 
     public String getSiteId() {
         return siteId;
@@ -90,19 +77,11 @@ public class SiteAccount {
         this.available = available;
     }
 
-    public Date getCreatedDate() {
-        return createdDate;
+    public String getPassWord() {
+        return passWord;
     }
 
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public Date getLastUpdatedDate() {
-        return lastUpdatedDate;
-    }
-
-    public void setLastUpdatedDate(Date lastUpdatedDate) {
-        this.lastUpdatedDate = lastUpdatedDate;
+    public void setPassWord(String passWord) {
+        this.passWord = passWord;
     }
 }
