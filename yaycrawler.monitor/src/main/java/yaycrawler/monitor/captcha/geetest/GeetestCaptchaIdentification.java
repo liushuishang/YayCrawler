@@ -40,9 +40,7 @@ public class GeetestCaptchaIdentification {
     private static boolean startIdentification(String pageUrl,String jsFileName, String deltaResolveAddress) {
         String result = CasperjsProgramManager.launch(jsFileName, pageUrl, deltaResolveAddress, UUID.randomUUID().toString(), " web-security=no", "ignore-ssl-errors=true");
         logger.info("验证码识别结果：\r\n" + result);
-        if (result != null && result.contains("验证通过"))
-            return true;
-        return false;
+        return result != null && (result.contains("验证通过") || result.contains("页面中不存在极验验证码模块"));
     }
 
     public static void main(String[] args) throws InterruptedException {

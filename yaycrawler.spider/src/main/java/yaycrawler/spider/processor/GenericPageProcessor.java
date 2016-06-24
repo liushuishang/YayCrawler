@@ -47,12 +47,10 @@ public class GenericPageProcessor implements PageProcessor {
     public void process(Page page) {
         Request pageRequest = page.getRequest();
         String pageUrl = pageRequest.getUrl();
-        PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
-
         if(doAutomaticRecovery(page, pageRequest, pageUrl))
             return;
-
         //是否正确的页面
+        PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
         String pageValidationExpression = pageInfo.getPageValidationRule();
         if (pageValidated(page, pageValidationExpression)) {
             try {

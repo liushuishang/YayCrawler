@@ -40,7 +40,7 @@ public class MasterActor {
         String targetUrl = CommunicationAPIs.getFullRemoteUrl(WorkerContext.getMasterServerAddress(), CommunicationAPIs.WORKER_POST_MASTER_REGISTER);
         RestFulResult result = HttpUtils.doSignedHttpExecute(WorkerContext.getSignatureSecret(), targetUrl, HttpMethod.POST, workerRegistration);
         if (result.hasError()) {
-            logger.error("worker-{}注册Master失败！", WorkerContext.getWorkerId());
+            logger.error("worker-{}注册Master失败,原因:{}", WorkerContext.getWorkerId(),result.getMessage());
 //            throw new WorkerRegisteFailureException(result.getMessage());
             return false;
         }
