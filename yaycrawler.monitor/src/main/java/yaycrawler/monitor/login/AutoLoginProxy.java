@@ -26,19 +26,21 @@ public class AutoLoginProxy {
     @Value("${server.context-path}")
     private String serverContextPath;
 
-    public LoginResult login(String pageUrl, String loginJsFileName, String pageContent) {
+    public LoginResult login(String pageUrl, String loginJsFileName, String pageContent,String userName,String password) {
         if (StringUtils.isBlank(loginJsFileName)) {
             logger.error("jsFileName不能为空！");
             return null;
         }
-        if (StringUtils.isBlank(pageContent)) return null;
 
+        if (StringUtils.isBlank(pageContent)) return null;
+        if (StringUtils.isBlank(userName)) return null;
+        if (StringUtils.isBlank(password)) return null;
         String resolverAddress = String.format("http://%s:%s%s/%s", serverIP, serverPort, serverContextPath, "resolveGeetestSlicePosition");
         int i = 0;
         String result = null;
         LoginResult loginResult = new LoginResult();
         while (i++ < 10) {
-            result = CasperjsProgramManager.launch(loginJsFileName, pageUrl,resolverAddress, UUID.randomUUID().toString()," --web-security=no", "--ignore-ssl-errors=true");
+            result = CasperjsProgramManager.launch(loginJsFileName, pageUrl,resolverAddress,UUID.randomUUID().toString(),userName,password," --web-security=no", "--ignore-ssl-errors=true");
 //            logger.info(result);
             if (result.contains("自动登录成功")) {
                 String cookie = StringUtils.substringBetween(result, "$CookieStart", "$CookieEnd");

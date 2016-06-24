@@ -26,10 +26,6 @@ public class SiteAccount {
     private String passWord;
 
     @NotNull
-    @Column(columnDefinition = "varchar(38)")
-    private String siteId;
-
-    @NotNull
     private String domain;
 
     @NotNull
@@ -51,16 +47,7 @@ public class SiteAccount {
     public void setUserName(String userName) {
         this.userName = userName;
     }
-
-
-    public String getSiteId() {
-        return siteId;
-    }
-
-    public void setSiteId(String siteId) {
-        this.siteId = siteId;
-    }
-
+    
     public String getDomain() {
         return domain;
     }
