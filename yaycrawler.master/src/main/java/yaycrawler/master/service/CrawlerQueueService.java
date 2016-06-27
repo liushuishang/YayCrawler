@@ -247,41 +247,6 @@ public class CrawlerQueueService {
         }
     }
 
-
-    public boolean regeditQueue(CrawlerRequest crawlerRequest) {
-       return regeditQueue(crawlerRequest,false);
-    }
-
-    public boolean regeditQueue(CrawlerRequest crawlerRequest,boolean removeDuplicated) {
-        boolean isDuplicate = removeDuplicated ?false: isDuplicate(crawlerRequest);
-        if (isDuplicate) return false;
-
-        try {
-//            String queue = getQueueKey();
-            String key = getItemKey();
-            String itemQueue = getItemQueueKey();
-
-            CrawlerRequest request = new CrawlerRequest();
-            BeanUtils.copyProperties(crawlerRequest, request);
-            String url = getRandomUrl(request);
-            String field = DigestUtils.sha1Hex(url);
-            request.setHashCode(field);
-            HashOperations hashOperations = redisTemplate.opsForHash();
-            ListOperations listOperations = redisTemplate.opsForList();
-            request.setUrl(url);
-            String value = JSON.toJSONString(request);
-            if (!hashOperations.hasKey(key, field)) {
-                listOperations.rightPush(itemQueue, field);
-            }
-            hashOperations.put(key, field, value);
-//            listOperations.rightPush(queue, field);
-            return true;
-        } catch (Exception ex) {
-            logger.info("任务{}注册失败！错误：{}", crawlerRequest.toString(), ex.getMessage());
-            return false;
-        }
-    }
-
     public boolean isDuplicate(CrawlerRequest request) {
         SetOperations setOperations = redisTemplate.opsForSet();
         String uniqQueue = getSetKey();
@@ -333,15 +298,15 @@ public class CrawlerQueueService {
             crawlerRequest.setWorkerId(workerHeartbeat.getWorkerId());
             String field = crawlerRequest.getHashCode();
             String value = JSON.toJSONString(crawlerRequest);
-            if (!hashOperations.hasKey(runningQueue, field)) {
+//            if (!hashOperations.hasKey(runningQueue, field)) {
                 listOperations.rightPush(runningKey, field);
-            }
+//            }
             hashOperations.put(runningQueue, field, value);
             hashOperations.delete(key, field);
-            if (!hashOperations.hasKey(key, field)) {
+//            if (!hashOperations.hasKey(key, field)) {
                 listOperations.remove(itemQueue, 0, field);
 //                listOperations.remove(queue, 0, field);
-            }
+//            }
         }
     }
 
@@ -360,10 +325,10 @@ public class CrawlerQueueService {
         crawlerRequest.setStartTime(startTime);
         crawlerRequest.setMessage(message);
         String value = JSON.toJSONString(crawlerRequest);
-        if (!hashOperations.hasKey(failQueue, field)) {
+
             listOperations.rightPush(failKey, field);
-        }
-        hashOperations.put(failQueue, field, value);
+            hashOperations.put(failQueue, field, value);
+
         hashOperations.delete(key, field);
         listOperations.remove(runningKey, 0, field);
     }
@@ -390,17 +355,10 @@ public class CrawlerQueueService {
         ListOperations listOperations = redisTemplate.opsForList();
         String successQueue = getSuccessKey();
         String successKey = getSuccessQueueKey();
-        if (!hashOperations.hasKey(successQueue, crawlerRequest.getHashCode())) {
-            listOperations.rightPush(successKey, crawlerRequest.getHashCode());
-        }
-        hashOperations.put(successQueue, crawlerRequest.getHashCode(), JSON.toJSONString(crawlerRequest));
-        return false;
-    }
 
-    public Object removeCrawlers(List<String> fields) {
-        for (String field : fields) {
-            removeSuccessedTaskFromRunningQueue(field);
-        }
+        listOperations.rightPush(successKey, crawlerRequest.getHashCode());
+        hashOperations.put(successQueue, crawlerRequest.getHashCode(), JSON.toJSONString(crawlerRequest));
+
         return false;
     }
 
@@ -423,7 +381,7 @@ public class CrawlerQueueService {
             if (oldTime > timeout) {
                 crawlerRequest.setStartTime(null);
                 crawlerRequest.setWorkerId(null);
-                removeSuccessedTaskFromRunningQueue(crawlerRequest.getHashCode());
+//                removeSuccessedTaskFromRunningQueue(crawlerRequest.getHashCode());
                 setOperations.remove(uniqQueue, crawlerRequest.getHashCode());
 //                regeditQueue(crawlerRequest);
                 CrawlerRequest request = new CrawlerRequest();
