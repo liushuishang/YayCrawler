@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.stereotype.Service;
 import yaycrawler.common.model.CrawlerRequest;
+import yaycrawler.common.model.CrawlerResult;
 import yaycrawler.common.model.TasksResult;
 import yaycrawler.common.model.WorkerHeartbeat;
 
@@ -34,16 +35,11 @@ import java.util.Set;
 public class CrawlerQueueService {
 
     private static final Logger logger = LoggerFactory.getLogger(CrawlerQueueService.class);
-
-
-    private Long count;
-
     @Autowired
     private RedisTemplate redisTemplate;
 
     @Value("${task.queue.count}")
     private int taskCount;
-//    private static final String QUEUE_PREFIX = "queue_";
 
     private static final String DUPLICATE_REMOVAL_PREFIX = "duplicateRemoval:set_";
 
@@ -234,10 +230,8 @@ public class CrawlerQueueService {
         try {
             HashOperations hashOperations = redisTemplate.opsForHash();
             ListOperations listOperations = redisTemplate.opsForList();
-//            String queue = getQueueKey();
             String key = getItemKey();
             String itemQueue = getItemQueueKey();
-//            listOperations.rightPushAll(queue,queueVal);
             listOperations.rightPushAll(itemQueue,queueVal);
             hashOperations.putAll(key,crawlerRequestMap);
             return true;
@@ -291,22 +285,21 @@ public class CrawlerQueueService {
         String key = getItemKey();
         String itemQueue = getItemQueueKey();
         String runningKey = getRunningQueueKey();
-//        String queue = getQueueKey();
         ListOperations listOperations = redisTemplate.opsForList();
         for (CrawlerRequest crawlerRequest : crawlerRequests) {
-            crawlerRequest.setStartTime(startTime);
-            crawlerRequest.setWorkerId(workerHeartbeat.getWorkerId());
+            Map multimap = Maps.newHashMap();
+            multimap.put("startTime",startTime);
+            multimap.put("workId",workerHeartbeat.getWorkerId());
+            crawlerRequest.setExtendMap(multimap);
             String field = crawlerRequest.getHashCode();
             String value = JSON.toJSONString(crawlerRequest);
-//            if (!hashOperations.hasKey(runningQueue, field)) {
-                listOperations.rightPush(runningKey, field);
-//            }
+            if (hashOperations.hasKey(runningQueue, field)) {
+                listOperations.remove(runningKey,0,field);
+            }
+            listOperations.leftPush(runningKey, field);
             hashOperations.put(runningQueue, field, value);
             hashOperations.delete(key, field);
-//            if (!hashOperations.hasKey(key, field)) {
-                listOperations.remove(itemQueue, 0, field);
-//                listOperations.remove(queue, 0, field);
-//            }
+            listOperations.remove(itemQueue, 0, field);
         }
     }
 
@@ -322,28 +315,36 @@ public class CrawlerQueueService {
             return;
         String data = String.valueOf(hashOperations.get(key, field));
         CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
-        crawlerRequest.setStartTime(startTime);
-        crawlerRequest.setMessage(message);
+        Map multimap = crawlerRequest.getExtendMap();
+        multimap.put("startTime",startTime);
+        multimap.put("message",message);
+        crawlerRequest.setExtendMap(multimap);
         String value = JSON.toJSONString(crawlerRequest);
-
-            listOperations.rightPush(failKey, field);
-            hashOperations.put(failQueue, field, value);
+        if (hashOperations.hasKey(failQueue, field)) {
+            listOperations.remove(failKey,0,field);
+        }
+        listOperations.leftPush(failKey, field);
+        hashOperations.put(failQueue, field, value);
 
         hashOperations.delete(key, field);
         listOperations.remove(runningKey, 0, field);
     }
 
-    public Object removeSuccessedTaskFromRunningQueue(String field) {
+    public Object removeSuccessedTaskFromRunningQueue(CrawlerResult result) {
         HashOperations hashOperations = redisTemplate.opsForHash();
         ListOperations listOperations = redisTemplate.opsForList();
         String runningQueue = getRunningKey();
         String runningKey = getRunningQueueKey();
+        String field = result.getKey();
         if (!hashOperations.hasKey(runningQueue, field))
             return false;
         String data = String.valueOf(hashOperations.get(runningQueue, field));
         CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
         if(crawlerRequest==null) return false;
-        crawlerRequest.setStartTime(System.currentTimeMillis());
+        Map multimap = crawlerRequest.getExtendMap();
+        multimap.put("startTime",System.currentTimeMillis());
+        multimap.put("result",result);
+        crawlerRequest.setExtendMap(multimap);
         moveSuccessQueue(crawlerRequest);
         hashOperations.delete(runningQueue, field);
         listOperations.remove(runningKey, 0, field);
@@ -355,8 +356,10 @@ public class CrawlerQueueService {
         ListOperations listOperations = redisTemplate.opsForList();
         String successQueue = getSuccessKey();
         String successKey = getSuccessQueueKey();
-
-        listOperations.rightPush(successKey, crawlerRequest.getHashCode());
+        if (hashOperations.hasKey(successQueue, crawlerRequest.getHashCode())) {
+            listOperations.remove(successKey,0,crawlerRequest.getHashCode());
+        }
+        listOperations.leftPush(successKey, crawlerRequest.getHashCode());
         hashOperations.put(successQueue, crawlerRequest.getHashCode(), JSON.toJSONString(crawlerRequest));
 
         return false;
@@ -377,13 +380,12 @@ public class CrawlerQueueService {
         Map<String,String> crawlerRequestMap = Maps.newHashMap();
         for (String data : datas) {
             CrawlerRequest crawlerRequest = JSON.parseObject(data, CrawlerRequest.class);
-            long oldTime = System.currentTimeMillis() - crawlerRequest.getStartTime();
+            Map multimap = crawlerRequest.getExtendMap();
+            long startTime = Long.parseLong(String.valueOf(multimap.get("startTime")));
+            long oldTime = System.currentTimeMillis() - startTime;
             if (oldTime > timeout) {
-                crawlerRequest.setStartTime(null);
-                crawlerRequest.setWorkerId(null);
-//                removeSuccessedTaskFromRunningQueue(crawlerRequest.getHashCode());
+                crawlerRequest.setExtendMap(null);
                 setOperations.remove(uniqQueue, crawlerRequest.getHashCode());
-//                regeditQueue(crawlerRequest);
                 CrawlerRequest request = new CrawlerRequest();
                 BeanUtils.copyProperties(crawlerRequest, request);
                 String url = getRandomUrl(request);
@@ -434,10 +436,13 @@ public class CrawlerQueueService {
             key = failKey;
             hashKey = failQueue;
         }
-        long size = listOperations.size(key);
-        long page = size - pageIndex * pageSize;
-        long offset = page - (pageSize - 1);
-        keys = listOperations.range(key,offset,page);
+//        long size = listOperations.size(key);
+//        long page = size - pageIndex * pageSize;
+//        long offset = page - (pageSize - 1);
+        int page = pageIndex * pageSize;
+        int offset = page + (pageSize - 1);
+        keys = listOperations.range(key, page, offset);
+//        keys = listOperations.range(key,offset,page);
         datas = hashOperations.multiGet(hashKey, keys);
         tasksResult.setTotal(hashOperations.size(hashKey));
         for (String data : datas) {

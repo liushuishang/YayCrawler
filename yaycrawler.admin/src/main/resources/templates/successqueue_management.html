@@ -69,13 +69,16 @@
                                     title: '请求参数'
                                 }, {
                                     field: 'workerId',
-                                    title: '处理的Worker编号'
+                                    title: '处理的Worker编号',
+                                    formatter: function (value, row, index) {
+                                        return row.extendMap.workId;
+                                    }
                                 },
                                 {
                                     field: 'startTime',
                                     title: '任务完成时间',
                                     formatter: function (value, row, index) {
-                                        var timestamp = value;
+                                        var timestamp = row.extendMap.startTime;
                                         var d = new Date(timestamp);    //根据时间戳生成的时间对象
                                         var date = (d.getFullYear()) + "-" +
                                                 (d.getMonth() + 1) + "-" +
@@ -105,18 +108,28 @@
                                                 type: "Post",
                                                 cache: false,
                                                 contentType: "application/json",
-                                                url: global.contextPath + "/viewCrawlerResult?random="+Math.random(),
+                                                url: global.contextPath + "/viewCrawlerResult?random=" + Math.random(),
                                                 data: JSON.stringify(data),
                                                 dataType: 'json',
-                                                async:false,
+                                                async: false,
                                                 success: function (result) {     //回调函数，result，返回值
                                                     debugger
+                                                    var resultReq = row.extendMap.result;
+                                                    if (resultReq.crawlerRequestList.length > 0) {
+                                                        result.resultReq = resultReq;
+                                                    }
                                                     $("#ta_result").val(JSON.stringify(result, null, "\t"));
                                                 },
                                                 error: function (msg) {
-                                                     $("#ta_result").html("");
+                                                    debugger
+                                                    var resultReq = row.extendMap.result;
+                                                    if (resultReq.crawlerRequestList.length > 0) {
+                                                        $("#ta_result").val(JSON.stringify(resultReq, null, "\t"));
+                                                    }
+
                                                 }
                                             });
+
                                             $('#divModal').modal({
                                                 keyboard: false
                                             });
