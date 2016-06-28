@@ -13,12 +13,10 @@ import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Json;
 import us.codecraft.webmagic.selector.Selectable;
 import yaycrawler.common.model.CrawlerRequest;
-import yaycrawler.common.model.PhantomCookie;
 import yaycrawler.dao.domain.*;
 import yaycrawler.dao.service.PageParserRuleService;
 import yaycrawler.monitor.captcha.CaptchaIdentificationProxy;
 import yaycrawler.monitor.login.AutoLoginProxy;
-import yaycrawler.monitor.login.LoginResult;
 import yaycrawler.spider.listener.IPageParseListener;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
 import yaycrawler.spider.service.PageSiteService;
@@ -217,46 +215,21 @@ public class GenericPageProcessor implements PageProcessor {
             String captchaJudgeExpression = pageSite.getCaptchaJudgeExpression();
             String loginJsFileName = pageSite.getLoginJsFileName();
             String captchaJsFileName = pageSite.getCaptchaJsFileName();
+            String oldCookieId = (String) pageRequest.getExtra("cookieId");
 
             Selectable judgeContext = StringUtils.isNotBlank(loginJsFileName) ? getPageRegionContext(page, pageRequest, loginJudgeExpression) : null;
             if (judgeContext != null && judgeContext.match()) {
                 doRecovery = true;
-                boolean isCookieChanged = false;
-                //重新加入队列
-                page.addTargetRequest(page.getRequest());
-                //干掉失效的验证码
-                Set<String> cookieIds = (Set<String>) page.getRequest().getExtra("cookieIds");
-                if (cookieIds != null && cookieIds.size() > 0) {
-                    pageSiteService.deleteCookieByIds(cookieIds);
-                    isCookieChanged = true;
-                }
-
                 //需要登录了
-                LoginResult loginResult = autoLoginProxy.login(pageUrl, loginJsFileName, page.getRawText());
-                if (loginResult.isSuccess()) {
-                    logger.info("自动登录{}成功！", pageUrl);
-                    List<PhantomCookie> phantomCookies = loginResult.getCookies();
-                    if (phantomCookies != null) {
-                        if (pageSiteService.saveCookies(pageSite.getId(), pageSite.getDomain(), phantomCookies)) {
-                            isCookieChanged = true;
-                            logger.info("保存{}的cookie成功！", pageUrl);
-                        } else logger.info("保存{}的cookie失败！", pageUrl);
-                    } else logger.info("没有cookie需要保存");
-                } else logger.info("自动登录{}失败！", pageUrl);
-
-                if (isCookieChanged && pageParseListener != null)
-                    pageParseListener.onCookieChanged(pageRequest);
-
+                autoLoginProxy.login(pageUrl, loginJsFileName, page.getRawText(), oldCookieId);
+                //重新加入队列
+                page.addTargetRequest(pageRequest);
             } else {
                 judgeContext = StringUtils.isNotBlank(captchaJsFileName) ? getPageRegionContext(page, pageRequest, captchaJudgeExpression) : null;
                 if (judgeContext != null && judgeContext.match()) {
                     doRecovery = true;
                     //需要刷新验证码了
-                    Set<String> cookieIdSet = (Set<String>) pageRequest.getExtra("cookieIds");
-                    if (captchaIdentificationProxy.recognition(pageUrl, getCookieFromSite(pageSite, cookieIdSet), captchaJsFileName, page.getRawText())) {
-                        logger.info("刷新{}页面的验证码成功！", page.getRequest().getUrl());
-                    } else
-                        logger.info("刷新{}页面的验证码失败！", page.getRequest().getUrl());
+                    captchaIdentificationProxy.recognition(pageUrl, captchaJsFileName, page.getRawText(), oldCookieId);
                 }
             }
         }
@@ -282,15 +255,4 @@ public class GenericPageProcessor implements PageProcessor {
             return StringUtils.isNotEmpty(String.valueOf(result));
 
     }
-
-    private String getCookieFromSite(PageSite site, Set<String> cookieIdSet) {
-        if (cookieIdSet == null || cookieIdSet.size() == 0 || site == null) return null;
-        String id = cookieIdSet.iterator().next();
-        for (SiteCookie cookie : site.getCookieList()) {
-            if (cookie.getId().equals(id))
-                return cookie.getCookie();
-        }
-        return null;
-    }
-
 }

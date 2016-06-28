@@ -14,7 +14,6 @@ import yaycrawler.common.utils.CasperjsProgramManager;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -24,42 +23,44 @@ public class PhantomJsMockDonwnloader extends AbstractDownloader {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Override
-    public Page download(Request request, Task task) {
+
+    public Page download(Request request, Task task, String cookie) {
         Site site = null;
         if (task != null) {
             site = task.getSite();
         }
         Set<Integer> acceptStatCode;
-        String charset = null;
-        Map<String, String> headers = null;
+//        String charset = "utf-8";
+//        Map<String, String> headers = null;
         if (site != null) {
             acceptStatCode = site.getAcceptStatCode();
-            charset = site.getCharset();
-            headers = site.getHeaders();
+//            charset = site.getCharset();
+//            headers = site.getHeaders();
         } else {
-            acceptStatCode = Sets.newHashSet(200,500);
+            acceptStatCode = Sets.newHashSet(200, 500);
         }
-        String cookie = String.valueOf(site.getHeaders().get("Cookie"));
         String domain = String.valueOf(site.getDomain());
         logger.debug("downloading page {}", request.getUrl());
         int statusCode = 0;
         String result = null;
         try {
-            result = CasperjsProgramManager.launch("casperjsDownload.js", request.getUrl(),URLEncoder.encode(site.getUserAgent().replaceAll(" ","%20"),"utf-8"),domain,site.isUseGzip(),site.getRetryTimes(),URLEncoder.encode(cookie.replaceAll(" ","%20"), "utf-8"), " --web-security=no", "--ignore-ssl-errors=true");
+            if(cookie==null) cookie = "";
+            result = CasperjsProgramManager.launch("casperjsDownload.js", request.getUrl(),
+                    URLEncoder.encode(site.getUserAgent().replaceAll(" ", "%20"), "utf-8"), domain, site.isUseGzip(), site.getRetryTimes(),
+                    URLEncoder.encode(cookie.replaceAll(" ", "%20"), "utf-8"), " web-security=no", "ignore-ssl-errors=true");
 //            logger.info(result);
-             statusCode = Integer.parseInt(StringUtils.substringBefore(result,"\r\n").trim());
+            statusCode = Integer.parseInt(StringUtils.substringBefore(result, "\r\n").trim());
             request.putExtra(Request.STATUS_CODE, statusCode);
             if (statusAccept(acceptStatCode, statusCode)) {
                 Page page = handleResponse(request, result);
                 onSuccess(request);
                 return page;
             } else {
-                logger.warn("code error {}\t,{}",statusCode,request.getUrl());
+                logger.warn("code error {}\t,{}", statusCode, request.getUrl());
                 return null;
             }
         } catch (Exception e) {
-            logger.warn("download page {} error {} msg {}",request.getUrl(),e,result);
+            logger.warn("download page {} error {} msg {}", request.getUrl(), e, result);
             if (site.getCycleRetryTimes() > 0) {
                 return addToCycleRetry(request, site);
             }
@@ -81,6 +82,11 @@ public class PhantomJsMockDonwnloader extends AbstractDownloader {
         page.setRequest(request);
         page.setStatusCode(200);
         return page;
+    }
+
+    @Override
+    public Page download(Request request, Task task) {
+        return download(request, task, null);
     }
 
     @Override

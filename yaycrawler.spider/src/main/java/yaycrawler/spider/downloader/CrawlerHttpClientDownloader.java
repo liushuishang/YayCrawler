@@ -3,12 +3,14 @@ package yaycrawler.spider.downloader;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.annotation.ThreadSafe;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
@@ -32,12 +34,8 @@ import us.codecraft.webmagic.utils.UrlUtils;
 import yaycrawler.common.utils.HttpClientGenerator;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -70,8 +68,8 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
         return httpClient;
     }
 
-    @Override
-    public Page download(Request request, Task task) {
+
+    public Page download(Request request, Task task,String cookie) {
         Site site = null;
         if (task != null) {
             site = task.getSite();
@@ -90,6 +88,10 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
         CloseableHttpResponse httpResponse = null;
         int statusCode = 0;
         try {
+            if (StringUtils.isNotBlank(cookie)) {
+                if (headers == null) headers = new HashMap<>();
+                headers.put("Cookie", cookie);
+            }
             HttpUriRequest httpUriRequest = getHttpUriRequest(request, site, headers);
             httpResponse = getHttpClient(site).execute(httpUriRequest);
             statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -123,6 +125,11 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
     }
 
     @Override
+    public Page download(Request request, Task task) {
+        return download(request,task,null);
+    }
+
+    @Override
     public void setThread(int thread) {
         httpClientGenerator.setPoolSize(thread);
     }
@@ -152,9 +159,17 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
             requestConfigBuilder.setProxy(host);
             request.putExtra(Request.PROXY, host);
         } else {
-//            HttpHost httpHost = new HttpHost("127.0.0.1",8888);
-//            requestConfigBuilder.setProxy(httpHost);
-//            request.putExtra(Request.PROXY,httpHost);
+
+            HttpHost httpHost = new HttpHost("127.0.0.1",8888);
+            requestConfigBuilder.setProxy(httpHost);
+            request.putExtra(Request.PROXY,httpHost);
+
+            System.setProperty("http.proxyHost", "127.0.0.1");
+            System.setProperty("http.proxyPort", "8888");
+            System.setProperty("https.proxyHost", "127.0.0.1");
+            System.setProperty("https.proxyPort", "8888");
+
+
         }
         requestBuilder.setConfig(requestConfigBuilder.build());
         return requestBuilder.build();
@@ -168,19 +183,22 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
         } else if (method.equalsIgnoreCase(HttpConstant.Method.POST)) {
             RequestBuilder requestBuilder = RequestBuilder.post();
 
+            List<NameValuePair> parameters=new ArrayList<>();
             Map<String,Object> paramsMap= (Map<String, Object>) request.getExtra("nameValuePair");
             if(paramsMap!=null) {
                 for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
                     //对中文编码
                     String value = String.valueOf(entry.getValue());
-                    try {
-                        value = URLEncoder.encode(value, "utf-8");
-                    } catch (UnsupportedEncodingException e) {
-                        logger.error(e.getMessage());
-                    }
-                    requestBuilder.addParameters(new BasicNameValuePair(entry.getKey(), value));
+//                    try {
+////                        value =
+//                                URLEncoder.encode(value, "utf-8");
+//                    } catch (UnsupportedEncodingException e) {
+//                        logger.error(e.getMessage());
+//                    }
+                    parameters.add(new BasicNameValuePair(entry.getKey(), value));
                 }
             }
+            requestBuilder.setEntity(new UrlEncodedFormEntity(parameters, Charset.forName("utf-8")));
             return requestBuilder;
         } else if (method.equalsIgnoreCase(HttpConstant.Method.HEAD)) {
             return RequestBuilder.head();

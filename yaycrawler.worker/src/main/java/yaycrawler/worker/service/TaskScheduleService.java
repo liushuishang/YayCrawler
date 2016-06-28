@@ -81,6 +81,7 @@ public class TaskScheduleService {
         try {
             logger.info("worker接收到{}个任务", taskList.size());
             for (CrawlerRequest crawlerRequest : taskList) {
+                if(crawlerRequest==null) continue;
                 //如果查找不到与url相关的解析规则，则该任务不能执行
                 if (pageParserRuleService.findOnePageInfoByRgx(crawlerRequest.getUrl()) == null) {
                     logger.info("查找不到与{}匹配的解析规则，该任务失败！", crawlerRequest.getUrl());
@@ -97,7 +98,7 @@ public class TaskScheduleService {
             }
             logger.info("worker任务分配完成！");
         } catch (Exception ex) {
-            logger.error(ex.getMessage());
+            logger.error(ex.getMessage(),ex);
         }
     }
 

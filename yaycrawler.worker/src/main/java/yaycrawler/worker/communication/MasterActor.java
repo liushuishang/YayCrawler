@@ -68,9 +68,9 @@ public class MasterActor {
         if (result.hasError()) {
             //心跳失败的处理
             WorkerContext.heartbeatFailCount++;
-            if(WorkerContext.heartbeatFailCount>=3){
+            if(WorkerContext.heartbeatFailCount>=10){
                 //worker应该停止自身所有的任务
-                logger.info("Worker已经与Master失联超过3个心跳周期，现在停止自身所有的任务");
+                logger.info("Worker已经与Master失联超过10个心跳周期，现在停止自身所有的任务");
                 taskScheduleService.interruptAllTasks();
                 WorkerContext.heartbeatFailCount = 0;
             }

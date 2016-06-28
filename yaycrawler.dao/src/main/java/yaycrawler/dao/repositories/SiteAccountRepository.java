@@ -16,7 +16,6 @@ import java.util.List;
 public interface SiteAccountRepository extends CrudRepository<SiteAccount, String> {
     Page<SiteAccount> findAll(Pageable pageable);
 
-    List<SiteAccount> findByDomainAndAvailable(String url, int i);
 
     @Query(value = "select *  from res_site_account where domain=? and available=1  limit 1", nativeQuery = true)
     SiteAccount findOneByDomain(String domain);

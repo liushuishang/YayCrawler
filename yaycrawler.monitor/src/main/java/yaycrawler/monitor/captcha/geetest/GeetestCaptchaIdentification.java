@@ -52,13 +52,13 @@ public class GeetestCaptchaIdentification {
         for (int i = 0; i < totalCount; i++) {
             stopWatch.reset();
             stopWatch.start();
-            if (startIdentification(pageUrl,"geetest_refresh.js",null,null, deltaResolveAddress))
+            if (startIdentification(pageUrl,null,null,"geetest_refresh.js", deltaResolveAddress))
                 successCount++;
             else {
                 int t = retryCount;
                 while (t > 0) {
                     System.out.println("重试一次");
-                    if (startIdentification(pageUrl, "geetest_refresh.js",null,null,deltaResolveAddress)) {
+                    if (startIdentification(pageUrl, null,null,"geetest_refresh.js",deltaResolveAddress)) {
                         successCount++;
                         break;
                     }

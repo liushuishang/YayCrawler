@@ -5,7 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Created by yuananyun on 2016/5/2.
@@ -60,10 +60,9 @@ public class PageSite implements Serializable {
     @Column(name = "captchaJsFileName", columnDefinition = "varchar(200)")
     private String captchaJsFileName;
 
-
     @OneToMany( fetch = FetchType.EAGER,cascade=CascadeType.REMOVE,orphanRemoval=true)
     @JoinColumn(name = "siteId", insertable = false, updatable = false)
-    private List<SiteCookie> cookieList;
+    private Set<SiteCookie> cookieList;
 
 
     public String getId() {
@@ -146,13 +145,6 @@ public class PageSite implements Serializable {
         this.headers = headers;
     }
 
-    public List<SiteCookie> getCookieList() {
-        return cookieList;
-    }
-
-    public void setCookieList(List<SiteCookie> cookieList) {
-        this.cookieList = cookieList;
-    }
 
     public String getCaptchaJsFileName() {
         return captchaJsFileName;
@@ -184,5 +176,13 @@ public class PageSite implements Serializable {
 
     public void setLoginJsFileName(String loginJsFileName) {
         this.loginJsFileName = loginJsFileName;
+    }
+
+    public Set<SiteCookie> getCookieList() {
+        return cookieList;
+    }
+
+    public void setCookieList(Set<SiteCookie> cookieList) {
+        this.cookieList = cookieList;
     }
 }

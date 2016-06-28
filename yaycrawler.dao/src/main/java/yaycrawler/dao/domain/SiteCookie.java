@@ -21,6 +21,10 @@ public class SiteCookie {
         this.domain = domain;
         this.cookie = cookie;
     }
+    public SiteCookie(String domain, String cookie) {
+        this.domain = domain;
+        this.cookie = cookie;
+    }
 
     @Id
     @GeneratedValue(generator = "uuid")
@@ -31,7 +35,7 @@ public class SiteCookie {
     @Column(name = "cookie", columnDefinition = "text")
     private String cookie;
 
-    @NotNull
+//    @NotNull
     @Column(columnDefinition = "varchar(38)")
     private String siteId;
 
