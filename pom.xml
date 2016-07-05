@@ -17,6 +17,7 @@
         <module>yaycrawler.quartz</module>
         <module>yaycrawler.proxy</module>
         <module>yaycrawler.ftpserver</module>
+        <module>yaycrawler.cache</module>
     </modules>
     <packaging>pom</packaging>
 
