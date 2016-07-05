@@ -160,14 +160,14 @@ public class CrawlerHttpClientDownloader extends AbstractDownloader {
             request.putExtra(Request.PROXY, host);
         } else {
 
-            HttpHost httpHost = new HttpHost("127.0.0.1",8888);
-            requestConfigBuilder.setProxy(httpHost);
-            request.putExtra(Request.PROXY,httpHost);
-
-            System.setProperty("http.proxyHost", "127.0.0.1");
-            System.setProperty("http.proxyPort", "8888");
-            System.setProperty("https.proxyHost", "127.0.0.1");
-            System.setProperty("https.proxyPort", "8888");
+//            HttpHost httpHost = new HttpHost("127.0.0.1",8888);
+//            requestConfigBuilder.setProxy(httpHost);
+//            request.putExtra(Request.PROXY,httpHost);
+//
+//            System.setProperty("http.proxyHost", "127.0.0.1");
+//            System.setProperty("http.proxyPort", "8888");
+//            System.setProperty("https.proxyHost", "127.0.0.1");
+//            System.setProperty("https.proxyPort", "8888");
 
 
         }

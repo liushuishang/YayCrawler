@@ -49,7 +49,7 @@ public class SiteCookie {
     @Column(name = "createdDate", columnDefinition = "timestamp default now()")
     private Date createdDate;
 
-    @Column(name = "lastUpdatedDate", columnDefinition = "date default now()")
+    @Column(name = "lastUpdatedDate", columnDefinition = "timestamp default now()")
     private Date lastUpdatedDate;
 
     public String getId() {
