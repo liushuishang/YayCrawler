@@ -54,6 +54,7 @@ public class GenericPageProcessor implements PageProcessor {
         }
         //是否正确的页面
         PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(pageUrl);
+        if(pageInfo==null) return;
         String pageValidationExpression = pageInfo.getPageValidationRule();
         if (pageValidated(page, pageValidationExpression)) {
             try {
