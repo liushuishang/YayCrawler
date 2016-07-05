@@ -45,16 +45,20 @@ public class PageSiteService {
             site.setUseGzip(true);
 
             if (StringUtils.isNotEmpty(pageSite.getHeaders())) {
-                Map<String, String> headMap = JSON.parseObject(pageSite.getHeaders(), Map.class);
-                for (Map.Entry<String, String> entry : headMap.entrySet()) {
-                    site.addHeader(entry.getKey(), entry.getValue());
-                }
+                try {
+                    Map<String, String> headMap = JSON.parseObject(pageSite.getHeaders(), Map.class);
+                    for (Map.Entry<String, String> entry : headMap.entrySet()) {
+                        site.addHeader(entry.getKey(), entry.getValue());
+                    }
+                }catch (Exception ex) {}
             }
             if (!StringUtils.isBlank(pageSite.getDefaultCookies())) {
+                try {
                 Map<String, String> cookiesMap = JSON.parseObject(pageSite.getDefaultCookies(), Map.class);
                 for (Map.Entry<String, String> entry : cookiesMap.entrySet()) {
                     site.addCookie(domain, entry.getKey(), entry.getValue());
                 }
+                }catch (Exception ex) {}
             }
 //            //只设置一个有效Cookie即可
 //            if (pageSite.getCookieList() != null)

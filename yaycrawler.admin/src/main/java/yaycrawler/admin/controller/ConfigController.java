@@ -100,7 +100,7 @@ public class ConfigController {
     @RequestMapping(value = "/testPageValidation", method = RequestMethod.POST)
     @ResponseBody
     public Object ValidationPageInfo(@RequestBody PageInfo pageInfo) {
-        return configSpiderService.testExpressionOnPage(pageInfo,pageInfo.getPageValidationRule());
+        return configSpiderService.testExpressionOnPage(pageInfo, pageInfo.getPageValidationRule());
     }
 
     @RequestMapping(value = "/deletePageInfoByIds", method = RequestMethod.POST)
@@ -317,6 +317,7 @@ public class ConfigController {
         if (StringUtils.isBlank(pageSite.getDomain())) {
             return false;
         }
+        if (pageSite.getSleepTime() == 0L) pageSite.setSleepTime(500L);
         return pageParseRuleService.addSite(pageSite);
     }
 
