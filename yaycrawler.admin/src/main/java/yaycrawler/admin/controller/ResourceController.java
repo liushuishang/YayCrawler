@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import yaycrawler.admin.service.CrawlerResultRetrivalService;
 import yaycrawler.dao.domain.SiteCookie;
 import yaycrawler.dao.repositories.SiteCookieRepository;
 
@@ -26,7 +25,7 @@ public class ResourceController {
         Assert.notNull(siteId);
         Assert.notNull(domain);
         Assert.notNull(cookie);
-        SiteCookie siteCookie = new SiteCookie(siteId, domain, cookie);
+        SiteCookie siteCookie = new SiteCookie(siteId,domain, cookie);
         siteCookie.setLastUpdatedDate(new java.sql.Date(System.currentTimeMillis()));
         return cookieRepository.save(siteCookie);
     }

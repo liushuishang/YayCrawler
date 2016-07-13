@@ -5,17 +5,11 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.Site;
-import yaycrawler.common.model.PhantomCookie;
 import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.PageSite;
-import yaycrawler.dao.domain.SiteCookie;
 import yaycrawler.dao.repositories.PageSiteRepository;
-import yaycrawler.dao.repositories.SiteAccountRepository;
-import yaycrawler.dao.repositories.SiteCookieRepository;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by yuananyun on 2016/5/2.
@@ -24,11 +18,6 @@ import java.util.Set;
 public class PageSiteService {
     @Autowired
     private PageSiteRepository siteRepository;
-    @Autowired
-    private SiteCookieRepository cookieRepository;
-
-    @Autowired
-    private SiteAccountRepository accountRepository;
 
     public Site getSite(String domain) {
         return getSite(domain, false);
@@ -56,40 +45,35 @@ public class PageSiteService {
             site.setUseGzip(true);
 
             if (StringUtils.isNotEmpty(pageSite.getHeaders())) {
-                Map<String, String> headMap = JSON.parseObject(pageSite.getHeaders(), Map.class);
-                for (Map.Entry<String, String> entry : headMap.entrySet()) {
-                    site.addHeader(entry.getKey(), entry.getValue());
-                }
+                try {
+                    Map<String, String> headMap = JSON.parseObject(pageSite.getHeaders(), Map.class);
+                    for (Map.Entry<String, String> entry : headMap.entrySet()) {
+                        site.addHeader(entry.getKey(), entry.getValue());
+                    }
+                }catch (Exception ex) {}
             }
-            if (!StringUtils.isBlank(pageSite.getDefaultCookies() )) {
+            if (!StringUtils.isBlank(pageSite.getDefaultCookies())) {
+                try {
                 Map<String, String> cookiesMap = JSON.parseObject(pageSite.getDefaultCookies(), Map.class);
                 for (Map.Entry<String, String> entry : cookiesMap.entrySet()) {
                     site.addCookie(domain, entry.getKey(), entry.getValue());
                 }
+                }catch (Exception ex) {}
             }
-            //只设置一个有效Cookie即可
-            if (pageSite.getCookieList() != null)
-                for (SiteCookie cookie : pageSite.getCookieList())
-                    if ("1".equals(cookie.getAvailable())) {
-                        site.addHeader("Cookie", cookie.getCookie());
-                        //记录当前使用的cookie信息以便后续进行cookie刷新
-                        site.addCookie(cookie.getId(), cookie.getCookie());
-                        break;
-                    }
+//            //只设置一个有效Cookie即可
+//            if (pageSite.getCookieList() != null)
+//                for (SiteCookie cookie : pageSite.getCookieList())
+//                    if ("1".equals(cookie.getAvailable())) {
+//                        site.addHeader("Cookie", cookie.getCookie());
+//                        //记录当前使用的cookie信息以便后续进行cookie刷新
+//                        site.addCookie(cookie.getId(), cookie.getCookie());
+//                        break;
+//                    }
         }
         return site;
     }
 
-    public void deleteCookieByIds(Set<String> cookieIds) {
-        for (String cookieId : cookieIds) {
-            try {
-                cookieRepository.delete(cookieId);
-            }catch (Exception ex)
-            {
 
-            }
-        }
-    }
 
     public PageSite getPageSiteByUrl(String pageUrl) {
         String domain = UrlUtils.getDomain(pageUrl);
@@ -97,14 +81,5 @@ public class PageSiteService {
         return siteRepository.findByDomain(domain);
     }
 
-    public boolean saveCookies(String siteId, String domain, List<PhantomCookie> cookies) {
-        if (StringUtils.isBlank(siteId) || cookies == null || cookies.size() == 0) return false;
-        try {
-            StringBuilder cookieBuild = new StringBuilder();
-            cookies.forEach(phantomCookie -> cookieBuild.append(String.format("%s=%s;", phantomCookie.getName(), phantomCookie.getValue())));
-            return cookieRepository.save(new SiteCookie(siteId, domain, cookieBuild.toString()))!=null;
-        } catch (Exception ex) {
-            return false;
-        }
-    }
+
 }

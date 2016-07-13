@@ -5,7 +5,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Created by yuananyun on 2016/5/2.
@@ -27,13 +27,13 @@ public class PageSite implements Serializable {
     private String defaultCookies;
     @Column(name = "charset", columnDefinition = "varchar(10) default 'utf-8'")
     private String charset;
-    @Column(name = "sleepTime", columnDefinition = "long default 500")
+    @Column(name = "sleepTime", columnDefinition = "float default 500")
     private Long sleepTime;
     @Column(name = "retryTimes", columnDefinition = "int default 3")
     private int retryTimes;
     @Column(name = "cycleRetryTimes", columnDefinition = "int default 1")
     private int cycleRetryTimes;
-    @Column(name = "timeOut", columnDefinition = "long default 10000")
+    @Column(name = "timeOut", columnDefinition = "float default 10000")
     private Long timeOut;
     @Column(name = "headers", columnDefinition = "varchar(1000)")
     private String headers;
@@ -60,10 +60,9 @@ public class PageSite implements Serializable {
     @Column(name = "captchaJsFileName", columnDefinition = "varchar(200)")
     private String captchaJsFileName;
 
-
     @OneToMany( fetch = FetchType.EAGER,cascade=CascadeType.REMOVE,orphanRemoval=true)
     @JoinColumn(name = "siteId", insertable = false, updatable = false)
-    private List<SiteCookie> cookieList;
+    private Set<SiteCookie> cookieList;
 
 
     public String getId() {
@@ -146,13 +145,6 @@ public class PageSite implements Serializable {
         this.headers = headers;
     }
 
-    public List<SiteCookie> getCookieList() {
-        return cookieList;
-    }
-
-    public void setCookieList(List<SiteCookie> cookieList) {
-        this.cookieList = cookieList;
-    }
 
     public String getCaptchaJsFileName() {
         return captchaJsFileName;
@@ -184,5 +176,13 @@ public class PageSite implements Serializable {
 
     public void setLoginJsFileName(String loginJsFileName) {
         this.loginJsFileName = loginJsFileName;
+    }
+
+    public Set<SiteCookie> getCookieList() {
+        return cookieList;
+    }
+
+    public void setCookieList(Set<SiteCookie> cookieList) {
+        this.cookieList = cookieList;
     }
 }

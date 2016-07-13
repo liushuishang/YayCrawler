@@ -12,6 +12,7 @@ import yaycrawler.common.utils.CasperjsProgramManager;
 import yaycrawler.common.utils.UrlUtils;
 import yaycrawler.dao.domain.SiteAccount;
 import yaycrawler.dao.repositories.SiteAccountRepository;
+import yaycrawler.dao.service.PageCookieService;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,13 +35,17 @@ public class AutoLoginProxy {
     @Autowired
     private SiteAccountRepository siteAccountRepository;
 
+    @Autowired
+    private PageCookieService pageCookieService;
 
-    public LoginResult login(String pageUrl, String loginJsFileName, String pageContent) {
+    public LoginResult login(String pageUrl, String loginJsFileName, String pageContent, String oldCookieId) {
+        //先干掉旧的cookie
+        pageCookieService.deleteCookieById(oldCookieId);
+
         if (StringUtils.isBlank(loginJsFileName)) {
             logger.error("jsFileName不能为空！");
             return null;
         }
-
         SiteAccount siteAccount = siteAccountRepository.findOneByDomain(UrlUtils.getDomain(pageUrl));
         String userName = siteAccount.getUserName();
         String password = siteAccount.getPassWord();
@@ -56,6 +61,7 @@ public class AutoLoginProxy {
         while (i++ < 5) {
             result = CasperjsProgramManager.launch(loginJsFileName, pageUrl, resolverAddress, UUID.randomUUID().toString(), userName, password, " --web-security=no", "--ignore-ssl-errors=true");
             logger.info(result);
+            assert result != null;
             if (result.contains("自动登录成功")) {
                 String cookie = StringUtils.substringBetween(result, "$CookieStart", "$CookieEnd");
                 if (StringUtils.isNotEmpty(cookie)) {
@@ -67,6 +73,15 @@ public class AutoLoginProxy {
             } else {
                 loginResult.setSuccess(false);
             }
+        }
+        if(loginResult.isSuccess())
+        {
+            //保存新的cookie
+           if( pageCookieService.saveCookies(UrlUtils.getDomain(pageUrl),loginResult.getCookies()))
+           {
+               logger.info("保存新的cookie成功！");
+           }else
+               logger.info("保存新的cookie失败！");
         }
         return loginResult;
     }

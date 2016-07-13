@@ -3,9 +3,11 @@ package yaycrawler.monitor.captcha;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import yaycrawler.common.utils.UrlUtils;
+import yaycrawler.dao.service.PageCookieService;
 import yaycrawler.monitor.captcha.geetest.GeetestCaptchaIdentification;
 
 import java.io.UnsupportedEncodingException;
@@ -26,11 +28,12 @@ public class CaptchaIdentificationProxy {
     @Value("${server.context-path}")
     private String serverContextPath;
 
+    @Autowired
+    private PageCookieService pageCookieService;
 
 
-    public boolean recognition(String pageUrl,String cookies,String jsFileName, String pageContent) {
-        if(StringUtils.isBlank(jsFileName))
-        {
+    public boolean recognition(String pageUrl, String jsFileName, String pageContent, String cookieId) {
+        if (StringUtils.isBlank(jsFileName)) {
             logger.error("jsFileName不能为空！");
             return false;
         }
@@ -39,13 +42,18 @@ public class CaptchaIdentificationProxy {
             String resolverAddress = String.format("http://%s:%s%s/%s", serverIP, serverPort, serverContextPath, "resolveGeetestSlicePosition");
 
             String domain = UrlUtils.getDomain(pageUrl);
-            String cookieValue= null;
-            try {
-                cookieValue = URLEncoder.encode(cookies.replaceAll(" ", "%20"), "utf-8");
-            } catch (UnsupportedEncodingException e) {
-                logger.error(e.getMessage());
+            String cookieValue = pageCookieService.getCookieValueById(cookieId);
+            if (StringUtils.isNotBlank(cookieValue)) {
+                try {
+                    cookieValue = URLEncoder.encode(cookieValue.replaceAll(" ", "%20"), "utf-8");
+                } catch (UnsupportedEncodingException e) {
+                    logger.error(e.getMessage());
+                }
             }
-            return GeetestCaptchaIdentification.process(pageUrl,domain,cookieValue,jsFileName, resolverAddress);
+            if (GeetestCaptchaIdentification.process(pageUrl, domain, cookieValue, jsFileName, resolverAddress))
+                logger.info("刷新{}页面的验证码成功！", pageUrl);
+            else
+                logger.info("刷新{}页面的验证码失败！", pageUrl);
         }
         return false;
     }

@@ -1,5 +1,4 @@
 package yaycrawler.common.model;
-
 import yaycrawler.common.utils.UrlUtils;
 
 import java.io.Serializable;
@@ -13,26 +12,25 @@ public class CrawlerRequest implements Serializable{
     private String url;
     private String method;
     private Map data;
-    private String domain;
-    private Long startTime;
     private String hashCode;
-    private String workerId;
-    private String message;
+    private String domain;
+    private Map extendMap;
 
-    public String getMessage() {
-        return message;
+    /**
+     *
+     * startTime:开始时间
+     workerId:分配workerID
+     private String message;
+     crawlerRequests
+     hashCode
+     * @return
+     */
+    public Map getExtendMap() {
+        return extendMap;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getWorkerId() {
-        return workerId;
-    }
-
-    public void setWorkerId(String workerId) {
-        this.workerId = workerId;
+    public void setExtendMap(Map extendMap) {
+        this.extendMap = extendMap;
     }
 
     public String getHashCode() {
@@ -58,13 +56,6 @@ public class CrawlerRequest implements Serializable{
         this.data = data;
     }
 
-    public Long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Long startTime) {
-        this.startTime = startTime;
-    }
 
     public String getDomain() {
         return domain;

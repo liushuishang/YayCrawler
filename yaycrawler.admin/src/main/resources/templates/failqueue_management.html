@@ -10,7 +10,7 @@
         <!--<div class="col-md-4">-->
         <!--</div>-->
         <div class="col-md-12">
-            <table id="tb_departments"></table>
+            <table id="tb_departments" ></table>
         </div>
     </div>
 
@@ -44,13 +44,16 @@
                             title: '请求参数'
                         }, {
                             field: 'workerId',
-                            title: '处理的Worker编号'
+                            title: '处理的Worker编号',
+                            formatter:function(value,row,index) {
+                                return row.extendMap.workId;
+                            }
                         },
                         {
                             field: 'startTime',
                             title: '开始时间',
                             formatter: function (value, row, index) {
-                                var timestamp = value;
+                                var timestamp = row.extendMap.startTime;
                                 var d = new Date(timestamp);    //根据时间戳生成的时间对象
                                 var date = (d.getFullYear()) + "-" +
                                         (d.getMonth() + 1) + "-" +
@@ -61,7 +64,9 @@
                                 return date;
                             }
                         },
-                        {field: 'message', title: '失败原因'}]
+                        {field: 'message', title: '失败原因',formatter:function(value,row,index) {
+                            return row.extendMap.message;
+                        }}]
                 }));
             };
             return oTableInit;

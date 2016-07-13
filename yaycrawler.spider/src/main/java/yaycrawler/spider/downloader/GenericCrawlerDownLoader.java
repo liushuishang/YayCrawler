@@ -7,6 +7,8 @@ import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.AbstractDownloader;
 import yaycrawler.dao.domain.PageInfo;
+import yaycrawler.dao.domain.SiteCookie;
+import yaycrawler.dao.service.PageCookieService;
 import yaycrawler.dao.service.PageParserRuleService;
 
 import java.util.regex.Pattern;
@@ -16,8 +18,14 @@ import java.util.regex.Pattern;
  */
 @Component
 public class GenericCrawlerDownLoader extends AbstractDownloader {
+
+//    private static Logger logger = LoggerFactory.getLogger(GenericCrawlerDownLoader.class);
+
     @Autowired
     private PageParserRuleService pageParserRuleService;
+
+    @Autowired
+    private PageCookieService pageCookieService;
 
     private CrawlerHttpClientDownloader httpClientDownloader;
     private PhantomJsMockDonwnloader mockDonwnloader;
@@ -29,21 +37,21 @@ public class GenericCrawlerDownLoader extends AbstractDownloader {
     }
 
     private static Pattern redirectPattern = Pattern.compile("<script.*(?s).*location.href\\s*=.*(?s).*</script>");
+
     @Override
     public Page download(Request request, Task task) {
-        //记录当前请求使用的Cookie
-        request.putExtra("cookieIds", task.getSite().getCookies().keySet());
-        Page page;
         PageInfo pageInfo = pageParserRuleService.findOnePageInfoByRgx(request.getUrl());
-        if(pageInfo == null)
-            page= httpClientDownloader.download(request, task);
-        else if ("1".equals(pageInfo.getIsJsRendering()))
-            page= mockDonwnloader.download(request, task);
-        else
-            page= httpClientDownloader.download(request, task);
-
-        if(page != null && redirectPattern.matcher( page.getRawText()).find())
-            page=mockDonwnloader.download(request, task);
+        boolean isJsRendering = pageInfo != null && "1".equals(pageInfo.getIsJsRendering());
+        SiteCookie siteCookie = pageCookieService.getCookieByUrl(request.getUrl());
+        String cookie =null;
+        if(siteCookie!=null) {
+            cookie=siteCookie.getCookie();
+            String cookieId = siteCookie.getId();
+            request.putExtra("cookieId", cookieId);
+        }
+        Page page = !isJsRendering ? httpClientDownloader.download(request, task, cookie) : mockDonwnloader.download(request, task, cookie);
+        if ((!"post".equalsIgnoreCase(request.getMethod())&&page != null) && redirectPattern.matcher(page.getRawText()).find())
+            page = mockDonwnloader.download(request, task, cookie);
         return page;
     }
 
