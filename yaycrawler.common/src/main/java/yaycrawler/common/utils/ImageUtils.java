@@ -192,7 +192,7 @@ public class ImageUtils {
         rgb2[2] = (pixel2 & 0xff);
 
         for (int k = 0; k < 3; k++)
-            if (Math.abs(rgb1[k] - rgb2[k]) > 50)
+            if (Math.abs(rgb1[k] - rgb2[k]) > 50)//因为背景图会有一些像素差异
                 return true;
 
         return false;

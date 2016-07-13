@@ -69,8 +69,8 @@ public class CaptchaController {
                 int deltaX = ImageUtils.findXDiffRectangeOfTwoImage(fullbgImagePath, bgImagePath);
 
                 //删除缓存的图片
-                deleteImage(fullbgImagePath);
-                deleteImage(bgImagePath);
+//                deleteImage(fullbgImagePath);
+//                deleteImage(bgImagePath);
 
                 Map<String, Object> resultMap = new HashedMap();
                 resultMap.put("deltaX", deltaX);
