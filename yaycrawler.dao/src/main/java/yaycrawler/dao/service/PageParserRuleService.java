@@ -49,7 +49,7 @@ public class PageParserRuleService {
 
 
     public Page<PageSite> querySites(int pageIndex, int pageSize) {
-        return siteRepository.findAll(new PageRequest(pageIndex, pageSize));
+        return siteRepository.findAllByOrderByDomainAsc(new PageRequest(pageIndex, pageSize));
     }
 
     public Page<SiteAccount> queryAccounts(int pageIndex, int pageSize) {
@@ -81,7 +81,7 @@ public class PageParserRuleService {
     }
 
     public Page<PageInfo> queryPageInfos(int pageIndex, int pageSize) {
-        return pageInfoRepository.findAll(new PageRequest(pageIndex, pageSize));
+        return pageInfoRepository.findAllByOrderByCreatedDateDesc(new PageRequest(pageIndex, pageSize));
     }
 
     public boolean savePageInfo(PageInfo pageInfo) {

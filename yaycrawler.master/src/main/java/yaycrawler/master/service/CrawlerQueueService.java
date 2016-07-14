@@ -118,7 +118,7 @@ public class CrawlerQueueService {
             Map<String,String> crawlerRequestMap = Maps.newHashMap();
             logger.info("开始注册{}个任务", crawlerRequests.size());
             for (CrawlerRequest crawlerRequest : crawlerRequests) {
-                Map<String, String> parameter = crawlerRequest.getData();
+                Map<String, Object> parameter = crawlerRequest.getData();
                 List<Object> arrayTmps = null;
                 Map pagination = null;
                 List datas = Lists.newArrayList();
@@ -136,7 +136,7 @@ public class CrawlerQueueService {
                 } else {
                     for (String key : parameter.keySet()) {
                         if (StringUtils.startsWith(key, "$array_")) {
-                            arrayTmps = JSON.parseObject(parameter.get(key).toString(), List.class);
+                            arrayTmps = (List<Object>) parameter.get(key);
                             List<Map> tmpData = Lists.newArrayList();
                             String tmpParam = StringUtils.substringAfter(key, "$array_");
                             for (Object tmp : arrayTmps) {
@@ -145,7 +145,7 @@ public class CrawlerQueueService {
 
                             datas.add(ImmutableSet.copyOf(tmpData));
                         } else if (StringUtils.startsWith(key, "$pagination_")) {
-                            pagination = JSON.parseObject(parameter.get(key).toString(), Map.class);
+                            pagination =(Map)parameter.get(key);
                             List<Map> tmpData = Lists.newArrayList();
                             int start = Integer.parseInt(pagination.get("START").toString());
                             int end = Integer.parseInt(pagination.get("END").toString());

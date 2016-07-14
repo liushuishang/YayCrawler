@@ -15,7 +15,6 @@ import yaycrawler.common.model.CrawlerRequest;
 import yaycrawler.common.model.RestFulResult;
 import yaycrawler.dao.domain.PageInfo;
 import yaycrawler.dao.domain.PageParseRegion;
-import yaycrawler.monitor.captcha.CaptchaIdentificationProxy;
 import yaycrawler.spider.downloader.GenericCrawlerDownLoader;
 import yaycrawler.spider.processor.GenericPageProcessor;
 import yaycrawler.spider.resolver.SelectorExpressionResolver;
@@ -123,24 +122,17 @@ public class ConfigSpiderService {
                 return finalSite == null ? ConfigSpiderService.this.getSite(request.getUrl()) : finalSite;
             }
         });
-        if(page!=null){
-            Map<String, Object> m = new HashMap<>();
-            m.put("inputTime", System.currentTimeMillis());
-            m.put("page", page);
-            pageMap.put(request.getUrl(), m);
+        if (page != null) {
+//            Map<String, Object> m = new HashMap<>();
+//            m.put("inputTime", System.currentTimeMillis());
+//            m.put("page", page);
+//            pageMap.put(request.getUrl(), m);
         }
         return page;
     }
 
     private Site getSite(String url) {
-        Site site = pageSiteService.getSite(UrlUtils.getDomain(url));
-        if (site == null) {
-            site = Site.me();
-            String domain = UrlUtils.getDomain(url);
-            site.setDomain(domain);
-            site.addHeader("host", domain);
-        }
-        return site;
+        return pageSiteService.getSite(UrlUtils.getDomain(url));
     }
 
 }

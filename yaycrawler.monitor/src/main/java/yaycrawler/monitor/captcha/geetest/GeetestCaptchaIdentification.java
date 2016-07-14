@@ -5,6 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yaycrawler.common.utils.CasperjsProgramManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 极验验证码识别
  * Created by ucs_yuananyun on 2016/6/14.
@@ -36,7 +39,12 @@ public class GeetestCaptchaIdentification {
     }
 
     private static boolean startIdentification(String pageUrl,String domain,String cookies,String jsFileName, String deltaResolveAddress) {
-        String result = CasperjsProgramManager.launch(jsFileName, pageUrl,deltaResolveAddress,domain,cookies, " web-security=no", "ignore-ssl-errors=true");
+        List<String> paramList = new ArrayList<>();
+        paramList.add(pageUrl);
+        paramList.add(deltaResolveAddress);
+        paramList.add(domain);
+        paramList.add(cookies);
+        String result = CasperjsProgramManager.launch(jsFileName, paramList);
         logger.info("验证码识别结果：\r\n" + result);
         return result != null && (result.contains("验证通过") || result.contains("不存在极验验证码"));
     }

@@ -317,7 +317,6 @@ public class ConfigController {
         if (StringUtils.isBlank(pageSite.getDomain())) {
             return false;
         }
-        if (pageSite.getSleepTime() == 0L) pageSite.setSleepTime(500L);
         return pageParseRuleService.addSite(pageSite);
     }
 

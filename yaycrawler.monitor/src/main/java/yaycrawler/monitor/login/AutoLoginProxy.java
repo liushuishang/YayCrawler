@@ -14,6 +14,7 @@ import yaycrawler.dao.domain.SiteAccount;
 import yaycrawler.dao.repositories.SiteAccountRepository;
 import yaycrawler.dao.service.PageCookieService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,8 +59,16 @@ public class AutoLoginProxy {
         int i = 0;
         String result = null;
         LoginResult loginResult = new LoginResult();
+
+        List<String> paramList = new ArrayList<>();
+        paramList.add(pageUrl);
+        paramList.add(resolverAddress);
+        paramList.add(UUID.randomUUID().toString());
+        paramList.add(userName);
+        paramList.add(password);
+
         while (i++ < 5) {
-            result = CasperjsProgramManager.launch(loginJsFileName, pageUrl, resolverAddress, UUID.randomUUID().toString(), userName, password, " --web-security=no", "--ignore-ssl-errors=true");
+            result = CasperjsProgramManager.launch(loginJsFileName, paramList);
             logger.info(result);
             assert result != null;
             if (result.contains("自动登录成功")) {
@@ -74,14 +83,12 @@ public class AutoLoginProxy {
                 loginResult.setSuccess(false);
             }
         }
-        if(loginResult.isSuccess())
-        {
+        if (loginResult.isSuccess()) {
             //保存新的cookie
-           if( pageCookieService.saveCookies(UrlUtils.getDomain(pageUrl),loginResult.getCookies()))
-           {
-               logger.info("保存新的cookie成功！");
-           }else
-               logger.info("保存新的cookie失败！");
+            if (pageCookieService.saveCookies(UrlUtils.getDomain(pageUrl), loginResult.getCookies())) {
+                logger.info("保存新的cookie成功！");
+            } else
+                logger.info("保存新的cookie失败！");
         }
         return loginResult;
     }

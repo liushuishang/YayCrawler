@@ -27,14 +27,14 @@ public class PageSite implements Serializable {
     private String defaultCookies;
     @Column(name = "charset", columnDefinition = "varchar(10) default 'utf-8'")
     private String charset;
-    @Column(name = "sleepTime", columnDefinition = "float default 500")
-    private Long sleepTime;
+    @Column(name = "sleepTime", columnDefinition = "int default 500")
+    private Integer sleepTime;
     @Column(name = "retryTimes", columnDefinition = "int default 3")
     private int retryTimes;
     @Column(name = "cycleRetryTimes", columnDefinition = "int default 1")
     private int cycleRetryTimes;
-    @Column(name = "timeOut", columnDefinition = "float default 10000")
-    private Long timeOut;
+    @Column(name = "timeOut", columnDefinition = "int default 10000")
+    private Integer timeOut;
     @Column(name = "headers", columnDefinition = "varchar(1000)")
     private String headers;
 
@@ -60,7 +60,7 @@ public class PageSite implements Serializable {
     @Column(name = "captchaJsFileName", columnDefinition = "varchar(200)")
     private String captchaJsFileName;
 
-    @OneToMany( fetch = FetchType.EAGER,cascade=CascadeType.REMOVE,orphanRemoval=true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JoinColumn(name = "siteId", insertable = false, updatable = false)
     private Set<SiteCookie> cookieList;
 
@@ -105,13 +105,6 @@ public class PageSite implements Serializable {
         this.charset = charset;
     }
 
-    public long getSleepTime() {
-        return sleepTime;
-    }
-
-    public void setSleepTime(Long sleepTime) {
-        this.sleepTime = sleepTime;
-    }
 
     public int getRetryTimes() {
         return retryTimes;
@@ -129,13 +122,6 @@ public class PageSite implements Serializable {
         this.cycleRetryTimes = cycleRetryTimes;
     }
 
-    public Long getTimeOut() {
-        return timeOut;
-    }
-
-    public void setTimeOut(Long timeOut) {
-        this.timeOut = timeOut;
-    }
 
     public String getHeaders() {
         return headers;
@@ -184,5 +170,21 @@ public class PageSite implements Serializable {
 
     public void setCookieList(Set<SiteCookie> cookieList) {
         this.cookieList = cookieList;
+    }
+
+    public Integer getSleepTime() {
+        return sleepTime==null?0:sleepTime;
+    }
+
+    public void setSleepTime(Integer sleepTime) {
+        this.sleepTime = sleepTime;
+    }
+
+    public Integer getTimeOut() {
+        return timeOut;
+    }
+
+    public void setTimeOut(Integer timeOut) {
+        this.timeOut = timeOut;
     }
 }

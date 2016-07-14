@@ -14,15 +14,15 @@ import yaycrawler.common.utils.CasperjsProgramManager;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
  * Created by ucs_yuananyun on 2016/5/27.
  */
 public class PhantomJsMockDonwnloader extends AbstractDownloader {
-
     private Logger logger = LoggerFactory.getLogger(getClass());
-
 
     public Page download(Request request, Task task, String cookie) {
         Site site = null;
@@ -44,11 +44,18 @@ public class PhantomJsMockDonwnloader extends AbstractDownloader {
         int statusCode = 0;
         String result = null;
         try {
-            if(cookie==null) cookie = "";
-            result = CasperjsProgramManager.launch("casperjsDownload.js", request.getUrl(),
-                    URLEncoder.encode(site.getUserAgent().replaceAll(" ", "%20"), "utf-8"), domain, site.isUseGzip(), site.getRetryTimes(),
-                    URLEncoder.encode(cookie.replaceAll(" ", "%20"), "utf-8"), " web-security=no", "ignore-ssl-errors=true");
-//            logger.info(result);
+
+            List<String> paramList = new ArrayList<>();
+            paramList.add(request.getUrl());
+            paramList.add(URLEncoder.encode(site.getUserAgent().replaceAll(" ", "%20"), "utf-8"));
+            paramList.add(domain);
+            paramList.add(String.valueOf(site.isUseGzip()));
+            paramList.add(String.valueOf(site.getRetryTimes()));
+            cookie = cookie != null ? URLEncoder.encode(cookie.replaceAll(" ", "%20"), "utf-8") : "";
+            paramList.add(cookie);
+
+            result = CasperjsProgramManager.launch("casperjsDownload.js", site.getCharset(), paramList);
+
             statusCode = Integer.parseInt(StringUtils.substringBefore(result, "\r\n").trim());
             request.putExtra(Request.STATUS_CODE, statusCode);
             if (statusAccept(acceptStatCode, statusCode)) {
