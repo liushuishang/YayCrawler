@@ -39,6 +39,7 @@ public class CasperjsProgramManager {
                 casperJsPath = path + "casperjs/bin/casperjs.exe";
                 phantomJsPath = path + "phantomjs/window/phantomjs.exe";
             } else {
+                path = "/" + path;
                 casperJsPath = path + "casperjs/bin/casperjs";
                 phantomJsPath = path + "phantomjs/linux/phantomjs";
             }

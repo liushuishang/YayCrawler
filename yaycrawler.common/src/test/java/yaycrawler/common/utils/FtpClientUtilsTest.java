@@ -16,4 +16,8 @@ public class FtpClientUtilsTest {
         File file = new File("D:/12314/2016011417");
         FtpClientUtils.uploadFile("127.0.0.1",21,"admin","admin","/test222/tetet/tette/tetete/tetetwtf","2016011417",new FileInputStream(file));
     }
+
+    public static void main(String[] args) {
+        System.out.println(System.getProperties());
+    }
 }

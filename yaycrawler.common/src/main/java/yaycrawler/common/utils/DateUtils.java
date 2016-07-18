@@ -39,7 +39,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * ½«ÈÕÆÚ×ª»¯ÎªÖ¸¶¨µÄ¸ñÊ½ÏÔÊ¾
+	 * å°†æ—¥æœŸè½¬åŒ–ä¸ºæŒ‡å®šçš„æ ¼å¼æ˜¾ç¤º
 	 * @param date
 	 * @param format
 	 * @return
@@ -50,7 +50,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * µÃµ½µ±Ç°Ê±¼ä£¬Ö¸¶¨¸ñÊ½µÄ×Ö·û´®±íÊ¾yyyyMMddHHmmss
+	 * å¾—åˆ°å½“å‰æ—¶é—´ï¼ŒæŒ‡å®šæ ¼å¼çš„å­—ç¬¦ä¸²è¡¨ç¤ºyyyyMMddHHmmss
 	 * @param f
 	 * @return
 	 */
@@ -61,7 +61,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 
 
 	/**
-	 * µÃµ½µ±Ç°ÈÕÆÚ£¬Ö¸¶¨¸ñÊ½µÄ×Ö·û´®±íÊ¾yyyyMMdd
+	 * å¾—åˆ°å½“å‰æ—¥æœŸï¼ŒæŒ‡å®šæ ¼å¼çš„å­—ç¬¦ä¸²è¡¨ç¤ºyyyyMMdd
 	 * @return
 	 */
 	public static String getCurrDay(){
@@ -71,7 +71,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 
 
 	/**
-	 * ÈÕÆÚ½âÎö
+	 * æ—¥æœŸè§£æ
 	 * @param source
 	 * @param format
 	 * @return
@@ -100,7 +100,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * µÃµ½µ±Ç°Ê±¼ä¼¸·ÖÖÓÇ°»ò¼¸·ÖÖÓºóµÄÊ±¼ä
+	 * å¾—åˆ°å½“å‰æ—¶é—´å‡ åˆ†é’Ÿå‰æˆ–å‡ åˆ†é’Ÿåçš„æ—¶é—´
 	 * @param minutes
 	 * @return
 	 */
@@ -111,7 +111,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * µÃµ½µ±Ç°Ê±¼ä¼¸Ğ¡Ê±Ç°»ò¼¸Ğ¡Ê±ºóµÄÊ±¼ä
+	 * å¾—åˆ°å½“å‰æ—¶é—´å‡ å°æ—¶å‰æˆ–å‡ å°æ—¶åçš„æ—¶é—´
 	 * @param hour
 	 * @return
 	 */
@@ -122,7 +122,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * µÃµ½µ±Ç°Ê±¼ä¼¸ÌìÇ°»ò¼¸ÌìºóµÄÊ±¼ä
+	 * å¾—åˆ°å½“å‰æ—¶é—´å‡ å¤©å‰æˆ–å‡ å¤©åçš„æ—¶é—´
 	 * @param day
 	 * @return
 	 */
@@ -133,10 +133,10 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * Ä³¸öÈÕÆÚÔö¼ÓÌìÊı»ñÈ¡½á¹ûÈÕÆÚ×Ö·û´®
+	 * æŸä¸ªæ—¥æœŸå¢åŠ å¤©æ•°è·å–ç»“æœæ—¥æœŸå­—ç¬¦ä¸²
 	 *
-	 * @param date ÈÕÆÚ
-	 * @param days ÌìÊı
+	 * @param date æ—¥æœŸ
+	 * @param days å¤©æ•°
 	 * @return java.lang.String (yyyyMMdd)
 	 */
 	public static String dateIncreaseByDay(String date, int days) {
@@ -144,11 +144,11 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * Ä³¸öÈÕÆÚÔö¼ÓÌìÊı»ñÈ¡½á¹ûÈÕÆÚ×Ö·û´®
+	 * æŸä¸ªæ—¥æœŸå¢åŠ å¤©æ•°è·å–ç»“æœæ—¥æœŸå­—ç¬¦ä¸²
 	 *
-	 * @param date ÈÕÆÚ
-	 * @param fmt ¸ñÊ½×Ö·û´®
-	 * @param days Ôö¼ÓµÄÌìÊı
+	 * @param date æ—¥æœŸ
+	 * @param fmt æ ¼å¼å­—ç¬¦ä¸²
+	 * @param days å¢åŠ çš„å¤©æ•°
 	 * @return
 	 */
 	public static String dateIncreaseByDay(String date, String fmt, int days) {
@@ -156,12 +156,12 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * Ä³¸öÈÕÆÚÔö¼ÓÄêÊı/ÔÂÊı/ÌìÊı»ñÈ¡½á¹ûÈÕÆÚ
+	 * æŸä¸ªæ—¥æœŸå¢åŠ å¹´æ•°/æœˆæ•°/å¤©æ•°è·å–ç»“æœæ—¥æœŸ
 	 *
-	 * @param isoString ÈÕÆÚ×Ö·û´®
-	 * @param fmt ÈÕÆÚ×Ö·û´®µÄ¸ñÊ½
-	 * @param field ±íÃ÷ÊÇÔö¼ÓÄêÊı/ÔÂÊı/ÌìÊı Calendar.YEAR/Calendar.MONTH/Calendar.DATE
-	 * @param amount ÊıÁ¿
+	 * @param isoString æ—¥æœŸå­—ç¬¦ä¸²
+	 * @param fmt æ—¥æœŸå­—ç¬¦ä¸²çš„æ ¼å¼
+	 * @param field è¡¨æ˜æ˜¯å¢åŠ å¹´æ•°/æœˆæ•°/å¤©æ•° Calendar.YEAR/Calendar.MONTH/Calendar.DATE
+	 * @param amount æ•°é‡
 	 * @return
 	 * @throws ParseException
 	 */
@@ -180,11 +180,11 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * ½«ÈÕÆÚµÄ×Ö·û´®×ª»»ÎªDateÀà
+	 * å°†æ—¥æœŸçš„å­—ç¬¦ä¸²è½¬æ¢ä¸ºDateç±»
 	 *
-	 * @param dateText ÈÕÆÚ×Ö·û´®
-	 * @param format ¸ñÊ½»¯×Ö·û´®
-	 * @param lenient Ö¸Ã÷¶ÔÈÕÆÚ£¯Ê±¼äµÄ·ÖÎöÊÇ·ñÊÇ¿íËÉµÄ
+	 * @param dateText æ—¥æœŸå­—ç¬¦ä¸²
+	 * @param format æ ¼å¼åŒ–å­—ç¬¦ä¸²
+	 * @param lenient æŒ‡æ˜å¯¹æ—¥æœŸï¼æ—¶é—´çš„åˆ†ææ˜¯å¦æ˜¯å®½æ¾çš„
 	 * @return
 	 */
 	public static Date stringToDate(String dateText, String format, boolean lenient) {
@@ -214,7 +214,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * µÃµ½µ±Ç°Ê±¼ä,¸ñÊ½:yyyyMMddHHmmss
+	 * å¾—åˆ°å½“å‰æ—¶é—´,æ ¼å¼:yyyyMMddHHmmss
 	 *
 	 * @return
 	 */
@@ -223,7 +223,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * µÃµ½µ±Ç°Ê±¼ä,¸ñÊ½:yyyyMMddHHmmssSSS
+	 * å¾—åˆ°å½“å‰æ—¶é—´,æ ¼å¼:yyyyMMddHHmmssSSS
 	 *
 	 * @return
 	 */
@@ -232,7 +232,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * µÃµ½µ±Ç°Ê±¼ä,¸ñÊ½:yyyyMMdd
+	 * å¾—åˆ°å½“å‰æ—¶é—´,æ ¼å¼:yyyyMMdd
 	 *
 	 * @return
 	 */
@@ -241,7 +241,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * µÃµ½µ±Ç°Ê±¼ä,¸ñÊ½:yyyyMMdd
+	 * å¾—åˆ°å½“å‰æ—¶é—´,æ ¼å¼:yyyyMMdd
 	 *
 	 * @return
 	 */
@@ -257,8 +257,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 		return dateToString(new Date(), "yyyyMMddHHmm");
 	}
 	/**
-	 * »ñµÃÊ±¼ä²î£¬µ¥Î»ÊÇ·Ö
-	 * ¸ñÊ½:yyyyMMddHHmmss
+	 * è·å¾—æ—¶é—´å·®ï¼Œå•ä½æ˜¯åˆ†
+	 * æ ¼å¼:yyyyMMddHHmmss
 	 * @param endTime
 	 * @return
 	 */
@@ -278,7 +278,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils{
 	}
 
 	/**
-	 * ×Ö·û´®×ª»»³ÉÖ¸¶¨µÄÈÕÆÚ×Ö·û´®¸ñÊ½
+	 * å­—ç¬¦ä¸²è½¬æ¢æˆæŒ‡å®šçš„æ—¥æœŸå­—ç¬¦ä¸²æ ¼å¼
 	 * @param dateString
 	 * @param format
 	 * @return

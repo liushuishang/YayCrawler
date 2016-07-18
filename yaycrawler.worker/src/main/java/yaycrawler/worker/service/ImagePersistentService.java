@@ -80,8 +80,9 @@ public class ImagePersistentService implements IResultPersistentService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-        return false;
+        return true;
     }
 
     @Override

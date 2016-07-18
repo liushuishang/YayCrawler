@@ -10,6 +10,9 @@ import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.ehcache.config.builders.UserManagedCacheBuilder;
 import org.ehcache.config.units.MemoryUnit;
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import yaycrawler.cache.model.Business;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -44,13 +47,16 @@ public class CacheManagerTest {
 
     @Test
     public void testUserManager() {
-        UserManagedCache<Long, String> userManagedCache =
-                UserManagedCacheBuilder.newUserManagedCacheBuilder(Long.class, String.class)
+        UserManagedCache<String, String> userManagedCache =
+                UserManagedCacheBuilder.newUserManagedCacheBuilder(String.class, String.class)
                         .build(false);
         userManagedCache.init();
-
-        userManagedCache.put(1L, "da one!");
-        System.out.println("----------------" + userManagedCache.get(1L) + "-----------------------");
+        userManagedCache.put("key1", "da one!");
+        userManagedCache.put("key2","hello ehcache 3");
+        System.out.println("----------------" + userManagedCache.get("key1") + "-----------------------");
+        userManagedCache.remove("key1");
+        System.out.println("----------------" + userManagedCache.get("key2") + "-----------------------");
+        System.out.println("----------------" + userManagedCache.get("key1") + "-----------------------");
         userManagedCache.close();
     }
 
@@ -92,6 +98,9 @@ public class CacheManagerTest {
 
     @Test
     public void testUpdatePool() {
-
+        ApplicationContext appCtx = new ClassPathXmlApplicationContext("/spring/applicationContext.xml");
+        Business business = (Business) appCtx.getBean("business");
+        business.delete("猫");
+        business.delete("猫");
     }
 }

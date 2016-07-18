@@ -1,71 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
             http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
-            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd"
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"
        default-lazy-init="true">
-    <bean id="cacheManager" class="org.springframework.cache.support.CompositeCacheManager">
-        <property name="cacheManagers">
-            <list>
-                <ref bean="ehcacheManager"/>
-                <ref bean="jcacheManager"/>
-            </list>
-        </property>
-        <property name="fallbackToNoOpCache" value="true"/>
-    </bean>
-    <!--配置缓存管理器 -->
-    <!--<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">-->
-        <!--<property name="configLocation">-->
-            <!--<value>/spring/ehcache.xml</value>-->
-        <!--</property>-->
-    <!--</bean>-->
-
-    <!-- 创建缓存的工厂的应用 -->
-    <bean id="methodCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
-        <property name="cacheManager">
-            <ref local="cacheManager"/>
-        </property>
-        <property name="cacheName">
-            <value>DEFAULT_CACHE</value>
-        </property>
-    </bean>
-
-    <!-- 自定义缓存拦截器 -->
-    <bean id="methodCacheInterceptor" class="yaycrawler.cache.service.MethodCacheInterceptor">
-        <property name="cache">
-            <ref local="methodCache"/>
-        </property>
-    </bean>
-
-    <!-- 自定义拦截器 -->
-    <bean id="methodCachePointCut" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
-        <property name="advice">
-            <ref local="methodCacheInterceptor"/>
-        </property>
-        <!-- 下面的配置就使得在数据访问时，cache将拦截从数据库获取的数据，与cache数据比较，如有就不放入cache，没有就放入，更新到数据库去，也是先存入cache，再更新到数据库中去 -->
-        <property name="patterns">
-            <list>
-                <value>.*getServiceName</value>
-                <value>.*testMethod</value>
-            </list>
-        </property>
-    </bean>
-    <!-- 声明一个服务 -->
-
-    <bean id = "ticketServiceTarget"  class="yaycrawler.cache.service.TicketService" />
-
-    <!-- 相关的服务 -->
-    <bean id="ticketService"
-          class="org.springframework.aop.framework.ProxyFactoryBean">
-        <property name="target">
-            <ref local="ticketServiceTarget"/>
-        </property>
-        <property name="interceptorNames">
-            <list>
-                <value>methodCachePointCut</value>
-            </list>
-        </property>
-    </bean>
-
+    <context:component-scan base-package="yaycrawler.cache" />
+    <!-- 打开aop 注解 -->
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
 </beans>
